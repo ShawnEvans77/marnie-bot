@@ -1,0 +1,35 @@
+API = application programming interface.
+
+a way two pieces of software can communicate with one another.
+
+[ SOFTWARE 1 ] -> [ SOFTWARE 2 ]
+
+it allows different applications that aren't exactly the same to communicate. an api allows us to build functionality
+in this application to make a request to another application. we have a server and then a client. 
+
+instead of getting HTML, you will be getting javascript object orientation (JSON).
+
+you may run into APIs that use XML, but most of them use JSON.
+
+where we make the request, that is what we call an endpoint.
+
+this REST thing stands for representational state transfer. this is the means of communications.
+
+this 'REST' aspect is communicating over the web. 
+
+we have some type of server software. 
+
+we have a database, pieces of software would like to communicate with this database. we expose different API endpoints to this
+software. 
+
+we can do a GET request, get all the drinks or get a specific drink from my backend software. 
+
+
+GET - retrieve data from the server
+POST - post is used to write data. 
+DELETE - used to delete stuff.
+PUT - the difference between PUT and POST is a bit grey. PUT is used to update data, POST is used to write new data.
+
+POST is used to add a resource, PUT is used to replace a resource.
+
+PUT is said to be idempotent. 
