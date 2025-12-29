@@ -1,3 +1,5 @@
-This is a REPL to fetch data on Pokemon. 
+# Marnie Bot 
 
-You need to install requests to use the script. 
+Marnie Bot is a Discord bot that allows you to fetch data on Pokemon.
+
+Feel free to clone the source code to set up your own version of the bot.
