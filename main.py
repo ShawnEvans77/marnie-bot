@@ -18,7 +18,7 @@ while running:
 
     if command == "exit()":
         running = False
-    elif command[:3] == "/dt":
+    elif command[:3] == "/dt" or command[:3] == "!dt":
         name = command.split(" ")[1]
         url = f"{base_url}/pokemon/{name}"
 
