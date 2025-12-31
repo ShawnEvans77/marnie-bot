@@ -127,7 +127,6 @@ class FetchData:
         
         if moves.close_match(query) is not None:
             closest_match = moves.close_match(query)
-            print(closest_match)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_move(closest_match, moves, requests.get(move_url+closest_match))
 
         return "i don't even know what this is gang try again 😹"
