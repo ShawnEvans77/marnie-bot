@@ -93,7 +93,12 @@ class FetchData:
 
         query = self.sanitize(query)
         poke_url = f"{self.base_url}/pokemon/"
+        item_url = f"{self.base_url}/item/"
+        move_url = f"{self.base_url}/move/"
+
         dex = pd.Pokedex()
+        items = il.ItemList()
+        moves = ml.MoveList()
 
         if query.isnumeric():
             
@@ -104,27 +109,25 @@ class FetchData:
         
         if query in dex:
             return self.dt_pokemon(query, requests.get(poke_url+query))
-        elif dex.close_match(query) is not None:
+        
+        if query in items:
+            return self.dt_item(requests.get(item_url+query))
+        
+        if query in moves:
+            return self.dt_move(query, moves, requests.get(move_url+query))
+
+        if dex.close_match(query) is not None:
             closest_match = dex.close_match(query)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_pokemon(closest_match, requests.get(poke_url+closest_match))
         
-        items = il.ItemList()
-        item_url = f"{self.base_url}/item/"
-
-        if query in items:
-            return self.dt_item(requests.get(item_url+query))
-        elif items.close_match(query) is not None:
+        if items.close_match(query) is not None:
             closest_match = items.close_match(query)
+            print(closest_match)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_item(requests.get(item_url+closest_match))
         
-        moves = ml.MoveList()
-        move_url = f"{self.base_url}/move/"
-
-        if query in moves:
-            return self.dt_move(query, moves, requests.get(move_url+query))
-        elif moves.close_match(query) is not None:
-            print("closest match subroutine")
+        if moves.close_match(query) is not None:
             closest_match = moves.close_match(query)
+            print(closest_match)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_move(closest_match, moves, requests.get(move_url+closest_match))
 
         return "i don't even know what this is gang try again 😹"
