@@ -72,7 +72,8 @@ class FetchData:
         answer += "| "
         
         answer += f"**PP**: {move_list.get_pp(move)} | "
-        answer += f"**Generation**: {move_list.get_generation(move)}"
+        answer += f"**Generation**: {move_list.get_generation(move)} | "
+        answer += f"**Type**: {response.json()['damage_class']['name'].title()}"
 
         answer += "\n"
 
