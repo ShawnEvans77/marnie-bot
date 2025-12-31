@@ -1,6 +1,7 @@
 import requests
 import pokedex as pd
 import item_list as il
+import move_list as ml
 
 class FetchData:
     '''The Fetch Data class is a wrapper for PokeAPI.'''
@@ -50,9 +51,26 @@ class FetchData:
     def dt_item(self, response):
         '''Returns appropiate flavor text on a given item.'''
 
-        item_desc = f"{response.json()['effect_entries'][0]['effect']}\n"
-        return self.beautify(item_desc)
+        answer = f"{response.json()['effect_entries'][0]['effect']}\n"
+        return self.beautify(answer)
     
+
+    def dt_move(self, move: str, move_list, response):
+
+        answer = ""
+
+        answer += f"**{move.title()}** - "
+
+        answer += f"**Accuracy**: {move_list.get_accuracy(move)} | "
+        answer += f"**PP**: {move_list.get_pp(move)} | "
+        answer += f"**Generation**: {move_list.get_generation(move)}"
+
+        answer += "\n"
+
+        answer += f"{response.json()['effect_entries'][0]['effect']}\n"
+
+        return self.beautify(answer)
+
     def dt_ability(self, ability: str, response):
         pass
 
@@ -99,4 +117,13 @@ class FetchData:
             closest_match = items.close_match(query)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_item(requests.get(item_url+closest_match))
         
+        moves = ml.MoveList()
+        move_url = f"{self.base_url}/move/"
+
+        if query in moves:
+            return self.dt_move(query, moves, requests.get(move_url+query))
+        elif moves.close_match(query) is not None:
+            closest_match = moves.close_match(query)
+            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_move(closest_match, moves, requests.get(item_url+closest_match))
+
         return "i don't even know what this is gang try again 😹"
