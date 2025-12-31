@@ -29,7 +29,7 @@ class Pokedex:
     
     def flavor_exists(self, pokemon):
         '''Returns if the list contains a flavor of the input Pokemon. Meaning, if user queries for 'Aegislash', 
-        I still want the bot to return 'Aegislas'''
+        I still want the bot to return 'Aegislash-Sword'. Landorus queries still return 'Landorus-Incarnate.'''
 
         for listmon in self.list:
             if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
