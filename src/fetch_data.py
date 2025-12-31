@@ -1,5 +1,5 @@
 import requests
-import pokemon_list as pl
+import pokedex as pd
 import item_list as il
 
 class FetchData:
@@ -16,11 +16,11 @@ class FetchData:
         answer = ""
         total = 0
 
-        data = response.json()['stats']
+        json = response.json()
 
-        types = response.json()['types']
+        data = json['stats']
+        types = json['types']
 
-        answer += "----------------------------------\n"
         answer += f"**{pokemon.title()}** - "
 
         type_1 = types[0]['type']['name'].title()
@@ -40,8 +40,7 @@ class FetchData:
         answer += " | ".join(stats)
         answer += f" | **BST**: {total}\n"
 
-        answer += "----------------------------------"
-        return answer
+        return self.beautify(answer)
     
     def dt_item(self, item: str, response):
         answer = ""
@@ -54,48 +53,48 @@ class FetchData:
     def dt_ability(self, ability: str, response):
         pass
 
-    def dt(self, token):
+    def sanitize(self, token) -> str:
+        token = token.strip().replace(" ", "-")
+        tokens = token.split("-")
+
+        if tokens[0] == "mega":
+            return tokens[1] + "-" + tokens[0]
         
-        url = f"{self.base_url}/pokemon/"
+        return token
+    
+    def beautify(self, output):
+        return "----------------------------------\n" + output + "----------------------------------\n"
 
-        response = requests.get(url)
+    def dt(self, query):
 
-        mons = pl.PokemonList()
+        query = self.sanitize(query)
+        poke_url = f"{self.base_url}/pokemon/"
+        dex = pd.Pokedex()
 
-        if token.isnumeric() and mons.pokemon_by_number(token) is not None:
-
-            return self.dt_pokemon(mons.pokemon_by_number(token), requests.get(url+mons.pokemon_by_number(token)))
+        if query.isnumeric():
+            
+            if dex.by_number(query) is not None:
+                query = dex.by_number(query)
+            else:
+                return "you typed a random number 😹"
         
-        elif mons.pokemon_by_number(token) is None:
-
-            return "you typed a random number 😹"
-
-        if token in mons:
-
-            return self.dt_pokemon(token, requests.get(url+token))
+        if query in dex:
+            return self.dt_pokemon(query, requests.get(poke_url+query))
+        elif dex.close_match(query) is not None:
+            closest_match = dex.close_match(query)
+            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_pokemon(closest_match, requests.get(poke_url+closest_match))
         
-        elif len(mons.close_match(token)) >= 1:
-
-            closest_match = mons.close_match(token)[0]
-            answer = ""
-            answer += f"wth is {token} 😹. did u mean {closest_match}?\n"
-            answer += self.dt_pokemon(closest_match, requests.get(url+closest_match))
-            return answer
-                
-        url = f"{self.base_url}/item/"
-
         items = il.ItemList()
+        item_url = f"{self.base_url}/item/"
 
-        if token in items:
-
-            return self.dt_item(token, requests.get(url+token))
+        if query in items:
+            return self.dt_item(query, requests.get(item_url+query))
+        elif il.close_match(query) is not None:
+            closest_match = il.close_match(query)
+            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_pokemon(closest_match, requests.get(poke_url+closest_match))
         
-        elif len(items.close_match(token)) >= 1:
-
-            closest_match = items.close_match(token)[0]
-            answer = ""
-            answer += f"wth is {token} 😹. did u mean {closest_match}?\n"
-            answer += self.dt_item(closest_match, requests.get(url+closest_match))
-            return answer
-   
         return "i don't even know what this is gang try again 😹"
+    
+x = FetchData()
+
+print(x.dt("flame orb"))
