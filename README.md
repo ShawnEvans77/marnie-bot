@@ -25,6 +25,11 @@ Don't be silly and commit your .env publicly!
 
 ## Usage
 
-See below:
+See below. The bot implements [fuzzy string matching](https://en.wikipedia.org/wiki/Approximate_string_matching), so if you make
+a typo it will still try to parse what you said. As of now, the bot supports Pokemon and Pokemon item queries. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property.
 
 <img src="https://github.com/ShawnEvans77/marnie-bot/blob/main/image.png?raw=true"></img>
+
+## Motivation
+
+There are so many abhorrent vibe-coded ChatGPT wrapper SaaS B2B products which contain security lapses. I wanted to go back to basics and develop something from scratch on my own. It's nothing crazy, but I'm proud of it. I learned a lot making this.
