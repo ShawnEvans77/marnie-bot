@@ -24,8 +24,12 @@ class MoveList:
         return move.lower() in self.list
     
     def get_accuracy(self, move):
-        return int(self.df[self.df['identifier'] == move]['accuracy'].values[0])
-    
+
+        try: 
+            return int(self.df[self.df['identifier'] == move]['accuracy'].values[0])
+        except ValueError:
+            return None
+
     def get_generation(self, move):
         return int(self.df[self.df['identifier'] == move]['generation_id'].values[0])
     

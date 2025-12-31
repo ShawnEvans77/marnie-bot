@@ -58,10 +58,19 @@ class FetchData:
     def dt_move(self, move: str, move_list, response):
 
         answer = ""
-
         answer += f"**{move.title()}** - "
 
-        answer += f"**Accuracy**: {move_list.get_accuracy(move)} | "
+        accuracy = move_list.get_accuracy(move)
+
+        answer += f"**Accuracy**: "
+
+        if accuracy is not None:
+            answer += f"{move_list.get_accuracy(move)} "
+        else:
+            answer += "- "
+
+        answer += "| "
+        
         answer += f"**PP**: {move_list.get_pp(move)} | "
         answer += f"**Generation**: {move_list.get_generation(move)}"
 
@@ -122,7 +131,6 @@ class FetchData:
         
         if items.close_match(query) is not None:
             closest_match = items.close_match(query)
-            print(closest_match)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_item(requests.get(item_url+closest_match))
         
         if moves.close_match(query) is not None:
