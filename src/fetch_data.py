@@ -48,6 +48,8 @@ class FetchData:
         return self.beautify(answer)
     
     def dt_item(self, response):
+        '''Returns appropiate flavor text on a given item.'''
+
         item_desc = f"{response.json()['effect_entries'][0]['effect']}\n"
         return self.beautify(item_desc)
     
@@ -66,6 +68,7 @@ class FetchData:
         return token
     
     def beautify(self, output):
+        '''Helper method to print bot output easily.'''
         return "----------------------------------\n" + output + "----------------------------------\n"
 
     def dt(self, query):
