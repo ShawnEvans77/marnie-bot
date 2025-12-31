@@ -26,6 +26,25 @@ class Pokedex:
     def __contains__(self, pokemon):
         '''Returns if the input Pokemon exists, magic method that allows for interaction with Python in operator.'''
         return pokemon.lower() in self.list
+    
+    def flavor_exists(self, pokemon):
+        '''Returns if the list contains a flavor of the input Pokemon. Meaning, if user queries for 'Aegislash', 
+        I still want the bot to return 'Aegislas'''
+
+        for listmon in self.list:
+            if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
+                return True
+            
+        return False
+    
+    def flavor(self, pokemon):
+        '''I return the closest flavor of a "bare" Pokemon with forms.'''
+
+        for listmon in self.list:
+            if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
+                return listmon
+            
+        return None
 
     def close_match(self, incorrect) -> str:
         '''Returns the closest match to the input string. Useful for situations where the user mistypes a Pokemon.'''

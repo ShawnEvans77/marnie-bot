@@ -87,7 +87,7 @@ class FetchData:
     def sanitize(self, token) -> str:
         '''Removes trailing spaces, replaces spaces with dashes.'''
 
-        token = token.strip().replace(" ", "-")
+        token = token.strip().lower().replace(" ", "-")
         tokens = token.split("-")
 
         if tokens[0] == "mega":
@@ -120,6 +120,9 @@ class FetchData:
         if query in dex:
             return self.dt_pokemon(query, requests.get(poke_url+query))
         
+        if dex.flavor_exists(query) == True:
+            return self.dt_pokemon(dex.flavor(query), requests.get(poke_url+dex.flavor(query)))
+
         if query in items:
             return self.dt_item(requests.get(item_url+query))
         
