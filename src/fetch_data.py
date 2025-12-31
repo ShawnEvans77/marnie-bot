@@ -57,8 +57,6 @@ class FetchData:
 
     def dt_move(self, move: str, move_list, response):
 
-        print(move)
-
         answer = ""
 
         answer += f"**{move.title()}** - "
