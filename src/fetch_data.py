@@ -62,6 +62,14 @@ class FetchData:
 
         mons = pl.PokemonList()
 
+        if token.isnumeric() and mons.pokemon_by_number(token) is not None:
+
+            return self.dt_pokemon(mons.pokemon_by_number(token), requests.get(url+mons.pokemon_by_number(token)))
+        
+        elif mons.pokemon_by_number(token) is None:
+
+            return "you typed a random number 😹"
+
         if token in mons:
 
             return self.dt_pokemon(token, requests.get(url+token))

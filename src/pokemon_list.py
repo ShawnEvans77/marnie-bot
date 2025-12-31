@@ -16,5 +16,12 @@ class PokemonList:
 
     def close_match(self, incorrect):
         closest = [pokemon for pokemon in self.list if fuzz.ratio(incorrect.lower(), pokemon) >= 65]
-
         return closest
+    
+    def pokemon_by_number(self, number):
+        num = int(number)
+
+        try:
+            return self.df[self.df['id'] == num]['identifier'].values[0]
+        except IndexError:
+            return None
