@@ -26,7 +26,10 @@ class Bot:
 
         @self.bot.event
         async def on_ready():
-            print(f"MARNIE BOT fully operational!")
+            print(f"-------------------------------")
+            print(f"marnie bot fully operational! <3")
+            print(f"-------------------------------")
+
 
         @self.bot.command()
         async def dt(ctx, *, query):

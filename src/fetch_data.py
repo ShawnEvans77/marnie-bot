@@ -48,17 +48,16 @@ class FetchData:
 
         return self.beautify(answer)
     
-    def dt_item(self, response):
-        '''Returns appropiate flavor text on a given item.'''
-
-        answer = f"{response.json()['effect_entries'][0]['effect']}\n"
+    def dt_item(self, item: str, response):
+        answer = ""
+        answer += f"**{self.format_query(item)}\n**"
+        answer += f"{response.json()['effect_entries'][0]['effect']}\n"
         return self.beautify(answer)
     
-
     def dt_move(self, move: str, move_list, response):
 
         answer = ""
-        answer += f"**{move.title()}** - "
+        answer += f"**{self.format_query(move)}** - "
 
         accuracy = move_list.get_accuracy(move)
 
@@ -83,6 +82,9 @@ class FetchData:
 
     def dt_ability(self, ability: str, response):
         pass
+
+    def format_query(self, query):
+        return query.replace("-", " ").title()
 
     def sanitize(self, token) -> str:
         '''Removes trailing spaces, replaces spaces with dashes.'''
@@ -124,7 +126,7 @@ class FetchData:
             return self.dt_pokemon(dex.flavor(query), requests.get(poke_url+dex.flavor(query)))
 
         if query in items:
-            return self.dt_item(requests.get(item_url+query))
+            return self.dt_item(query, requests.get(item_url+query))
         
         if query in moves:
             return self.dt_move(query, moves, requests.get(move_url+query))
@@ -135,7 +137,7 @@ class FetchData:
         
         if items.close_match(query) is not None:
             closest_match = items.close_match(query)
-            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_item(requests.get(item_url+closest_match))
+            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_item(closest_match, requests.get(item_url+closest_match))
         
         if moves.close_match(query) is not None:
             closest_match = moves.close_match(query)
