@@ -6,7 +6,7 @@ import os
 import fetch_data as f
 
 class Bot:
-    
+
     def __init__(self):
         '''Creates a bot. Please note - DISCORD_ENV is not included in this repo, because I don't wanna give out bot access for free!'''
         '''If you wanna fork my project, please remember to not commit your .env file to the repo! :3'''
