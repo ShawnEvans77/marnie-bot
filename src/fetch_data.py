@@ -71,7 +71,7 @@ class FetchData:
 
         answer += f"**Accuracy**: "
 
-        if accuracy is not None:
+        if accuracy:
             answer += f"{move_list.get_accuracy(move)} "
         else:
             answer += "- "
