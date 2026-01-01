@@ -2,6 +2,7 @@ import requests
 import pokedex as pd
 import item_list as il
 import move_list as ml
+import ability_list as al
 
 class FetchData:
     '''The Fetch Data class is a wrapper for PokeAPI.'''
@@ -80,8 +81,13 @@ class FetchData:
 
         return self.beautify(answer)
 
-    def dt_ability(self, ability: str, response):
-        pass
+    def dt_ability(self, ability: str, ability_list, response):
+        answer = ""
+        answer += f"**{self.format_query(ability)}** "
+        answer += f"- **Generation**: {ability_list.get_generation(ability)}\n"
+        answer += f"{response.json()['effect_entries'][1]['effect']}\n"
+
+        return self.beautify(answer)
 
     def format_query(self, query):
         return query.replace("-", " ").title()
@@ -107,10 +113,12 @@ class FetchData:
         poke_url = f"{self.base_url}/pokemon/"
         item_url = f"{self.base_url}/item/"
         move_url = f"{self.base_url}/move/"
+        ability_url = f"{self.base_url}/ability/"
 
         dex = pd.Pokedex()
         items = il.ItemList()
         moves = ml.MoveList()
+        abilities = al.AbilityList()
 
         if query.isnumeric():
             
@@ -130,6 +138,9 @@ class FetchData:
         
         if query in moves:
             return self.dt_move(query, moves, requests.get(move_url+query))
+        
+        if query in abilities:
+            return self.dt_ability(query, abilities, requests.get(ability_url+query))
 
         if dex.close_match(query) is not None:
             closest_match = dex.close_match(query)
@@ -142,5 +153,9 @@ class FetchData:
         if moves.close_match(query) is not None:
             closest_match = moves.close_match(query)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_move(closest_match, moves, requests.get(move_url+closest_match))
+        
+        if abilities.close_match(query) is not None:
+            closest_match = abilities.close_match(query)
+            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_ability(closest_match, abilities, requests.get(ability_url+closest_match))
 
         return "i don't even know what this is gang try again 😹"

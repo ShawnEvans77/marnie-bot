@@ -1,6 +1,6 @@
 # marnie bot 👢
 
-Marnie Bot is a Discord bot that allows you to fetch data on Pokemon and Pokemon items. No vibe coding was used in this project. It is called Marnie Bot because who wouldn't want to be a part of Team Yell?
+Marnie Bot is a Discord bot that allows you to fetch data on Pokemon and Pokemon items. No vibe coding was used in this project. This isn't a ChatGPT wrapper, all code is originally written by me. It is called Marnie Bot because who wouldn't want to be a part of Team Yell?
 
 Feel free to clone the source code to set up your own version of the bot.
 
@@ -28,7 +28,7 @@ Don't be silly and commit your .env publicly!
 ## Usage
 
 See below. The bot implements [fuzzy string matching](https://en.wikipedia.org/wiki/Approximate_string_matching), so if you make
-a typo it will still try to parse what you said. As of now, the bot supports Pokemon, Pokemon item, and Pokemon move queries. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property.
+a typo it will still try to parse what you said. As of now, the bot supports Pokemon, Pokemon item, and Pokemon ability queries. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property.
 
 <img src="https://github.com/ShawnEvans77/marnie-bot/blob/main/image.png?raw=true"></img>
 
