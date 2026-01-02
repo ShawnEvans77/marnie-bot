@@ -151,7 +151,7 @@ class FetchData:
 
         if query.isnumeric():
             
-            if dex.by_number(query) is not None:
+            if dex.by_number(query):
                 query = dex.by_number(query)
             else:
                 return "you typed a random number 😹"
