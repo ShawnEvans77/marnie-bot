@@ -28,7 +28,7 @@ Don't be silly and commit your .env publicly!
 ## Usage
 
 See below. The bot implements [fuzzy string matching](https://en.wikipedia.org/wiki/Approximate_string_matching), so if you make
-a typo it will still try to parse what you said. As of now, the bot supports Pokemon, Pokemon item, and Pokemon ability queries. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property. Commands are invoked by typing !dt.
+a typo it will still try to parse what you said. As of now, the bot supports Pokemon, Pokemon item, and Pokemon ability queries. You can invoke Pokemon by their name or dex number. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property. Commands are invoked by typing !dt.
 
 <img src="https://github.com/ShawnEvans77/marnie-bot/blob/main/image.png?raw=true"></img>
 
