@@ -17,10 +17,10 @@ class MoveList:
         self.df = pandas.read_csv('assets/moves.csv')
         self.list = self.df['identifier'].values.tolist()
 
-    def exists(self, move):
+    def exists(self, move:str) -> bool:
         return move.lower() in self.list
     
-    def __contains__(self, move):
+    def __contains__(self, move:str) -> bool:
         return move.lower() in self.list
     
     def get_accuracy(self, move):

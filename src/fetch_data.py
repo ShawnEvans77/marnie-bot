@@ -108,7 +108,7 @@ class FetchData:
 
         return self.beautify(answer)
 
-    def dt_ability(self, ability: str, ability_list, response):
+    def dt_ability(self, ability: str, ability_list, response) -> str:
         answer = ""
         answer += f"**{self.format_response(ability)}** "
         answer += f"- **Generation**: {ability_list.get_generation(ability)}\n"
@@ -140,7 +140,9 @@ class FetchData:
 
         return f"{FetchData.HR}\n" + output + f"{FetchData.HR}\n"
 
-    def dt(self, query):
+    def dt(self, query) -> str:
+        '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
+        is a Pokemon, item, ability, or move.'''
 
         query = self.sanitize(query)
 

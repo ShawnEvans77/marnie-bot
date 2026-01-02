@@ -22,9 +22,11 @@ class AbilityList:
         return ability.lower() in self.list
     
     def __contains__(self, ability:str) -> str:
+        '''Returns if the input ability is in the ability list, dunder mother to support Python int.'''
+
         return ability.lower() in self.list
 
-    def close_match(self, incorrect) -> str:
+    def close_match(self, incorrect: str) -> str:
 
         '''Returns the closest match to the input string. Useful for situations where the user mistykes an item.'''
 
