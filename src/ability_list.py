@@ -16,11 +16,13 @@ class AbilityList:
         self.df = pandas.read_csv('assets/abilities.csv')
         self.list = self.df['identifier'].values.tolist()
 
-    def exists(self, item):
-        return item.lower() in self.list
+    def exists(self, ability:str) -> str:
+        '''Returns if the input ability exists in the list of abilities.'''
+
+        return ability.lower() in self.list
     
-    def __contains__(self, item):
-        return item.lower() in self.list
+    def __contains__(self, ability:str) -> str:
+        return ability.lower() in self.list
 
     def close_match(self, incorrect) -> str:
 
