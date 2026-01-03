@@ -65,7 +65,3 @@ class MoveList:
                 closest_item = move
 
         return closest_item
-    
-x = MoveList()
-
-print(x.get_power("close-combat"))
