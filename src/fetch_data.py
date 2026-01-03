@@ -16,6 +16,11 @@ class FetchData:
     move_url = f"{base_url}/move/"
     ability_url = f"{base_url}/ability/"
 
+    dex = pd.Pokedex()
+    items = il.ItemList()
+    moves = ml.MoveList()
+    abilities = al.AbilityList()
+
     modifiers = ("hisui", "mega", "primal", "origin", "galar", "alola")
 
     LINE_LENGTH = 35
@@ -161,47 +166,42 @@ class FetchData:
 
         query = self.sanitize(query)
 
-        dex = pd.Pokedex()
-        items = il.ItemList()
-        moves = ml.MoveList()
-        abilities = al.AbilityList()
-
         if query.isnumeric():
             
-            if dex.by_number(query):
-                query = dex.by_number(query)
+            if FetchData.dex.by_number(query):
+                query = FetchData.dex.by_number(query)
             else:
                 return "you typed a random number 😹"
         
-        if query in dex:
+        if query in FetchData.dex:
             return self.dt_pokemon(query, requests.get(FetchData.poke_url+query))
         
-        if dex.flavor_exists(query):
-            return self.dt_pokemon(dex.flavor(query), requests.get(FetchData.poke_url+dex.flavor(query)))
+        if FetchData.dex.flavor_exists(query):
+            return self.dt_pokemon(FetchData.dex.flavor(query), requests.get(FetchData.poke_url+FetchData.dex.flavor(query)))
 
-        if query in items:
+        if query in FetchData.items:
             return self.dt_item(query, requests.get(FetchData.item_url+query))
         
-        if query in moves:
-            return self.dt_move(query, moves, requests.get(FetchData.move_url+query))
+        if query in FetchData.moves:
+            return self.dt_move(query, FetchData.moves, requests.get(FetchData.move_url+query))
         
-        if query in abilities:
-            return self.dt_ability(query, abilities, requests.get(FetchData.ability_url+query))
+        if query in FetchData.abilities:
+            return self.dt_ability(query, FetchData.abilities, requests.get(FetchData.ability_url+query))
 
-        if dex.close_match(query):
-            closest_match = dex.close_match(query)
+        if FetchData.dex.close_match(query):
+            closest_match = FetchData.dex.close_match(query)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_pokemon(closest_match, requests.get(FetchData.poke_url+closest_match))
         
-        if items.close_match(query):
-            closest_match = items.close_match(query)
+        if FetchData.items.close_match(query):
+            closest_match = FetchData.items.close_match(query)
             return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_item(closest_match, requests.get(FetchData.item_url+closest_match))
         
-        if moves.close_match(query):
-            closest_match = moves.close_match(query)
-            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_move(closest_match, moves, requests.get(FetchData.move_url+closest_match))
+        if FetchData.moves.close_match(query):
+            closest_match = FetchData.moves.close_match(query)
+            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_move(closest_match, FetchData.moves, requests.get(FetchData.move_url+closest_match))
         
-        if abilities.close_match(query):
-            closest_match = abilities.close_match(query)
-            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_ability(closest_match, abilities, requests.get(FetchData.ability_url+closest_match))
+        if FetchData.abilities.close_match(query):
+            closest_match = FetchData.abilities.close_match(query)
+            return f"wth is {query} 😹. did u mean {closest_match}?\n" + self.dt_ability(closest_match, FetchData.abilities, requests.get(FetchData.ability_url+closest_match))
 
         return "i don't even know what this is gang try again 😹"
