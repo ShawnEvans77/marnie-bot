@@ -19,11 +19,11 @@ class Pokedex:
         self.dex_numbers = set(self.df['species_id'].values.tolist())
         self.num_pokemon = len(self.list) + 1
 
-    def exists(self, pokemon):
+    def exists(self, pokemon:str)->bool:
         '''Returns if the input Pokemon exists, done without magic method dunder.'''
         return pokemon.lower() in self.list
     
-    def __contains__(self, pokemon):
+    def __contains__(self, pokemon:str)->bool:
         '''Returns if the input Pokemon exists, magic method that allows for interaction with Python in operator.'''
         return pokemon.lower() in self.list
     

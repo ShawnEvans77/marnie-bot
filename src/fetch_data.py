@@ -26,7 +26,8 @@ class FetchData:
         pass
 
     def dt_pokemon(self, pokemon: str, response) -> str:
-        '''Returns information on a given Pokemon.'''
+        '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
+        name, type, and base stats.'''
         
         answer = ""
         total = 0
@@ -77,12 +78,15 @@ class FetchData:
         return self.beautify(answer)
     
     def dt_item(self, item: str, response) -> str:
+        '''Returns information on a Pokemon item. Information consists of a simple description of what the item does.'''
+
         answer = ""
         answer += f"**{self.format_response(item)}\n**"
         answer += f"{response.json()['effect_entries'][0]['effect']}\n"
         return self.beautify(answer)
     
     def dt_move(self, move: str, move_list, response) -> str:
+        '''Returns information on a Pokemon move. Information consists of the moves accuracy, PP, generation, and type.'''
 
         answer = ""
         answer += f"**{self.format_response(move)}** - "
@@ -109,6 +113,7 @@ class FetchData:
         return self.beautify(answer)
 
     def dt_ability(self, ability: str, ability_list, response) -> str:
+        '''Returns information on a Pokemon ability. Information consists of the ability's generation and effect.'''
         answer = ""
         answer += f"**{self.format_response(ability)}** "
         answer += f"- **Generation**: {ability_list.get_generation(ability)}\n"
@@ -140,7 +145,7 @@ class FetchData:
 
         return f"{FetchData.HR}\n" + output + f"{FetchData.HR}\n"
 
-    def dt(self, query) -> str:
+    def dt(self, query:str) -> str:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
         is a Pokemon, item, ability, or move.'''
 

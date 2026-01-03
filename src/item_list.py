@@ -23,7 +23,7 @@ class ItemList:
     def __contains__(self, item:str) -> str:
         return item.lower() in self.list
 
-    def close_match(self, incorrect) -> str:
+    def close_match(self, incorrect:str) -> str:
 
         '''Returns the closest match to the input string. Useful for situations where the user mistykes an item.'''
 

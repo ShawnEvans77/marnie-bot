@@ -27,7 +27,6 @@ class AbilityList:
         return ability.lower() in self.list
 
     def close_match(self, incorrect: str) -> str:
-
         '''Returns the closest match to the input string. Useful for situations where the user mistykes an item.'''
 
         closest_val = 0
@@ -43,5 +42,7 @@ class AbilityList:
 
         return closest_item
     
-    def get_generation(self, move):
-        return int(self.df[self.df['identifier'] == move]['generation_id'].values[0])
+    def get_generation(self, ability:str)->str:
+        '''Given an ability, return the generation it comes from.'''
+
+        return int(self.df[self.df['identifier'] == ability]['generation_id'].values[0])
