@@ -17,10 +17,10 @@ class ItemList:
         self.df = pandas.read_csv('assets/items.csv')
         self.list = self.df['identifier'].values.tolist()
 
-    def exists(self, item):
+    def exists(self, item:str) -> str:
         return item.lower() in self.list
     
-    def __contains__(self, item):
+    def __contains__(self, item:str) -> str:
         return item.lower() in self.list
 
     def close_match(self, incorrect) -> str:

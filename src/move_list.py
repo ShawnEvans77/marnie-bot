@@ -30,16 +30,16 @@ class MoveList:
         except ValueError:
             return None
 
-    def get_generation(self, move):
+    def get_generation(self, move:str)->str:
         return int(self.df[self.df['identifier'] == move]['generation_id'].values[0])
     
-    def get_power(self, move):
+    def get_power(self, move:str)->str:
         return int(self.df[self.df['identifier'] == move]['power'].values[0])
     
-    def get_pp(self, move):
+    def get_pp(self, move:str) -> str:
         return int(self.df[self.df['identifier'] == move]['pp'].values[0])
 
-    def close_match(self, incorrect) -> str:
+    def close_match(self, incorrect:str) -> str:
 
         '''Returns the closest match to the input string. Useful for situations where the user mistykes an item.'''
 

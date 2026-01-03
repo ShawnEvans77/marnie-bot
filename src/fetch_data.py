@@ -135,7 +135,7 @@ class FetchData:
         
         return token
     
-    def beautify(self, output):
+    def beautify(self, output:str) -> str:
         '''Helper method to print bot output easily.'''
 
         return f"{FetchData.HR}\n" + output + f"{FetchData.HR}\n"
