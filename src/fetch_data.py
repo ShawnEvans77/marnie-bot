@@ -26,6 +26,9 @@ class FetchData:
     alias = {
         "zard": "charizard",
         "fridge": "rotom-frost",
+        "lando": "landorus-incarnate",
+        "landot": "landorus-therian",
+        "lando-t": "landorus-incarnate",
     }
 
     LINE_LENGTH = 35
