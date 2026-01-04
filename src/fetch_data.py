@@ -23,6 +23,11 @@ class FetchData:
 
     modifiers = ("hisui", "mega", "primal", "origin", "galar", "alola")
 
+    alias = {
+        "zard": "charizard",
+        "fridge": "rotom-frost",
+    }
+
     LINE_LENGTH = 35
 
     HR = '-' * LINE_LENGTH
@@ -174,7 +179,10 @@ class FetchData:
                 query = FetchData.dex.by_number(query)
             else:
                 return "you typed a random number 😹"
-        
+            
+        if query in FetchData.alias:
+            return self.dt_pokemon(FetchData.alias[query], requests.get(FetchData.poke_url+FetchData.alias[query]))
+
         if query in FetchData.dex:
             return self.dt_pokemon(query, requests.get(FetchData.poke_url+query))
         
