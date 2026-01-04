@@ -15,7 +15,6 @@ class Pokedex:
     def __init__(self):
         self.df = pandas.read_csv('assets/pokemon.csv')
         self.list = self.df['identifier'].values.tolist()
-        self.dex_numbers = set(self.df['species_id'].values.tolist())
         self.num_pokemon = len(self.list) + 1
 
     def exists(self, pokemon:str)->bool:
