@@ -45,6 +45,8 @@ class FetchData:
 
         answer += f"**{pokemon.title()}** - "
 
+        answer += f"**Type:** "
+
         type_1 = types[0]['type']['name'].title()
         answer += f"_{type_1}_"
 
