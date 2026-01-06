@@ -7,7 +7,7 @@ Feel free to clone the source code to set up your own version of the bot.
 The bot scrapes PokeAPI data to provide updated information on Pokemon Base Stat Totals. Useful if you have a Discord Server
 based around Pokemon Showdown, and you want your own lightweight port of the website's commands. The primary information returned for queries on a Pokemon species are their stats, abilities, and type.
 
-The bot is mostly hosted on my own machine, but I am looking for proper hosting.
+The bot (should) hopefully be live as we speak! She is hosted on Render.
 
 ## Installation
 
