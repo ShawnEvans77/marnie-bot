@@ -1,6 +1,7 @@
 import pokedex as pd
 
 class Bulbapedia:
+    '''A class representing Bulbapedia. You can query Pokemon information and recieve Bulbapedia pages.'''
 
     dex = pd.Pokedex()
 

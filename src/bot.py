@@ -7,6 +7,7 @@ import fetch_data as f
 import bulbapedia as bp
 
 class Bot:
+    '''The Bot Class represents your Discord Bot. Start it using the run() function. It reads the proper token from the .env file.'''
 
     def __init__(self):
         '''Creates a bot. Please note - DISCORD_ENV is not included in this repo, because I don't wanna give out bot access for free!'''

@@ -5,7 +5,10 @@ import move_list as ml
 import ability_list as al
 
 class FetchData:
-    '''The Fetch Data class is a wrapper for PokeAPI. It is the primary way our bot finds information on Pokemon.'''
+    '''The Fetch Data class is a wrapper for PokeAPI. It is the primary way our bot finds information on Pokemon.
+    Queries should be sent to the dt() function, which parses the query to determine if it is a move, item, ability, or Pokemon.
+    After determining what type of object the query is, it invokes the appropiate subroutine to find the appropiate data.
+    Several static members are in this class. Names for stats, URLs, a Pokedex, aliases, and so forth.'''
 
     stat_names = ["HP", "ATK", "DEF", "SP. ATK", "SP. DEF", "SPEED"]
 
@@ -29,6 +32,12 @@ class FetchData:
         "lando": "landorus-incarnate",
         "landot": "landorus-therian",
         "lando-t": "landorus-incarnate",
+        "mark": "ludicolo",
+        "trump": "gumshoos",
+        "kamala": "komala",
+        "biden": "musharna",
+        "perc": "scrafty-mega",
+        "itami": "snorlax",
     }
 
     LINE_LENGTH = 35
@@ -178,6 +187,8 @@ class FetchData:
         return f"{FetchData.HR}\n" + output + f"{FetchData.HR}\n"
     
     def fuzzy(self, erroneous: str, correct: str) -> str:
+        '''Message for an approximate string match.'''
+
         return f"ummmm... {erroneous}? perhaps you meant {correct}?\n"
 
     def dt(self, query:str) -> str:
