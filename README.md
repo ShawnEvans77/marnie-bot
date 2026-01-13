@@ -28,7 +28,7 @@ docker run marnie
 ## Usage
 
 See below. The bot implements [fuzzy string matching](https://en.wikipedia.org/wiki/Approximate_string_matching), so if you make
-a typo it will still try to parse what you said. As of now, the bot supports Pokemon, Pokemon item, and Pokemon ability queries. You can invoke Pokemon by their name or dex number. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property. Commands are invoked by typing !dt.
+a typo it will still try to parse what you said. As of now, the bot supports Pokemon, Pokemon item, and Pokemon ability queries. You can invoke Pokemon by their name or dex number. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property. Commands are invoked by typing !dt. You can also type !wiki to search up Bulbapedia articles.
 
 <img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie.png"></img>
 
