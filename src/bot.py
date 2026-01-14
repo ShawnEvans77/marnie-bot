@@ -4,7 +4,6 @@ import logging
 from dotenv import load_dotenv
 import os
 import fetch_data as f
-import bulbapedia as bp
 import server
 
 class Bot:
@@ -26,7 +25,6 @@ class Bot:
         self.bot = commands.Bot(command_prefix='!', intents=self.intents)
 
         self.fetcher = f.FetchData()
-        self.pedia = bp.Bulbapedia()
 
         @self.bot.event
         async def on_ready():
@@ -37,10 +35,6 @@ class Bot:
         @self.bot.command()
         async def dt(ctx, *, query):
             await ctx.send(self.fetcher.dt(query))
-
-        @self.bot.command()
-        async def wiki(ctx, *, pokemon):
-            await ctx.send(self.pedia.get_mon(pokemon))
 
     def start(self):
         '''Executes the bot.'''

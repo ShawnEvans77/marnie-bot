@@ -1,8 +1,9 @@
 import pandas
 import numpy
 from thefuzz import fuzz
+import list as l
 
-class Pokedex:
+class Pokedex(l.List):
     '''
     The PokeDex class is an abstraction of a Pandas Table containing information on all of the Pokemon.
 
@@ -13,18 +14,9 @@ class Pokedex:
     THRESHOLD = 80
 
     def __init__(self):
-        self.df = pandas.read_csv('assets/pokemon.csv')
-        self.list = self.df['identifier'].values.tolist()
+        super().__init__(pandas.read_csv('assets/pokemon.csv'), Pokedex.THRESHOLD)
         self.num_pokemon = len(self.list) + 1
 
-    def exists(self, pokemon:str)->bool:
-        '''Returns if the input Pokemon exists, done without magic method dunder.'''
-        return not self.df[self.df['identifier']==pokemon.lower()].empty
-    
-    def __contains__(self, pokemon:str)->bool:
-        '''Returns if the input Pokemon exists, magic method that allows for interaction with Python in operator.'''
-        return not self.df[self.df['identifier']==pokemon.lower()].empty
-    
     def flavor_exists(self, pokemon: str) -> str:
         '''Returns if the list contains a flavor of the input Pokemon. Meaning, if user queries for 'Aegislash', 
         I still want the bot to return 'Aegislash-Sword'. Landorus queries still return 'Landorus-Incarnate.'''
@@ -44,22 +36,6 @@ class Pokedex:
             
         return None
 
-    def close_match(self, incorrect: str) -> str:
-        '''Returns the closest match to the input string. Useful for situations where the user mistypes a Pokemon.'''
-
-        closest_val = 0
-        closest_mon = None
-
-        for pokemon in self.list:
-
-            comparison = fuzz.ratio(incorrect.lower(), pokemon)
-
-            if comparison > closest_val and comparison > Pokedex.THRESHOLD:
-                closest_val = fuzz.ratio(incorrect.lower(), pokemon)
-                closest_mon = pokemon
-
-        return closest_mon
-    
     def by_number(self, num_str: str) -> str:
         '''Returns a Pokemon based on its dex number. Returns none if input string is not numeric or out of bounds.'''
     

@@ -1,8 +1,9 @@
 import pandas
 import numpy
 from thefuzz import fuzz
+import list as l
 
-class MoveList:
+class MoveList(l.List):
     '''The move List stores all moves from all Pokemon Games.
     
     Attributes:
@@ -14,16 +15,7 @@ class MoveList:
     THRESHOLD = 70
 
     def __init__(self):
-        self.df = pandas.read_csv('assets/moves.csv')
-        self.list = self.df['identifier'].values.tolist()
-
-    def exists(self, move:str) -> bool:
-        '''Returns if the input move exists in the list of moves.'''
-        return not self.df[self.df['identifier']==move].empty
-    
-    def __contains__(self, move:str) -> bool:
-        '''Returns if the input move exists in the list of moves, dunder method for in operator.'''
-        return not self.df[self.df['identifier']==move].empty
+        super().__init__(pandas.read_csv('assets/moves.csv'), MoveList.THRESHOLD)
 
     def get_accuracy(self, move:str) -> int:
         '''Returns the accuracy of the input move it has one. If the move has no accuracy, like Swords Dance, this function returns
@@ -50,20 +42,3 @@ class MoveList:
         '''Returns the amount of PP the input move has.'''
 
         return int(self.df[self.df['identifier'] == move]['pp'].values[0])
-
-    def close_match(self, incorrect:str) -> str:
-
-        '''Returns the closest match to the input string. Useful for situations where the user mistykes an item.'''
-
-        closest_val = 0
-        closest_item = None
-
-        for move in self.list:
-
-            comparison = fuzz.ratio(incorrect.lower(), move)
-
-            if comparison > closest_val and comparison > MoveList.THRESHOLD:
-                closest_val = fuzz.ratio(incorrect.lower(), move)
-                closest_item = move
-
-        return closest_item
