@@ -7,10 +7,12 @@ import fetch_data as f
 import server
 
 class Bot:
-    '''The Bot Class represents your Discord Bot. Start it using the run() function. It reads the proper token from the .env file.'''
+    '''The Bot Class represents your Discord Bot. Start it using the run() function. 
+    It reads the proper token from the .env file. It'''
 
     def __init__(self):
-        '''Creates a bot. Please note - DISCORD_ENV is not included in this repo, because I don't wanna give out bot access for free!'''
+        '''Creates a bot. Please note - DISCORD_ENV is not included in this repo, 
+        because I don't wanna give out bot access for free!'''
         '''If you wanna fork my project, please remember to not commit your .env file to the repo! :3'''
 
         load_dotenv()
@@ -28,12 +30,16 @@ class Bot:
 
         @self.bot.event
         async def on_ready():
+            '''A message to be printed to standard out indicating the bot started successfully.'''
+            
             print(f"-------------------------------")
             print(f"marnie bot fully operational! <3")
             print(f"-------------------------------")
 
         @self.bot.command()
         async def dt(ctx, *, query):
+            '''Handles dt commands by invoking the dt() function on the fetcher object.'''
+
             await ctx.send(self.fetcher.dt(query))
 
     def start(self):

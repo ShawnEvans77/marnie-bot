@@ -4,11 +4,11 @@ from thefuzz import fuzz
 import list as l
 
 class ItemList(l.List):
-    '''
-    The Item List stores all items from all Pokemon Games. It inherits from the List class. 
+    '''The Item List stores all items from all Pokemon Games.
     
     Attributes:
-        df - A Pandas Dataframe with a list of items.    
+        df - A pandas dataframe sourced from a CSV, used for determing if an item exists in the Pokemon games.
+        list - A list of items from all Pokemon games.  
     '''
     THRESHOLD = 70
 
