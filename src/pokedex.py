@@ -4,12 +4,12 @@ from thefuzz import fuzz
 import list as l
 
 class Pokedex(l.List):
-    '''
-    The PokeDex class is an abstraction of a Pandas Table containing information on all of the Pokemon.
-
+    '''The Pokedex stores all moves from all Pokemon Games.
+    
     Attributes:
-        THRESHOLD (int) - A crucial variable that assists our fuzzy matching algorithim. The higher it is, the more precise
-        queries have to be for the 'did you mean this Pokemon' suggestion to work. 
+        THRESHOLD (int) - How close a user has to be for the "did you mean?" suggestion to work.
+        df (pandas dataframe) - The result of reading the item CSV.
+        list (list) - A list of all Pokemon from all Pokemon games.  
     '''
     THRESHOLD = 80
 
@@ -19,7 +19,7 @@ class Pokedex(l.List):
 
     def flavor_exists(self, pokemon: str) -> str:
         '''Returns if the list contains a flavor of the input Pokemon. Meaning, if user queries for 'Aegislash', 
-        I still want the bot to return 'Aegislash-Sword'. Landorus queries still return 'Landorus-Incarnate.'''
+        'Aegislash-Sword' is returned. Landorus queries still return 'Landorus-Incarnate.'''
 
         for listmon in self.list:
             if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
@@ -28,7 +28,7 @@ class Pokedex(l.List):
         return False
     
     def flavor(self, pokemon: str) -> str:
-        '''I return the closest flavor of a "bare" Pokemon with forms.'''
+        '''Return the closest flavor of a "bare" Pokemon with forms.'''
 
         for listmon in self.list:
             if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
