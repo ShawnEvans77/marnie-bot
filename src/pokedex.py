@@ -4,12 +4,12 @@ from thefuzz import fuzz
 import list as l
 
 class Pokedex(l.List):
-    '''The Pokedex stores all moves from all Pokemon Games.
+    '''The Pokedex stores abilities from all Pokemon Games.
     
     Attributes:
-        THRESHOLD (int) - How close a user has to be for the "did you mean?" suggestion to work.
-        df (pandas dataframe) - The result of reading the item CSV.
-        list (list) - A list of all Pokemon from all Pokemon games.  
+        df - A pandas dataframe sourced from a CSV, used for determing if a Pokemon exists in the Pokemon games.
+        list - A list of all Pokemon.
+        num_pokemon - The number of Pokemon that exist in all the games.
     '''
     THRESHOLD = 80
 
