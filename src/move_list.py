@@ -4,14 +4,14 @@ from thefuzz import fuzz
 import list as l
 
 class MoveList(l.List):
-    '''The move List stores all moves from all Pokemon Games.
+    '''The move list stores moves from all Pokemon Games.
     
     Attributes:
-        THRESHOLD (int) - How close a user has to be for the "did you mean?" suggestion to work.
-        df (pandas dataframe) - The result of reading the item CSV.
-        list (list) - A list of moves from all Pokemon games.  
+        df - A pandas dataframe sourced from a CSV, used for determing if a Pokemon exists in the Pokemon games.
+        list - A list of all Pokemon.
+        num_pokemon - The number of Pokemon that exist in all the games.
     '''
-
+    
     THRESHOLD = 70
 
     def __init__(self):
