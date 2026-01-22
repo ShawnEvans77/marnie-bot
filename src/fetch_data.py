@@ -15,7 +15,6 @@ class FetchData:
         name, type, and base stats.'''
         
         answer = ""
-        total = 0
         json = response.json()
         stats, types, abilities = json['stats'], json['types'], json['abilities']
   
@@ -26,12 +25,14 @@ class FetchData:
         answer += "\n"
         get_stats = []
 
+        total = 0
+
         for i in range(len(constants.stat_names)):
             stat_name = constants.stat_names[i]
             stat_num = stats[i]['base_stat']
 
             get_stats.append(f"**{stat_name}**: {stat_num}")
-            total += stats[i]['base_stat']
+            total += stat_num
 
         answer += f"{" | ".join(get_stats)} | **BST**: {total}\n" 
 
