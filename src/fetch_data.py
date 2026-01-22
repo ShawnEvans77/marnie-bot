@@ -1,50 +1,11 @@
 import requests
-import pokedex as pd
-import item_list as il
-import move_list as ml
-import ability_list as al
+import constants
 
 class FetchData:
     '''The Fetch Data class is a wrapper for PokeAPI. It is the primary way our bot finds information on Pokemon.
     Queries should be sent to the dt() function, which parses the query to determine if it is a move, item, ability, or Pokemon.
     After determining what type of object the query is, it invokes the appropiate subroutine to find the appropiate data.
     Several static members are in this class. Names for stats, URLs, a Pokedex, aliases, and so forth.'''
-
-    stat_names = ["HP", "ATK", "DEF", "SP. ATK", "SP. DEF", "SPEED"]
-
-    base_url = "https://pokeapi.co/api/v2"
-
-    poke_url = f"{base_url}/pokemon/"
-    item_url = f"{base_url}/item/"
-    move_url = f"{base_url}/move/"
-    ability_url = f"{base_url}/ability/"
-
-    dex = pd.Pokedex()
-    items = il.ItemList()
-    moves = ml.MoveList()
-    abilities = al.AbilityList()
-
-    modifiers = ("hisui", "mega", "primal", "origin", "galar", "alola")
-
-    alias = {
-        "zard": "charizard",
-        "fridge": "rotom-frost",
-        "lando": "landorus-incarnate",
-        "landot": "landorus-therian",
-        "lando-t": "landorus-incarnate",
-        "mark": "ludicolo",
-        "trump": "gumshoos",
-        "kamala": "komala",
-        "biden": "musharna",
-        "perc": "scrafty-mega",
-        "itami": "snorlax",
-    }
-
-    LINE_LENGTH = 35
-
-    HR = '-' * LINE_LENGTH
-
-    placeholder = "$effect_chance%"
 
     def __init__(self):
         pass
@@ -55,37 +16,24 @@ class FetchData:
         
         answer = ""
         total = 0
-
         json = response.json()
+        stats, types, abilities = json['stats'], json['types'], json['abilities']
+  
+        answer += f"**{pokemon.title()}** - **Type:** _{types[0]['type']['name'].title()}_"
 
-        data = json['stats']
-        types = json['types']
-        abilities = json['abilities']
-
-        answer += f"**{pokemon.title()}** - "
-        answer += f"**Type:** "
-
-        type_1 = types[0]['type']['name'].title()
-        answer += f"_{type_1}_"
-
-        if len(types) == 2: 
-            type_2 = types[1]['type']['name'].title()
-            answer += f"/_{type_2}_"
+        if len(types) == 2: answer += f"/_{types[1]['type']['name'].title()}_"
 
         answer += "\n"
+        get_stats = []
 
-        stats = []
+        for i in range(len(constants.stat_names)):
+            stat_name = constants.stat_names[i]
+            stat_num = stats[i]['base_stat']
 
-        for i in range(len(FetchData.stat_names)):
-            stat_name = FetchData.stat_names[i]
-            stat_num = data[i]['base_stat']
+            get_stats.append(f"**{stat_name}**: {stat_num}")
+            total += stats[i]['base_stat']
 
-            stats.append(f"**{stat_name}**: {stat_num}")
-
-            total += data[i]['base_stat']
-
-        answer += " | ".join(stats)
-        answer += f" | **BST**: {total}\n"
+        answer += f"{" | ".join(get_stats)} | **BST**: {total}\n" 
 
         for i in range(len(abilities)):
 
@@ -96,7 +44,6 @@ class FetchData:
                 answer += " | "
 
         answer += "**Ab. 1**: N/A\n" if not abilities else "\n"
-
         return self.beautify(answer)
     
     def dt_item(self, item: str, response) -> str:
@@ -118,17 +65,9 @@ class FetchData:
 
         json = response.json()
 
-        answer += f"**Accuracy**: "
-        answer += f"{accuracy} " if accuracy else "- "
-        answer += "| "
-        answer += f"**Power**: "
-        answer += f"{power} " if power else "- "
-        answer += "| "
-        answer += f"**Type:** "
-
-        type = json['type']['name'].title()
-        answer += f"_{type}_ | "
-        
+        answer += f"**Accuracy**: {accuracy if accuracy else "-"} | "
+        answer += f"**Power**: {power if power else "-"} | "
+        answer += f"**Type:** _{json['type']['name'].title()}_ | "
         answer += f"**PP**: {move_list.get_pp(move)} | "
         answer += f"**Generation**: {move_list.get_generation(move)} | "
         answer += f"**Category**: {json['damage_class']['name'].title()}"
@@ -137,20 +76,16 @@ class FetchData:
 
         effect = f"{json['effect_entries'][1]['effect']}\n"
 
-        if FetchData.placeholder in effect:
-            effect = effect.replace(FetchData.placeholder, str(json['effect_chance']) + "%")
-
-        answer += effect
-
+        answer += effect if constants.placeholder not in effect else effect.replace(constants.placeholder, str(json['effect_chance']) + "%")
         return self.beautify(answer)
 
     def dt_ability(self, ability: str, ability_list, response) -> str:
         '''Returns information on a Pokemon ability. Information consists of the ability's generation and effect.'''
+
         answer = ""
         answer += f"**{self.format_response(ability)}** "
         answer += f"- **Generation**: {ability_list.get_generation(ability)}\n"
-
-        answer += f"{response.json()['effect_entries'][1]['effect']}\n"
+        answer += f"{response.json()['effect_entries'][2]['effect']}\n"
 
         return self.beautify(answer)
 
@@ -163,16 +98,13 @@ class FetchData:
 
         token = token.strip().lower().replace(" ", "-")
         tokens = token.split("-")
-
-        if tokens[0] in FetchData.modifiers:
-            return tokens[1] + "-" + tokens[0]            
-        
-        return token
+         
+        return token if tokens[0] not in constants.modifiers else tokens[1] + "-" + tokens[0]
     
     def beautify(self, output:str) -> str:
         '''Helper method to print bot output easily.'''
 
-        return f"{FetchData.HR}\n" + output + f"{FetchData.HR}\n"
+        return f"{constants.HR}\n" + output + f"{constants.HR}"
     
     def fuzzy(self, erroneous: str, correct: str) -> str:
         '''Message for an approximate string match.'''
@@ -187,43 +119,43 @@ class FetchData:
 
         if query.isnumeric():
             
-            if FetchData.dex.by_number(query):
-                query = FetchData.dex.by_number(query)
+            if constants.pokemon.by_number(query):
+                query = constants.pokemon.by_number(query)
             else:
-                return "you typed a random number 😹"
+                return "you typed a random number..."
             
-        if query in FetchData.alias:
-            return self.dt_pokemon(FetchData.alias[query], requests.get(FetchData.poke_url+FetchData.alias[query]))
+        if query in constants.alias:
+            return self.dt_pokemon(constants.alias[query], requests.get(constants.poke_url+constants.alias[query]))
 
-        if query in FetchData.dex:
-            return self.dt_pokemon(query, requests.get(FetchData.poke_url+query))
+        if query in constants.pokemon:
+            return self.dt_pokemon(query, requests.get(constants.poke_url+query))
         
-        if FetchData.dex.flavor_exists(query):
-            return self.dt_pokemon(FetchData.dex.flavor(query), requests.get(FetchData.poke_url+FetchData.dex.flavor(query)))
+        if constants.pokemon.flavor_exists(query):
+            return self.dt_pokemon(constants.pokemon.flavor(query), requests.get(constants.poke_url+constants.pokemon.flavor(query)))
 
-        if query in FetchData.items:
-            return self.dt_item(query, requests.get(FetchData.item_url+query))
+        if query in constants.items:
+            return self.dt_item(query, requests.get(constants.item_url+query))
         
-        if query in FetchData.moves:
-            return self.dt_move(query, FetchData.moves, requests.get(FetchData.move_url+query))
+        if query in constants.moves:
+            return self.dt_move(query, constants.moves, requests.get(constants.move_url+query))
         
-        if query in FetchData.abilities:
-            return self.dt_ability(query, FetchData.abilities, requests.get(FetchData.ability_url+query))
+        if query in constants.abilities:
+            return self.dt_ability(query, constants.abilities, requests.get(constants.ability_url+query))
 
-        if FetchData.dex.close_match(query):
-            closest_match = FetchData.dex.close_match(query)
-            return self.fuzzy(query, closest_match) + self.dt_pokemon(closest_match, requests.get(FetchData.poke_url+closest_match))
+        if constants.pokemon.close_match(query):
+            closest_match = constants.pokemon.close_match(query)
+            return self.fuzzy(query, closest_match) + self.dt_pokemon(closest_match, requests.get(constants.poke_url+closest_match))
         
-        if FetchData.items.close_match(query):
-            closest_match = FetchData.items.close_match(query)
-            return self.fuzzy(query, closest_match) + self.dt_item(closest_match, requests.get(FetchData.item_url+closest_match))
+        if constants.items.close_match(query):
+            closest_match = constants.items.close_match(query)
+            return self.fuzzy(query, closest_match) + self.dt_item(closest_match, requests.get(constants.item_url+closest_match))
         
-        if FetchData.moves.close_match(query):
-            closest_match = FetchData.moves.close_match(query)
-            return self.fuzzy(query, closest_match) + self.dt_move(closest_match, FetchData.moves, requests.get(FetchData.move_url+closest_match))
+        if constants.moves.close_match(query):
+            closest_match = constants.moves.close_match(query)
+            return self.fuzzy(query, closest_match) + self.dt_move(closest_match, constants.moves, requests.get(constants.move_url+closest_match))
         
-        if FetchData.abilities.close_match(query):
-            closest_match = FetchData.abilities.close_match(query)
-            return self.fuzzy(query, closest_match) + self.dt_ability(closest_match, FetchData.abilities, requests.get(FetchData.ability_url+closest_match))
+        if constants.abilities.close_match(query):
+            closest_match = constants.abilities.close_match(query)
+            return self.fuzzy(query, closest_match) + self.dt_ability(closest_match, constants.abilities, requests.get(constants.ability_url+closest_match))
 
         return f"i don't know what {query} is... check your spelling?"
