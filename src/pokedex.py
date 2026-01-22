@@ -17,15 +17,15 @@ class Pokedex(l.List):
         super().__init__(pandas.read_csv('assets/pokemon.csv'), Pokedex.THRESHOLD)
         self.num_pokemon = len(self.list) + 1
 
-    def flavor_exists(self, pokemon: str) -> str:
+    def flavor_exists(self, pokemon: str) -> bool:
         '''Returns if the list contains a flavor of the input Pokemon. Meaning, if user queries for 'Aegislash', 
         'Aegislash-Sword' is returned. Landorus queries still return 'Landorus-Incarnate.'''
 
         for listmon in self.list:
             if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
                 return True
-            
-        return False
+    
+        return False    
     
     def flavor(self, pokemon: str) -> str:
         '''Return the closest flavor of a "bare" Pokemon with forms.'''
@@ -39,12 +39,7 @@ class Pokedex(l.List):
     def by_number(self, num_str: str) -> str:
         '''Returns a Pokemon based on its dex number. Returns none if input string is not numeric or out of bounds.'''
     
-        if not num_str.isnumeric():
-            return None
-        
+        if not num_str.isnumeric(): return None
         num = int(num_str)
-
-        if num < 1 or num > self.num_pokemon:
-            return None
-        
+        if num < 1 or num > self.num_pokemon: return None
         return self.df[self.df['id'] == num]['identifier'].values[0]

@@ -41,8 +41,7 @@ class FetchData:
             ability_label = f"**Ab. {i+1}**" if not abilities[i]['is_hidden'] else "**HA**"
             answer += f"{ability_label}: {self.format_response(abilities[i]['ability']['name'])}"
 
-            if i != len(abilities) - 1:
-                answer += " | "
+            if i != len(abilities) - 1: answer += " | "
 
         answer += "**Ab. 1**: N/A\n" if not abilities else "\n"
         return self.beautify(answer)
@@ -92,6 +91,7 @@ class FetchData:
 
     def format_response(self, query:str) -> str:
         '''PokeAPI can return String names weird. This gets rid of pesky dashes while also titling Strings.'''
+        
         return query.replace("-", " ").title()
 
     def sanitize(self, token: str) -> str:
