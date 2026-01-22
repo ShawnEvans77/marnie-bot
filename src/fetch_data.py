@@ -63,7 +63,6 @@ class FetchData:
         abilities = json['abilities']
 
         answer += f"**{pokemon.title()}** - "
-
         answer += f"**Type:** "
 
         type_1 = types[0]['type']['name'].title()
@@ -96,10 +95,7 @@ class FetchData:
             if i != len(abilities) - 1:
                 answer += " | "
 
-        if not abilities:
-            answer += "**Ab. 1**: N/A"
-
-        answer += "\n"
+        answer += "**Ab. 1**: N/A\n" if not abilities else "\n"
 
         return self.beautify(answer)
     
