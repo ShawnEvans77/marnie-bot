@@ -44,6 +44,8 @@ class FetchData:
 
     HR = '-' * LINE_LENGTH
 
+    placeholder = "$effect_chance%"
+
     def __init__(self):
         pass
 
@@ -106,7 +108,7 @@ class FetchData:
 
         answer = ""
         answer += f"**{self.format_response(item)}\n**"
-        answer += f"{response.json()['effect_entries'][0]['effect']}\n"
+        answer += f"{response.json()['effect_entries'][1]['effect']}\n"
         return self.beautify(answer)
     
     def dt_move(self, move: str, move_list, response) -> str:
@@ -121,23 +123,11 @@ class FetchData:
         json = response.json()
 
         answer += f"**Accuracy**: "
-
-        if accuracy:
-            answer += f"{accuracy} "
-        else:
-            answer += "- "
-
+        answer += f"{accuracy} " if accuracy else "- "
         answer += "| "
-
         answer += f"**Power**: "
-
-        if power:
-            answer += f"{power} "
-        else:
-            answer += "- "
-
+        answer += f"{power} " if power else "- "
         answer += "| "
-
         answer += f"**Type:** "
 
         type = json['type']['name'].title()
@@ -145,11 +135,16 @@ class FetchData:
         
         answer += f"**PP**: {move_list.get_pp(move)} | "
         answer += f"**Generation**: {move_list.get_generation(move)} | "
-        answer += f"**Category**: {response.json()['damage_class']['name'].title()}"
+        answer += f"**Category**: {json['damage_class']['name'].title()}"
 
         answer += "\n"
 
-        answer += f"{response.json()['effect_entries'][0]['effect']}\n"
+        effect = f"{json['effect_entries'][1]['effect']}\n"
+
+        if FetchData.placeholder in effect:
+            effect = effect.replace(FetchData.placeholder, str(json['effect_chance']) + "%")
+
+        answer += effect
 
         return self.beautify(answer)
 
@@ -159,10 +154,7 @@ class FetchData:
         answer += f"**{self.format_response(ability)}** "
         answer += f"- **Generation**: {ability_list.get_generation(ability)}\n"
 
-        try:
-            answer += f"{response.json()['effect_entries'][1]['effect']}\n"
-        except IndexError:
-            answer += f"{response.json()['effect_entries'][0]['effect']}\n"
+        answer += f"{response.json()['effect_entries'][1]['effect']}\n"
 
         return self.beautify(answer)
 
