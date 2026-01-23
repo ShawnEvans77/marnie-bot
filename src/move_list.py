@@ -7,7 +7,7 @@ class MoveList(l.List):
     '''The move list stores moves from all Pokemon Games.
     
     Attributes:
-        df - A pandas dataframe sourced from a CSV, used for determing if a Pokemon exists in the Pokemon games.
+        df - A pandas dataframe sourced from a CSV, used for determining if a Pokemon exists in the Pokemon games.
         list - A list of all Pokemon.
         num_pokemon - The number of Pokemon that exist in all the games.
     '''
@@ -24,11 +24,11 @@ class MoveList(l.List):
         except ValueError:
             return None
 
-    def get_generation(self, move:str)->str:
+    def get_generation(self, move:str)->int:
         '''Returns the generation the input move originated from.'''
         return int(self.df[self.df['identifier'] == move]['generation_id'].values[0])
     
-    def get_power(self, move:str)->str:
+    def get_power(self, move:str)->int:
         '''Returns the power of the input move.'''
 
         try:
@@ -36,7 +36,7 @@ class MoveList(l.List):
         except ValueError:
             return None
     
-    def get_pp(self, move:str) -> str:
+    def get_pp(self, move:str) -> int:
         '''Returns the amount of PP the input move has.'''
 
         return int(self.df[self.df['identifier'] == move]['pp'].values[0])
