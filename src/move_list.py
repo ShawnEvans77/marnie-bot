@@ -1,6 +1,4 @@
 import pandas
-import numpy
-from thefuzz import fuzz
 import list as l
 
 MOVE_THRESHOLD = 70

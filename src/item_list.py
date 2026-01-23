@@ -1,5 +1,4 @@
 import pandas
-from thefuzz import fuzz
 import list as l
 
 ITEM_THRESHOLD = 70
