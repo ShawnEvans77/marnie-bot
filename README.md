@@ -31,6 +31,7 @@ See below. The bot implements [fuzzy string matching](https://en.wikipedia.org/w
 a typo it will still try to parse what you said. You can invoke Pokemon by their name or dex number. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property. Commands are invoked by typing !dt. 
 
 <img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie.png"></img>
+<img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie_2.png"></img>
 
 ## Motivation
 
