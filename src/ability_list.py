@@ -2,6 +2,8 @@ import pandas
 from thefuzz import fuzz
 import list as l
 
+ABILITY_THRESHOLD = 70
+
 class AbilityList(l.List):
     '''The Ability List stores abilities from all Pokemon Games.
     
@@ -10,10 +12,8 @@ class AbilityList(l.List):
         list - A list of abilities from all Pokemon games.  
     '''
 
-    THRESHOLD = 70
-
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/abilities.csv'), AbilityList.THRESHOLD)
+        super().__init__(pandas.read_csv('assets/abilities.csv'), ABILITY_THRESHOLD)
 
     def get_generation(self, ability:str)->str:
         '''Given an ability, return the generation it comes from as a string.'''

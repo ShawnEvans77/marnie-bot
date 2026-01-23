@@ -3,6 +3,8 @@ import numpy
 from thefuzz import fuzz
 import list as l
 
+POKEDEX_THRESHOLD = 80
+
 class Pokedex(l.List):
     '''The Pokedex stores abilities from all Pokemon Games.
     
@@ -11,10 +13,9 @@ class Pokedex(l.List):
         list - A list of all Pokemon.
         num_pokemon - The number of Pokemon that exist in all the games.
     '''
-    THRESHOLD = 80
 
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/pokemon.csv'), Pokedex.THRESHOLD)
+        super().__init__(pandas.read_csv('assets/pokemon.csv'), POKEDEX_THRESHOLD)
         self.num_pokemon = len(self.list) + 1
 
     def flavor_exists(self, pokemon: str) -> bool:

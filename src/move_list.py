@@ -3,6 +3,8 @@ import numpy
 from thefuzz import fuzz
 import list as l
 
+MOVE_THRESHOLD = 70
+
 class MoveList(l.List):
     '''The move list stores moves from all Pokemon Games.
     
@@ -12,10 +14,8 @@ class MoveList(l.List):
         num_pokemon - The number of Pokemon that exist in all the games.
     '''
     
-    THRESHOLD = 70
-
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/moves.csv'), MoveList.THRESHOLD)
+        super().__init__(pandas.read_csv('assets/moves.csv'), MOVE_THRESHOLD)
 
     def get_accuracy(self, move:str) -> int:
         '''Returns the accuracy of the input move it has one. If the move has no accuracy, like Swords Dance, this function returns
