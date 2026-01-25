@@ -1,7 +1,4 @@
-import pandas
-import list as l
-
-ITEM_THRESHOLD = 70
+import pandas, list as l, constants
 
 class ItemList(l.List):
     '''The Item List stores all items from all Pokemon Games.
@@ -12,4 +9,4 @@ class ItemList(l.List):
     '''
 
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/items.csv'), ITEM_THRESHOLD)
+        super().__init__(pandas.read_csv('assets/items.csv'), constants.item_threshold)

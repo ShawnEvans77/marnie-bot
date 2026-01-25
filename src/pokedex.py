@@ -1,7 +1,4 @@
-import pandas
-import list as l
-
-POKEDEX_THRESHOLD = 80
+import pandas, list as l, constants
 
 class Pokedex(l.List):
     '''The Pokedex stores abilities from all Pokemon Games.
@@ -13,7 +10,7 @@ class Pokedex(l.List):
     '''
 
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/pokemon.csv'), POKEDEX_THRESHOLD)
+        super().__init__(pandas.read_csv('assets/pokemon.csv'), constants.poke_threshold)
         self.num_pokemon = len(self.list) + 1
 
     def flavor(self, pokemon: str) -> str:
@@ -37,7 +34,7 @@ class Pokedex(l.List):
         if num < 1 or num > self.num_pokemon: return None
         return self.df[self.df['id'] == num]['identifier'].values[0]
     
-    def get_species_id(self, pokemon: str) -> str:
+    def get_species_id(self, pokemon: str) -> int:
         '''Returns the national dex number of the input Pokemon.'''
         
-        return self.df[self.df['identifier'] == pokemon]['species_id'].values[0]
+        return int(self.df[self.df['identifier'] == pokemon]['species_id'].values[0])

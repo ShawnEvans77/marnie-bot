@@ -1,7 +1,4 @@
-import pandas
-import list as l
-
-MOVE_THRESHOLD = 70
+import pandas, list as l, constants
 
 class MoveList(l.List):
     '''The move list stores moves from all Pokemon Games.
@@ -13,7 +10,7 @@ class MoveList(l.List):
     '''
     
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/moves.csv'), MOVE_THRESHOLD)
+        super().__init__(pandas.read_csv('assets/moves.csv'), constants.move_threshold)
 
     def get_accuracy(self, move:str) -> int:
         '''Returns the accuracy of the input move it has one. If the move has no accuracy, like Swords Dance, this function returns
@@ -24,11 +21,11 @@ class MoveList(l.List):
         except ValueError:
             return None
 
-    def get_generation(self, move:str)->int:
+    def get_generation(self, move:str) -> int:
         '''Returns the generation the input move originated from.'''
         return int(self.df[self.df['identifier'] == move]['generation_id'].values[0])
     
-    def get_power(self, move:str)->int:
+    def get_power(self, move:str) -> int:
         '''Returns the power of the input move.'''
 
         try:

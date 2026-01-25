@@ -1,5 +1,4 @@
-import requests
-import constants
+import requests, constants
 
 class FetchData:
     '''The Fetch Data class is a wrapper for PokeAPI. It is the primary way our bot finds information on Pokemon.
@@ -36,7 +35,7 @@ class FetchData:
         for i in range(len(abilities)):
 
             ability_label = f"**Ab. {i+1}**" if not abilities[i]['is_hidden'] else "**HA**"
-            answer += f"{ability_label}: {FetchData.format_response(abilities[i]['ability']['name'])}"
+            answer += f"{ability_label}: {FetchData.reverse_sanitize(abilities[i]['ability']['name'])}"
 
             if i != len(abilities) - 1: answer += " | "
 
@@ -47,7 +46,7 @@ class FetchData:
         '''Returns information on a Pokemon item. Information consists of a simple description of what the item does.'''
 
         answer = ""
-        answer += f"**{FetchData.format_response(item)}\n**"
+        answer += f"**{FetchData.reverse_sanitize(item)}\n**"
 
         json = response.json()
         answer += f"{FetchData.get_effect(json)}\n"
@@ -58,7 +57,7 @@ class FetchData:
         '''Returns information on a Pokemon move. Information consists of the moves accuracy, PP, generation, and type.'''
 
         answer = ""
-        answer += f"**{FetchData.format_response(move)}** - "
+        answer += f"**{FetchData.reverse_sanitize(move)}** - "
 
         accuracy = constants.moves.get_accuracy(move)
         power = constants.moves.get_power(move)
@@ -82,7 +81,7 @@ class FetchData:
         '''Returns information on a Pokemon ability. Information consists of the ability's generation and effect.'''
 
         answer = ""
-        answer += f"**{FetchData.format_response(ability)}** "
+        answer += f"**{FetchData.reverse_sanitize(ability)}** "
         answer += f"- **Generation**: {constants.abilities.get_generation(ability)}\n"
 
         json = response.json()
@@ -91,8 +90,8 @@ class FetchData:
         return FetchData.beautify(answer)
     
     @staticmethod
-    def format_response(query: str) -> str:
-        '''PokeAPI can return String names weird. This gets rid of pesky dashes while also titling Strings.'''
+    def reverse_sanitize(query: str) -> str:
+        '''Gets rid of dashes in a String and titles it.'''
         
         return query.replace("-", " ").title()
     
@@ -110,7 +109,7 @@ class FetchData:
     def beautify(output: str) -> str:
         '''Helper method to print bot output easily.'''
 
-        return f"{constants.HR}\n" + output + f"{constants.HR}"
+        return f"{constants.hr}\n" + output + f"{constants.hr}"
     
     @staticmethod
     def fuzzy(erroneous: str, correct: str) -> str:

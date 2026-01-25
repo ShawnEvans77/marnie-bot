@@ -10,6 +10,12 @@ item_url = f"{base_url}/item/"
 move_url = f"{base_url}/move/"
 ability_url = f"{base_url}/ability/"
 
+# thresholds
+poke_threshold = 80
+item_threshold = 70
+ability_threshold = 70
+move_threshold = 70
+
 #collections
 pokemon = pd.Pokedex()
 items = il.ItemList()
@@ -35,8 +41,8 @@ alias = {
 }
 
 # the line created in responses
-LINE_LENGTH = 35
-HR = '-' * LINE_LENGTH
+line_length = 35
+hr = '-' * line_length
 
 #placeholder for moves with a chance for secondary effect
 placeholder = "$effect_chance%"
