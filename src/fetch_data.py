@@ -149,8 +149,7 @@ class FetchData:
                 return v[0](query, requests.get(v[1]+query))
             
         for k, v in i:
-            if k.close_match(query):
-                closest = k.close_match(query)
+            if closest := k.close_match(query):
                 return FetchData.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
 
         return f"i don't know what {query} is... check your spelling?"
