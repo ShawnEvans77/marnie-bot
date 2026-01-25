@@ -30,6 +30,8 @@ docker run marnie
 See below. The bot implements [fuzzy string matching](https://en.wikipedia.org/wiki/Approximate_string_matching), so if you make
 a typo it will still try to parse what you said. You can invoke Pokemon by their name or dex number. I have plans to implement a dexsearch algorithim to find Pokemon matching a specific property. Commands are invoked by typing !dt. 
 
+If you're cloning this project, feel free to change the language by altering the language constants variable. "es" for Spanish. "fr" for French. View all supported languages [here](https://pokeapi.co/api/v2/language). The bot is the Queen's English by default.
+
 <img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie.png"></img>
 <img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie_2.png"></img>
 
