@@ -28,11 +28,8 @@ class FetchData:
         total = 0
 
         for i in range(len(constants.stat_names)):
-            stat_name = constants.stat_names[i]
-            stat_num = stats[i]['base_stat']
-
-            get_stats.append(f"**{stat_name}**: {stat_num}")
-            total += stat_num
+            get_stats.append(f"**{constants.stat_names[i]}**: {stats[i]['base_stat']}")
+            total += stats[i]['base_stat']
 
         answer += f"{" | ".join(get_stats)} | **BST**: {total}\n" 
 
