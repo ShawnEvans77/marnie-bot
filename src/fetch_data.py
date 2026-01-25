@@ -4,10 +4,14 @@ class FetchData:
     '''The Fetch Data class is a wrapper for PokeAPI. It is the primary way our bot finds information on Pokemon.
     Queries should be sent to the dt() function, which parses the query to determine if it is a move, item, ability, or Pokemon.
     After determining what type of object the query is, it invokes the appropiate subroutine to find the appropiate data.
-    The class imports a constants module to store Pokemon aliases and lists of items.'''
+    The class imports a constants module to store Pokemon aliases and lists of items.
+    
+    Attributes:
+        funcs - A set-like object mapping collections to their associated function names and URLs.
+    '''
 
     def __init__(self):
-        pass
+        self.funcs = self.get_func_map().items()
 
     def dt_pokemon(self, pokemon: str, response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
@@ -162,14 +166,11 @@ class FetchData:
         if flavor := constants.pokemon.flavor(query): 
             return self.dt_pokemon(flavor, requests.get(constants.poke_url+flavor))
 
-        m = self.get_func_map()
-        i = m.items()
-
-        for k, v in i:
+        for k, v in self.funcs:
             if query in k:
                 return v[0](query, requests.get(v[1]+query))
         
-        for k, v in i:
+        for k, v in self.funcs:
             if closest := k.close_match(query):
                 return FetchData.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
 
