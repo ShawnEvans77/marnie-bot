@@ -134,8 +134,8 @@ class FetchData:
 
         if not json['effect_entries']:
             for entry in json['flavor_text_entries']:
-                if entry['language']['name'] == constants.language:
-                    effect = f"{entry['text']}"
+                if entry['language']['name'] == constants.language:                        
+                    effect = f"{entry['text']}" if 'text' in entry else f"{entry['flavor_text']}"
 
         return effect
 
