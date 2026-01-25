@@ -50,15 +50,7 @@ class FetchData:
         answer += f"**{FetchData.format_response(item)}\n**"
 
         json = response.json()
-
-        for entry in json['effect_entries']:
-            if entry['language']['name'] == constants.language:
-                answer += f"{entry['effect']}\n"
-
-        if not json['effect_entries']:
-            for entry in json['flavor_text_entries']:
-                if entry['language']['name'] == constants.language:
-                    answer += f"{entry['text']}\n"
+        answer += f"{FetchData.get_effect(json)}\n"
 
         return FetchData.beautify(answer)
     
@@ -81,13 +73,9 @@ class FetchData:
         answer += f"**Category**: {json['damage_class']['name'].title()}"
 
         answer += "\n"
-        effect = ""
-
-        for entry in json['effect_entries']:
-            if entry['language']['name'] == constants.language:
-                effect = f"{entry['effect']}\n"
-
+        effect = f"{FetchData.get_effect(json)}\n"
         answer += effect if constants.placeholder not in effect else effect.replace(constants.placeholder, str(json['effect_chance']) + "%")
+
         return FetchData.beautify(answer)
 
     def dt_ability(self, ability: str, response) -> str:
@@ -98,10 +86,7 @@ class FetchData:
         answer += f"- **Generation**: {constants.abilities.get_generation(ability)}\n"
 
         json = response.json()
-
-        for entry in json['effect_entries']:
-            if entry['language']['name'] == constants.language:
-                answer += f"{entry['effect']}\n"
+        answer += f"{FetchData.get_effect(json)}\n"
 
         return FetchData.beautify(answer)
     
@@ -133,6 +118,24 @@ class FetchData:
 
         return f"ummmm... {erroneous}? perhaps you meant {correct}?\n"
     
+    @staticmethod
+    def get_effect(json) -> str:
+        '''Returns the effect of a move, item, or ability in the system assigned language.
+        Function exists for error checking purposes, sometimes PokeAPI puts the English Desc. in different places.'''
+
+        effect = ""
+
+        for entry in json['effect_entries']:
+            if entry['language']['name'] == constants.language:
+                effect = f"{entry['effect']}"
+
+        if not json['effect_entries']:
+            for entry in json['flavor_text_entries']:
+                if entry['language']['name'] == constants.language:
+                    effect = f"{entry['text']}"
+
+        return effect
+
     def get_func_map(self) -> dict:
         '''Returns a function map and their associated URLs.'''
 
@@ -166,7 +169,7 @@ class FetchData:
         for k, v in i:
             if query in k:
                 return v[0](query, requests.get(v[1]+query))
-            
+        
         for k, v in i:
             if closest := k.close_match(query):
                 return FetchData.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
