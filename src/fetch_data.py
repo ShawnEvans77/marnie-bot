@@ -5,14 +5,14 @@ class FetchData:
     '''The Fetch Data class is a wrapper for PokeAPI. It is the primary way our bot finds information on Pokemon.
     Queries should be sent to the dt() function, which parses the query to determine if it is a move, item, ability, or Pokemon.
     After determining what type of object the query is, it invokes the appropiate subroutine to find the appropiate data.
-    Several static members are in this class. Names for stats, URLs, a Pokedex, aliases, and so forth.'''
+    The class imports a constants module to store Pokemon aliases and lists of items.'''
 
     def __init__(self):
         pass
 
     def dt_pokemon(self, pokemon: str, response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
-        name, type, and base stats.'''
+        name, generation, type, abilities, base stats, and base stat total.'''
         
         answer = ""
         json = response.json()
@@ -36,37 +36,37 @@ class FetchData:
         for i in range(len(abilities)):
 
             ability_label = f"**Ab. {i+1}**" if not abilities[i]['is_hidden'] else "**HA**"
-            answer += f"{ability_label}: {self.format_response(abilities[i]['ability']['name'])}"
+            answer += f"{ability_label}: {FetchData.format_response(abilities[i]['ability']['name'])}"
 
             if i != len(abilities) - 1: answer += " | "
 
         answer += "**Ab. 1**: N/A\n" if not abilities else "\n"
-        return self.beautify(answer)
+        return FetchData.beautify(answer)
     
     def dt_item(self, item: str, response) -> str:
         '''Returns information on a Pokemon item. Information consists of a simple description of what the item does.'''
 
         answer = ""
-        answer += f"**{self.format_response(item)}\n**"
+        answer += f"**{FetchData.format_response(item)}\n**"
         answer += f"{response.json()['effect_entries'][1]['effect']}\n"
-        return self.beautify(answer)
+        return FetchData.beautify(answer)
     
-    def dt_move(self, move: str, move_list, response) -> str:
+    def dt_move(self, move: str, response) -> str:
         '''Returns information on a Pokemon move. Information consists of the moves accuracy, PP, generation, and type.'''
 
         answer = ""
-        answer += f"**{self.format_response(move)}** - "
+        answer += f"**{FetchData.format_response(move)}** - "
 
-        accuracy = move_list.get_accuracy(move)
-        power = move_list.get_power(move)
+        accuracy = constants.moves.get_accuracy(move)
+        power = constants.moves.get_power(move)
 
         json = response.json()
 
-        answer += f"**Generation**: {move_list.get_generation(move)} | "
+        answer += f"**Generation**: {constants.moves.get_generation(move)} | "
         answer += f"**Type:** _{json['type']['name'].title()}_ | "
         answer += f"**Power**: {power if power else "-"} | "
         answer += f"**Accuracy**: {accuracy if accuracy else "-"} | "
-        answer += f"**PP**: {move_list.get_pp(move)} | "
+        answer += f"**PP**: {constants.moves.get_pp(move)} | "
         answer += f"**Category**: {json['damage_class']['name'].title()}"
 
         answer += "\n"
@@ -74,24 +74,26 @@ class FetchData:
         effect = f"{json['effect_entries'][1]['effect']}\n"
 
         answer += effect if constants.placeholder not in effect else effect.replace(constants.placeholder, str(json['effect_chance']) + "%")
-        return self.beautify(answer)
+        return FetchData.beautify(answer)
 
-    def dt_ability(self, ability: str, ability_list, response) -> str:
+    def dt_ability(self, ability: str, response) -> str:
         '''Returns information on a Pokemon ability. Information consists of the ability's generation and effect.'''
 
         answer = ""
-        answer += f"**{self.format_response(ability)}** "
-        answer += f"- **Generation**: {ability_list.get_generation(ability)}\n"
+        answer += f"**{FetchData.format_response(ability)}** "
+        answer += f"- **Generation**: {constants.abilities.get_generation(ability)}\n"
         answer += f"{response.json()['effect_entries'][2]['effect']}\n"
 
-        return self.beautify(answer)
-
-    def format_response(self, query:str) -> str:
+        return FetchData.beautify(answer)
+    
+    @staticmethod
+    def format_response(query: str) -> str:
         '''PokeAPI can return String names weird. This gets rid of pesky dashes while also titling Strings.'''
         
         return query.replace("-", " ").title()
-
-    def sanitize(self, token: str) -> str:
+    
+    @staticmethod
+    def sanitize(token: str) -> str:
         '''Removes trailing spaces, replaces spaces with dashes, rearranges Pokemon with a modifier where the modifier
         is typed first. For example, token "Mega Alakazam" becomes "alakazam-mega."'''
 
@@ -100,21 +102,23 @@ class FetchData:
          
         return token if tokens[0] not in constants.modifiers else tokens[1] + "-" + tokens[0]
     
-    def beautify(self, output:str) -> str:
+    @staticmethod
+    def beautify(output: str) -> str:
         '''Helper method to print bot output easily.'''
 
         return f"{constants.HR}\n" + output + f"{constants.HR}"
     
-    def fuzzy(self, erroneous: str, correct: str) -> str:
+    @staticmethod
+    def fuzzy(erroneous: str, correct: str) -> str:
         '''Message for an approximate string match.'''
 
         return f"ummmm... {erroneous}? perhaps you meant {correct}?\n"
 
-    def dt(self, query:str) -> str:
+    def dt(self, query: str) -> str:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
         is a Pokemon, item, ability, or move.'''
 
-        query = self.sanitize(query)
+        query = FetchData.sanitize(query)
 
         if query.isnumeric():
             
@@ -136,25 +140,25 @@ class FetchData:
             return self.dt_item(query, requests.get(constants.item_url+query))
         
         if query in constants.moves:
-            return self.dt_move(query, constants.moves, requests.get(constants.move_url+query))
+            return self.dt_move(query, requests.get(constants.move_url+query))
         
         if query in constants.abilities:
-            return self.dt_ability(query, constants.abilities, requests.get(constants.ability_url+query))
+            return self.dt_ability(query, requests.get(constants.ability_url+query))
 
         if constants.pokemon.close_match(query):
             closest_match = constants.pokemon.close_match(query)
-            return self.fuzzy(query, closest_match) + self.dt_pokemon(closest_match, requests.get(constants.poke_url+closest_match))
+            return FetchData.fuzzy(query, closest_match) + self.dt_pokemon(closest_match, requests.get(constants.poke_url+closest_match))
         
         if constants.items.close_match(query):
             closest_match = constants.items.close_match(query)
-            return self.fuzzy(query, closest_match) + self.dt_item(closest_match, requests.get(constants.item_url+closest_match))
+            return FetchData.fuzzy(query, closest_match) + self.dt_item(closest_match, requests.get(constants.item_url+closest_match))
         
         if constants.moves.close_match(query):
             closest_match = constants.moves.close_match(query)
-            return self.fuzzy(query, closest_match) + self.dt_move(closest_match, constants.moves, requests.get(constants.move_url+closest_match))
+            return FetchData.fuzzy(query, closest_match) + self.dt_move(closest_match, requests.get(constants.move_url+closest_match))
         
         if constants.abilities.close_match(query):
             closest_match = constants.abilities.close_match(query)
-            return self.fuzzy(query, closest_match) + self.dt_ability(closest_match, constants.abilities, requests.get(constants.ability_url+closest_match))
+            return FetchData.fuzzy(query, closest_match) + self.dt_ability(closest_match, requests.get(constants.ability_url+closest_match))
 
         return f"i don't know what {query} is... check your spelling?"
