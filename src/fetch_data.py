@@ -82,7 +82,11 @@ class FetchData:
         answer = ""
         answer += f"**{FetchData.format_response(ability)}** "
         answer += f"- **Generation**: {constants.abilities.get_generation(ability)}\n"
-        answer += f"{response.json()['effect_entries'][2]['effect']}\n"
+
+        try:
+            answer += f"{response.json()['effect_entries'][2]['effect']}\n"
+        except IndexError:
+            answer += f"{response.json()['effect_entries'][1]['effect']}\n"
 
         return FetchData.beautify(answer)
     
