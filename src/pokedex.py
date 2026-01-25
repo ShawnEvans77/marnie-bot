@@ -42,3 +42,8 @@ class Pokedex(l.List):
         num = int(num_str)
         if num < 1 or num > self.num_pokemon: return None
         return self.df[self.df['id'] == num]['identifier'].values[0]
+    
+    def get_species_id(self, pokemon: str) -> str:
+        '''Returns the national dex number of the input Pokemon.'''
+        
+        return self.df[self.df['identifier'] == pokemon]['species_id'].values[0]

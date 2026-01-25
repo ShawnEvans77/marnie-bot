@@ -17,8 +17,9 @@ class FetchData:
         answer = ""
         json = response.json()
         stats, types, abilities = json['stats'], json['types'], json['abilities']
+
   
-        answer += f"**{pokemon.title()}** - **Type:** _{types[0]['type']['name'].title()}_"
+        answer += f"**{pokemon.title()}** - **Dex #**: {constants.pokemon.get_species_id(pokemon)} | **Type:** _{types[0]['type']['name'].title()}_"
 
         if len(types) == 2: answer += f"/_{types[1]['type']['name'].title()}_"
 
@@ -62,11 +63,11 @@ class FetchData:
 
         json = response.json()
 
-        answer += f"**Accuracy**: {accuracy if accuracy else "-"} | "
-        answer += f"**Power**: {power if power else "-"} | "
-        answer += f"**Type:** _{json['type']['name'].title()}_ | "
-        answer += f"**PP**: {move_list.get_pp(move)} | "
         answer += f"**Generation**: {move_list.get_generation(move)} | "
+        answer += f"**Type:** _{json['type']['name'].title()}_ | "
+        answer += f"**Power**: {power if power else "-"} | "
+        answer += f"**Accuracy**: {accuracy if accuracy else "-"} | "
+        answer += f"**PP**: {move_list.get_pp(move)} | "
         answer += f"**Category**: {json['damage_class']['name'].title()}"
 
         answer += "\n"
