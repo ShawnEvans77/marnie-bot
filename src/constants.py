@@ -1,20 +1,25 @@
 import pokedex as pd, item_list as il, move_list as ml, ability_list as al
 
+# stat names
 stat_names = ["HP", "ATK", "DEF", "SP. ATK", "SP. DEF", "SPEED"]
 
+#urls
 base_url = "https://pokeapi.co/api/v2"
 poke_url = f"{base_url}/pokemon/"
 item_url = f"{base_url}/item/"
 move_url = f"{base_url}/move/"
 ability_url = f"{base_url}/ability/"
 
+#collections
 pokemon = pd.Pokedex()
 items = il.ItemList()
 moves = ml.MoveList()
 abilities = al.AbilityList()
 
+#modifiers
 modifiers = ("hisui", "mega", "primal", "origin", "galar", "alola")
 
+#aliases
 alias = {
     "zard": "charizard",
     "fridge": "rotom-frost",
@@ -29,7 +34,12 @@ alias = {
     "itami": "snorlax",
 }
 
+# the line created in responses
 LINE_LENGTH = 35
 HR = '-' * LINE_LENGTH
 
+#placeholder for moves with a chance for secondary effect
 placeholder = "$effect_chance%"
+
+#system language, english by default
+language = "en"

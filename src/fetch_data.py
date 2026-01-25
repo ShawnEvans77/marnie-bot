@@ -48,7 +48,18 @@ class FetchData:
 
         answer = ""
         answer += f"**{FetchData.format_response(item)}\n**"
-        answer += f"{response.json()['effect_entries'][1]['effect']}\n"
+
+        json = response.json()
+
+        for entry in json['effect_entries']:
+            if entry['language']['name'] == constants.language:
+                answer += f"{entry['effect']}\n"
+
+        if not json['effect_entries']:
+            for entry in json['flavor_text_entries']:
+                if entry['language']['name'] == constants.language:
+                    answer += f"{entry['text']}\n"
+
         return FetchData.beautify(answer)
     
     def dt_move(self, move: str, response) -> str:
@@ -70,8 +81,11 @@ class FetchData:
         answer += f"**Category**: {json['damage_class']['name'].title()}"
 
         answer += "\n"
+        effect = ""
 
-        effect = f"{json['effect_entries'][1]['effect']}\n"
+        for entry in json['effect_entries']:
+            if entry['language']['name'] == constants.language:
+                effect = f"{entry['effect']}\n"
 
         answer += effect if constants.placeholder not in effect else effect.replace(constants.placeholder, str(json['effect_chance']) + "%")
         return FetchData.beautify(answer)
@@ -83,10 +97,11 @@ class FetchData:
         answer += f"**{FetchData.format_response(ability)}** "
         answer += f"- **Generation**: {constants.abilities.get_generation(ability)}\n"
 
-        try:
-            answer += f"{response.json()['effect_entries'][2]['effect']}\n"
-        except IndexError:
-            answer += f"{response.json()['effect_entries'][1]['effect']}\n"
+        json = response.json()
+
+        for entry in json['effect_entries']:
+            if entry['language']['name'] == constants.language:
+                answer += f"{entry['effect']}\n"
 
         return FetchData.beautify(answer)
     
