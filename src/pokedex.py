@@ -16,18 +16,12 @@ class Pokedex(l.List):
         super().__init__(pandas.read_csv('assets/pokemon.csv'), POKEDEX_THRESHOLD)
         self.num_pokemon = len(self.list) + 1
 
-    def flavor_exists(self, pokemon: str) -> bool:
-        '''Returns if the list contains a flavor of the input Pokemon. Meaning, if user queries for 'Aegislash', 
-        'Aegislash-Sword' is returned. Landorus queries still return 'Landorus-Incarnate.'''
-
-        for listmon in self.list:
-            if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
-                return True
-    
-        return False    
-    
     def flavor(self, pokemon: str) -> str:
-        '''Return the closest flavor of a "bare" Pokemon with forms.'''
+        '''For Pokemon like 'Landorus' who by themselves do not exist in PokeAPI, convert them into their closest flavor,
+        for 'Landorus' it would be 'Landorus-Incarnate'. Returns None for queries whose flavor is already in PokeAPI.
+        Therefore, Pikachu would return None.'''
+
+        if pokemon in self: return None
 
         for listmon in self.list:
             if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:

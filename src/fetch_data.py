@@ -113,6 +113,16 @@ class FetchData:
         '''Message for an approximate string match.'''
 
         return f"ummmm... {erroneous}? perhaps you meant {correct}?\n"
+    
+    def get_func_map(self) -> dict:
+        '''Returns a function map and their associated URLs.'''
+
+        return  {
+            constants.pokemon: [self.dt_pokemon, constants.poke_url],
+            constants.items: [self.dt_item, constants.item_url],
+            constants.moves: [self.dt_move, constants.move_url],
+            constants.abilities: [self.dt_ability, constants.ability_url]
+        }
 
     def dt(self, query: str) -> str:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
@@ -120,45 +130,27 @@ class FetchData:
 
         query = FetchData.sanitize(query)
 
-        if query.isnumeric():
-            
-            if constants.pokemon.by_number(query):
-                query = constants.pokemon.by_number(query)
-            else:
-                return "you typed a random number..."
-            
         if query in constants.alias:
-            return self.dt_pokemon(constants.alias[query], requests.get(constants.poke_url+constants.alias[query]))
+            associated = constants.alias[query]
+            return self.dt_pokemon(associated, requests.get(constants.poke_url+associated))
+        
+        if query.isnumeric():
+            mon = constants.pokemon.by_number(query)
+            return self.dt_pokemon(mon, requests.get(constants.poke_url+mon)) if mon else "you typed a random number..."
+        
+        if flavor := constants.pokemon.flavor(query): 
+            return self.dt_pokemon(flavor, requests.get(constants.poke_url+flavor))
 
-        if query in constants.pokemon:
-            return self.dt_pokemon(query, requests.get(constants.poke_url+query))
-        
-        if constants.pokemon.flavor_exists(query):
-            return self.dt_pokemon(constants.pokemon.flavor(query), requests.get(constants.poke_url+constants.pokemon.flavor(query)))
+        m = self.get_func_map()
+        i = m.items()
 
-        if query in constants.items:
-            return self.dt_item(query, requests.get(constants.item_url+query))
-        
-        if query in constants.moves:
-            return self.dt_move(query, requests.get(constants.move_url+query))
-        
-        if query in constants.abilities:
-            return self.dt_ability(query, requests.get(constants.ability_url+query))
-
-        if constants.pokemon.close_match(query):
-            closest_match = constants.pokemon.close_match(query)
-            return FetchData.fuzzy(query, closest_match) + self.dt_pokemon(closest_match, requests.get(constants.poke_url+closest_match))
-        
-        if constants.items.close_match(query):
-            closest_match = constants.items.close_match(query)
-            return FetchData.fuzzy(query, closest_match) + self.dt_item(closest_match, requests.get(constants.item_url+closest_match))
-        
-        if constants.moves.close_match(query):
-            closest_match = constants.moves.close_match(query)
-            return FetchData.fuzzy(query, closest_match) + self.dt_move(closest_match, requests.get(constants.move_url+closest_match))
-        
-        if constants.abilities.close_match(query):
-            closest_match = constants.abilities.close_match(query)
-            return FetchData.fuzzy(query, closest_match) + self.dt_ability(closest_match, requests.get(constants.ability_url+closest_match))
+        for k, v in i:
+            if query in k:
+                return v[0](query, requests.get(v[1]+query))
+            
+        for k, v in i:
+            if k.close_match(query):
+                closest = k.close_match(query)
+                return FetchData.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
 
         return f"i don't know what {query} is... check your spelling?"
