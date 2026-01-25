@@ -92,7 +92,8 @@ class FetchData:
         return query.replace("-", " ").title()
 
     def sanitize(self, token: str) -> str:
-        '''Removes trailing spaces, replaces spaces with dashes.'''
+        '''Removes trailing spaces, replaces spaces with dashes, rearranges Pokemon with a modifier where the modifier
+        is typed first. For example, token "Mega Alakazam" becomes "alakazam-mega."'''
 
         token = token.strip().lower().replace(" ", "-")
         tokens = token.split("-")
