@@ -13,6 +13,43 @@ class FetchData:
     def __init__(self):
         self.funcs = self.get_func_map().items()
 
+    def get_func_map(self) -> dict:
+        '''Returns a function map and their associated URLs.'''
+
+        return  {
+            constants.pokemon: [self.dt_pokemon, constants.poke_url],
+            constants.items: [self.dt_item, constants.item_url],
+            constants.moves: [self.dt_move, constants.move_url],
+            constants.abilities: [self.dt_ability, constants.ability_url]
+        }
+
+    def dt(self, query: str) -> str:
+        '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
+        is a Pokemon, item, ability, or move.'''
+
+        query = FetchData.sanitize(query)
+
+        if query in constants.alias:
+            associated = constants.alias[query]
+            return self.dt_pokemon(associated, requests.get(constants.poke_url+associated))
+        
+        if query.isnumeric():
+            mon = constants.pokemon.by_number(query)
+            return self.dt_pokemon(mon, requests.get(constants.poke_url+mon)) if mon else "you typed a random number..."
+        
+        if flavor := constants.pokemon.flavor(query): 
+            return self.dt_pokemon(flavor, requests.get(constants.poke_url+flavor))
+
+        for k, v in self.funcs:
+            if query in k:
+                return v[0](query, requests.get(v[1]+query))
+        
+        for k, v in self.funcs:
+            if closest := k.close_match(query):
+                return FetchData.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
+
+        return f"i don't know what {query} is... check your spelling?"
+
     def dt_pokemon(self, pokemon: str, response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
         name, generation, type, abilities, base stats, and base stat total.'''
@@ -138,40 +175,3 @@ class FetchData:
                     effect = f"{entry['text']}" if 'text' in entry else f"{entry['flavor_text']}"
 
         return effect
-
-    def get_func_map(self) -> dict:
-        '''Returns a function map and their associated URLs.'''
-
-        return  {
-            constants.pokemon: [self.dt_pokemon, constants.poke_url],
-            constants.items: [self.dt_item, constants.item_url],
-            constants.moves: [self.dt_move, constants.move_url],
-            constants.abilities: [self.dt_ability, constants.ability_url]
-        }
-
-    def dt(self, query: str) -> str:
-        '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
-        is a Pokemon, item, ability, or move.'''
-
-        query = FetchData.sanitize(query)
-
-        if query in constants.alias:
-            associated = constants.alias[query]
-            return self.dt_pokemon(associated, requests.get(constants.poke_url+associated))
-        
-        if query.isnumeric():
-            mon = constants.pokemon.by_number(query)
-            return self.dt_pokemon(mon, requests.get(constants.poke_url+mon)) if mon else "you typed a random number..."
-        
-        if flavor := constants.pokemon.flavor(query): 
-            return self.dt_pokemon(flavor, requests.get(constants.poke_url+flavor))
-
-        for k, v in self.funcs:
-            if query in k:
-                return v[0](query, requests.get(v[1]+query))
-        
-        for k, v in self.funcs:
-            if closest := k.close_match(query):
-                return FetchData.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
-
-        return f"i don't know what {query} is... check your spelling?"
