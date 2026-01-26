@@ -23,6 +23,7 @@ class MoveList(l.List):
 
     def get_generation(self, move: str) -> int:
         '''Returns the generation the input move originated from.'''
+        
         return int(self.df[self.df['identifier'] == move]['generation_id'].values[0])
     
     def get_power(self, move: str) -> int:
