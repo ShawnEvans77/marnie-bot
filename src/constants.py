@@ -3,12 +3,16 @@ import pokedex as pd, item_list as il, move_list as ml, ability_list as al
 # stat names
 stat_names = ["HP", "ATK", "DEF", "SP. ATK", "SP. DEF", "SPEED"]
 
-#urls
+# urls
 base_url = "https://pokeapi.co/api/v2"
 poke_url = f"{base_url}/pokemon/"
 item_url = f"{base_url}/item/"
 move_url = f"{base_url}/move/"
 ability_url = f"{base_url}/ability/"
+
+# categories
+generation = "Generation"
+type = "Type"
 
 # thresholds
 poke_threshold = 80

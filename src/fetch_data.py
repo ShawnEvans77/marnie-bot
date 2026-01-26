@@ -21,7 +21,7 @@ class FetchData:
         json = response.json()
         stats, types, abilities = json['stats'], json['types'], json['abilities']
 
-        answer += f"**{pokemon.title()}** - **Dex #**: {constants.pokemon.get_species_id(pokemon)} | **Type:** _{types[0]['type']['name'].title()}_"
+        answer += f"**{pokemon.title()}** - **Dex #**: {constants.pokemon.get_species_id(pokemon)} | **{constants.type}:** _{types[0]['type']['name'].title()}_"
 
         if len(types) == 2: answer += f"/_{types[1]['type']['name'].title()}_"
 
@@ -68,8 +68,8 @@ class FetchData:
 
         json = response.json()
 
-        answer += f"**Generation**: {constants.moves.get_generation(move)} | "
-        answer += f"**Type:** _{json['type']['name'].title()}_ | "
+        answer += f"**{constants.generation}**: {constants.moves.get_generation(move)} | "
+        answer += f"**{constants.type}:** _{json['type']['name'].title()}_ | "
         answer += f"**Power**: {power if power else "-"} | "
         answer += f"**Accuracy**: {accuracy if accuracy else "-"} | "
         answer += f"**PP**: {constants.moves.get_pp(move)} | "
@@ -86,7 +86,7 @@ class FetchData:
 
         answer = ""
         answer += f"**{FetchData.reverse_sanitize(ability)}** "
-        answer += f"- **Generation**: {constants.abilities.get_generation(ability)}\n"
+        answer += f"- **{constants.generation}**: {constants.abilities.get_generation(ability)}\n"
 
         json = response.json()
         answer += f"{FetchData.get_effect(json)}\n"
