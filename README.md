@@ -27,9 +27,15 @@ docker run marnie
 
 If you would prefer not to use Docker, you may do:
 
-```git clone https://github.com/ShawnEvans77/marnie-bot```
-```pip install -r requirements.txt```
-```py src/main.py```
+```
+git clone https://github.com/ShawnEvans77/marnie-bot
+```
+```
+pip install -r requirements.txt
+```
+```
+py src/main.py
+```
 
 .env is obviously .gitignore'd by default. Make sure to create it and put in your DISCORD_ENV if you want to host the bot yourself. 
 
