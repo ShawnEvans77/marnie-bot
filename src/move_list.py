@@ -12,7 +12,7 @@ class MoveList(l.List):
     def __init__(self):
         super().__init__(pandas.read_csv('assets/moves.csv'), constants.move_threshold)
 
-    def get_accuracy(self, move:str) -> int:
+    def get_accuracy(self, move: str) -> int:
         '''Returns the accuracy of the input move it has one. If the move has no accuracy, like Swords Dance, this function returns
         None.'''
 
@@ -21,11 +21,11 @@ class MoveList(l.List):
         except ValueError:
             return None
 
-    def get_generation(self, move:str) -> int:
+    def get_generation(self, move: str) -> int:
         '''Returns the generation the input move originated from.'''
         return int(self.df[self.df['identifier'] == move]['generation_id'].values[0])
     
-    def get_power(self, move:str) -> int:
+    def get_power(self, move: str) -> int:
         '''Returns the power of the input move.'''
 
         try:
@@ -33,7 +33,7 @@ class MoveList(l.List):
         except ValueError:
             return None
     
-    def get_pp(self, move:str) -> int:
+    def get_pp(self, move: str) -> int:
         '''Returns the amount of PP the input move has.'''
 
         return int(self.df[self.df['identifier'] == move]['pp'].values[0])
