@@ -2,9 +2,7 @@ import discord
 from discord.ext import commands
 import logging
 from dotenv import load_dotenv
-import os
-import fetch_data as f
-import server
+import os, fetch_data as f, server
 
 class Bot:
     '''The Bot Class represents your Discord Bot. Start it using the run() function. 
@@ -17,7 +15,6 @@ class Bot:
 
         load_dotenv()
         self.token = os.getenv('DISCORD_ENV')
-
         self.handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
         self.intents = discord.Intents.default()
 
@@ -25,7 +22,6 @@ class Bot:
         self.intents.members = True
 
         self.bot = commands.Bot(command_prefix='!', intents=self.intents)
-
         self.fetcher = f.FetchData()
 
         @self.bot.event
