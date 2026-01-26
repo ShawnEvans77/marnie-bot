@@ -11,9 +11,11 @@ The bot is currently hosted 24/7 using the Render Cloud Hosting Platform. Please
 
 ## Installation
 
-Feel free to install her [at this link if you want her in a server.](https://discord.com/oauth2/authorize?client_id=1455036822014001168&permissions=68608&integration_type=0&scope=bot). If you want her in direct messages, send a message to her. This is her profile.
+Feel free to install her [at this link if you want her in one of your servers.](https://discord.com/oauth2/authorize?client_id=1455036822014001168&permissions=68608&integration_type=0&scope=bot). If you want her in direct messages, send a message to her. This is her profile and tag.
 
-Or, alternatively, if you desire to host an instance of herself to customize her to your liking, do:
+<img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie_prof.png"></img>
+
+If you desire to host an instance of her yourself to self-host and customize her to your liking, do these Docker commands:
 
 ```
 docker build -t marnie .
@@ -23,7 +25,13 @@ docker build -t marnie .
 docker run marnie
 ```
 
-.env is obviously .gitignore'd by default. 
+If you would prefer not to use Docker, you may do:
+
+```git clone https://github.com/ShawnEvans77/marnie-bot```
+```pip install -r requirements.txt```
+```py src/main.py```
+
+.env is obviously .gitignore'd by default. Make sure to create it and put in your DISCORD_ENV if you want to host the bot yourself. 
 
 ## Usage
 
