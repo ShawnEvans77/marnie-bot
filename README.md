@@ -11,7 +11,7 @@ The bot is currently hosted 24/7 using the Render Cloud Hosting Platform. Please
 
 ## Installation
 
-Feel free to install her [at this link](https://discord.com/oauth2/authorize?client_id=1455036822014001168&permissions=68608&integration_type=0&scope=bot). The bot can run in servers or direct messages.
+Feel free to install her [at this link if you want her in a server.](https://discord.com/oauth2/authorize?client_id=1455036822014001168&permissions=68608&integration_type=0&scope=bot). If you want her in direct messages, send a message to her. This is her profile.
 
 Or, alternatively, if you desire to host an instance of herself to customize her to your liking, do:
 
