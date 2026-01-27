@@ -1,22 +1,15 @@
 import pandas, list as l, constants
 
 class Pokedex(l.List):
-    '''The Pokedex stores abilities from all Pokemon Games.
-    
-    Attributes:
-        df - A pandas dataframe sourced from a CSV, used for determing if a Pokemon exists in the Pokemon games.
-        list - A list of all Pokemon.
-        num_pokemon - The number of Pokemon that exist in all the games.
-    '''
+    '''The Pokedex stores abilities from all Pokemon Games.'''
 
     def __init__(self):
         super().__init__(pandas.read_csv('assets/pokemon.csv'), constants.poke_threshold)
         self.num_pokemon = len(self.list) + 1
 
     def flavor(self, pokemon: str) -> str:
-        '''For Pokemon like 'Landorus' who by themselves do not exist in PokeAPI, convert them into their closest flavor,
-        for 'Landorus' it would be 'Landorus-Incarnate'. Returns None for queries whose flavor is already in PokeAPI.
-        Therefore, Pikachu would return None.'''
+        '''For Pokemon who do not exist in PokeAPI, convert them into their closest flavor,
+        For example, flavor('Landorus') is 'Landorus-Incarnate'.'''
 
         if pokemon in self: return None
 

@@ -1,10 +1,10 @@
 import requests, constants
 
 class FetchData:
-    '''The Fetch Data class is a wrapper for PokeAPI. It is the primary way our bot finds information on Pokemon.
-    Queries should be sent to the dt() function, which parses the query to determine if it is a move, item, ability, or Pokemon.
+    '''The Fetch Data class is a wrapper for PokeAPI. Queries should be sent to the dt() function, 
+    which parses the query to determine if it is a move, item, ability, or Pokemon.
     After determining what type of object the query is, it invokes the appropiate subroutine to find the appropiate data.
-    The class imports a constants module to store Pokemon aliases and lists of items.
+    The class imports a constants module that contains Pokemon aliases and lists of items.
     
     Attributes:
         funcs - A set-like object mapping collections to their associated function names and URLs.
@@ -16,7 +16,7 @@ class FetchData:
     def get_func_map(self) -> dict:
         '''Returns a function map and their associated URLs.'''
 
-        return  {
+        return {
             constants.pokemon: [self.dt_pokemon, constants.poke_url],
             constants.items: [self.dt_item, constants.item_url],
             constants.moves: [self.dt_move, constants.move_url],

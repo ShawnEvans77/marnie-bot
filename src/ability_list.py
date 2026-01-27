@@ -2,12 +2,7 @@ import pandas, list as l, constants
 from thefuzz import fuzz
 
 class AbilityList(l.List):
-    '''The Ability List stores abilities from all Pokemon Games.
-    
-    Attributes:
-        df - A pandas dataframe sourced from a CSV, used for determining if an ability exists in the Pokemon games.
-        list - A list of abilities from all Pokemon games.  
-    '''
+    '''The Ability List stores abilities from all Pokemon Games. '''
 
     def __init__(self):
         super().__init__(pandas.read_csv('assets/abilities.csv'), constants.ability_threshold)
