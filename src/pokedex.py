@@ -20,9 +20,8 @@ class Pokedex(l.List):
         return None
 
     def by_number(self, num_str: str) -> str:
-        '''Returns a Pokemon based on its dex number. Returns none if input string is not numeric or out of bounds.'''
+        '''Returns a Pokemon based on its dex number. Returns none if the input string is out of bounds.'''
     
-        if not num_str.isnumeric(): return None
         num = int(num_str)
         if num < 1 or num > self.num_pokemon: return None
         return self.df[self.df['id'] == num]['identifier'].values[0]
