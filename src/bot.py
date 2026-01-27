@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import logging
 from dotenv import load_dotenv
-import os, fetch_data as f, server
+import os, fetch_data as f
 
 class Bot:
     '''The Bot Class represents your Discord Bot.'''
@@ -32,5 +32,4 @@ class Bot:
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''
 
-        server.keep_alive()
         self.bot.run(self.token, log_handler=self.handler, log_level=logging.DEBUG)
