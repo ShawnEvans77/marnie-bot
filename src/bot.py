@@ -30,7 +30,7 @@ class Bot:
             await ctx.send(self.fetcher.dt(query))
 
     def start(self):
-        '''Causes the bot to go online and start accepting commands.'''
+        '''Makes the bot to go online and start accepting commands.'''
 
         server.keep_alive()
         self.bot.run(self.token, log_handler=self.handler, log_level=logging.DEBUG)
