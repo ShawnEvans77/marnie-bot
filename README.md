@@ -7,7 +7,7 @@ Feel free to clone the source code to set up your own version of the bot.
 The bot scrapes PokeAPI data to provide updated information on Pokemon game data. Useful if you have a Discord Server
 based around Pokemon Showdown and you want your own lightweight port of the website's commands. The primary information returned for queries on a Pokemon species are their stats, abilities, generation, and type. Simple descriptions are returned for items and abilities. Generation, Power, PP, Accuracy, Type, and Damage Type are returned for moves. 
 
-The bot is currently hosted 24/7 using the Render Cloud Hosting Platform. Please contact me if it is not online. 
+The bot is typically online, but due to me being limited to free hosting services sometimes she is offline. There is a "flaskless" branch of this repository that does not implement a Flask Server if you want this application to be more lightweight.
 
 ## Installation
 
