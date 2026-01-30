@@ -1,13 +1,7 @@
 import pandas, list as l, constants
 
 class MoveList(l.List):
-    '''The move list stores moves from all Pokemon Games.
-    
-    Attributes:
-        df - A pandas dataframe sourced from a CSV, used for determining if a Pokemon exists in the Pokemon games.
-        list - A list of all Pokemon.
-        num_pokemon - The number of Pokemon that exist in all the games.
-    '''
+    '''The move list stores moves from all Pokemon Games.'''
     
     def __init__(self):
         super().__init__(pandas.read_csv('assets/moves.csv'), constants.move_threshold)
