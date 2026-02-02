@@ -35,7 +35,7 @@ class FetchData:
         
         if query.isnumeric():
             mon = constants.pokemon.by_number(query)
-            return self.dt_pokemon(mon, requests.get(constants.poke_url+mon)) if mon else "you typed a random number..."
+            return self.dt_pokemon(mon, requests.get(constants.poke_url+mon)) if mon else FetchData.error_number(query)
         
         if flavor := constants.pokemon.flavor(query): 
             return self.dt_pokemon(flavor, requests.get(constants.poke_url+flavor))
@@ -175,3 +175,7 @@ class FetchData:
                     effect = f"{entry['text']}" if 'text' in entry else f"{entry['flavor_text']}"
 
         return effect
+    
+    @staticmethod
+    def error_number(num_str: str) -> str:
+        return f"there are only {constants.pokemon.get_num_pokemon()} pokemon, {num_str} is way too big..."
