@@ -37,4 +37,6 @@ class Pokedex(l.List):
         return int(self.df[self.df['identifier'] == pokemon]['species_id'].values[0])
     
     def randmon(self) -> int:
+        '''Returns a random Pokemon by dex number.'''
+        
         return random.randint(1, self.num_pokemon+1)
