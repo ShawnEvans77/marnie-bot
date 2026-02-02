@@ -1,5 +1,10 @@
 import pokedex as pd, item_list as il, move_list as ml, ability_list as al
 
+# help command
+help = "!dt {query} - Returns information on Pokemon, Pokemon abilities, Pokemon items, or Pokemon moves.\n" \
+       "!pick {args...} - Selects a random option given a list of options.\n" \
+       "!randmon - Returns a random Pokemon."
+
 # stat names
 stat_names = ["HP", "ATK", "DEF", "SP. ATK", "SP. DEF", "SPEED"]
 
