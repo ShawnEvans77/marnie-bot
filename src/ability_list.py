@@ -1,5 +1,4 @@
 import pandas, list as l, constants
-from thefuzz import fuzz
 
 class AbilityList(l.List):
     '''The Ability List stores abilities from all Pokemon Games. '''
