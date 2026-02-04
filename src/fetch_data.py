@@ -50,7 +50,7 @@ class FetchData:
 
         return f"i don't know what {query} is... check your spelling?"
 
-    def dt_pokemon(self, pokemon: str, response) -> str:
+    def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
         name, generation, type, abilities, base stats, and base stat total.'''
         
@@ -83,7 +83,7 @@ class FetchData:
         answer += "**Ab. 1**: N/A\n" if not abilities else "\n"
         return FetchData.beautify(answer)
     
-    def dt_item(self, item: str, response) -> str:
+    def dt_item(self, item: str, response: requests.models.Response) -> str:
         '''Returns information on a Pokemon item. Information consists of a simple description of what the item does.'''
 
         answer = ""
@@ -94,7 +94,7 @@ class FetchData:
 
         return FetchData.beautify(answer)
     
-    def dt_move(self, move: str, response) -> str:
+    def dt_move(self, move: str, response: requests.models.Response) -> str:
         '''Returns information on a Pokemon move. Information consists of the moves accuracy, PP, generation, and type.'''
 
         answer = ""
@@ -118,7 +118,7 @@ class FetchData:
 
         return FetchData.beautify(answer)
 
-    def dt_ability(self, ability: str, response) -> str:
+    def dt_ability(self, ability: str, response: requests.models.Response) -> str:
         '''Returns information on a Pokemon ability. Information consists of the ability's generation and effect.'''
 
         answer = ""

@@ -26,11 +26,11 @@ class Bot:
             print(f"-------------------------------")
 
         @self.bot.command()
-        async def dt(ctx, *, query):
+        async def dt(ctx, *, query: str):
             await ctx.send(self.fetcher.dt(query))
 
         @self.bot.command()
-        async def pick(ctx, *, query):
+        async def pick(ctx, *, query: str):
             await ctx.send(f"i randomly selected: {random.choice(query.split(",")).strip()}")
 
         @self.bot.command()

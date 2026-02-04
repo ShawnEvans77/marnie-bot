@@ -1,5 +1,6 @@
 from abc import ABC
 from thefuzz import fuzz
+import pandas
 
 class List(ABC):
     '''
@@ -12,7 +13,7 @@ class List(ABC):
         threshold - An int that indicates how close incorrect strings have to be to trigger a "did you mean" prompt.
     '''
     
-    def __init__(self, df, threshold: int):
+    def __init__(self, df: pandas.DataFrame, threshold: int):
         self.df = df
         self.list = self.df['identifier'].values.tolist()
         self.threshold = threshold
