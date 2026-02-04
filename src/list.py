@@ -33,10 +33,11 @@ class List(ABC):
 
         for object in self.list:
 
-            comparison = fuzz.ratio(incorrect.lower(), object)
+            incorrect = incorrect.lower()
+            comparison = fuzz.ratio(incorrect, object)
 
             if comparison > closest_val and comparison > self.threshold:
-                closest_val = fuzz.ratio(incorrect.lower(), object)
+                closest_val = fuzz.ratio(incorrect, object)
                 closest_item = object
 
         return closest_item
