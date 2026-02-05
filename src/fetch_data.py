@@ -27,8 +27,6 @@ class FetchData:
     def pokemonic(self, query: str) -> str:
         '''Returns a Pokemon version of a Pokemonic query. Returns None if it is not Pokemonic or is a valid Pokemon already.'''
 
-        query = FetchData.sanitize(query)
-
         if query in constants.alias:
             return constants.alias[query]
         
