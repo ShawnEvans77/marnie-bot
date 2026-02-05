@@ -22,7 +22,7 @@ class FetchData:
             constants.moves: [self.dt_move, constants.move_url],
             constants.abilities: [self.dt_ability, constants.ability_url]
         }
-
+    
     def dt(self, query: str) -> str:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
         is a Pokemon, item, ability, or move.'''
