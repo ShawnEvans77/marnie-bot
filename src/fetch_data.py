@@ -1,4 +1,5 @@
 import requests, constants
+from typing import List
 
 class FetchData:
     '''The Fetch Data class is a wrapper for PokeAPI. Queries should be sent to the dt() function, 
@@ -23,6 +24,27 @@ class FetchData:
             constants.abilities: [self.dt_ability, constants.ability_url]
         }
     
+    def fetch_pokemon_request(self, query: str) -> List:
+        '''Based on a Pokemonic query, return a List where the first index is the name of the Pokemon, and the second index
+        is a PokeAPI HTTP request response based on the Pokemon.'''
+
+        query = FetchData.sanitize(query)
+
+        if query in constants.alias:
+            associated = constants.alias[query]
+            return [associated, requests.get(constants.poke_url+associated)]
+        
+        if query.isnumeric():
+            mon = constants.pokemon.by_number(query)
+            return [mon, requests.get(constants.poke_url+mon) if mon else FetchData.error_number(query)]
+        
+        if flavor := constants.pokemon.flavor(query):
+            return [flavor, requests.get(constants.poke_url+flavor)]
+        
+        for k, v in self.funcs:
+            if query in k:
+                return []
+
     def dt(self, query: str) -> str:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
         is a Pokemon, item, ability, or move.'''
