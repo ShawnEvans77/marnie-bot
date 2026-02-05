@@ -24,26 +24,21 @@ class FetchData:
             constants.abilities: [self.dt_ability, constants.ability_url]
         }
     
-    def fetch_pokemon_request(self, query: str) -> List:
-        '''Based on a Pokemonic query, return a List where the first index is the name of the Pokemon, and the second index
-        is a PokeAPI HTTP request response based on the Pokemon.'''
+    def pokemonic(self, query: str) -> str:
+        '''Returns a Pokemon version of a Pokemonic query. Returns None if it is not Pokemonic or is a valid Pokemon already.'''
 
         query = FetchData.sanitize(query)
 
         if query in constants.alias:
-            associated = constants.alias[query]
-            return [associated, requests.get(constants.poke_url+associated)]
+            return constants.alias[query]
         
-        if query.isnumeric():
-            mon = constants.pokemon.by_number(query)
-            return [mon, requests.get(constants.poke_url+mon) if mon else FetchData.error_number(query)]
+        if query.isnumeric(): 
+            return constants.pokemon.by_number(query)
         
-        if flavor := constants.pokemon.flavor(query):
-            return [flavor, requests.get(constants.poke_url+flavor)]
+        if flavor := constants.pokemon.flavor(query): 
+            return flavor
         
-        for k, v in self.funcs:
-            if query in k:
-                return []
+        return None
 
     def dt(self, query: str) -> str:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
@@ -51,16 +46,8 @@ class FetchData:
 
         query = FetchData.sanitize(query)
 
-        if query in constants.alias:
-            associated = constants.alias[query]
-            return self.dt_pokemon(associated, requests.get(constants.poke_url+associated))
-        
-        if query.isnumeric():
-            mon = constants.pokemon.by_number(query)
-            return self.dt_pokemon(mon, requests.get(constants.poke_url+mon)) if mon else FetchData.error_number(query)
-        
-        if flavor := constants.pokemon.flavor(query): 
-            return self.dt_pokemon(flavor, requests.get(constants.poke_url+flavor))
+        if monic_str := self.pokemonic(query):
+            return self.dt_pokemon(monic_str, requests.get(constants.poke_url+monic_str))
 
         for k, v in self.funcs:
             if query in k:
@@ -71,7 +58,7 @@ class FetchData:
                 return FetchData.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
 
         return f"i don't know what {query} is... check your spelling?"
-
+  
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
         name, generation, type, abilities, base stats, and base stat total.'''
