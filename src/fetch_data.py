@@ -1,40 +1,182 @@
-import pandas, list as l, constants, random
+import requests, constants
 
-class Pokedex(l.List):
-    '''The Pokedex stores abilities from all Pokemon Games.'''
+class FetchData:
+    '''The Fetch Data class is a wrapper for PokeAPI. Queries should be sent to the dt() function, 
+    which parses the query to determine if it is a move, item, ability, or Pokemon.
+    After determining what type of object the query is, it invokes the appropiate subroutine to find the appropiate data.
+    The class imports a constants module that contains Pokemon aliases and lists of items.
+    
+    Attributes:
+        funcs - A set-like object mapping collections to their associated function names and URLs.
+    '''
 
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/pokemon.csv'), 70)
-        self.num_pokemon = self.df['species_id'].max()
+        self.funcs = self.get_func_map().items()
 
-    def flavor(self, pokemon: str) -> str:
-        '''For Pokemon who do not exist in PokeAPI, convert them into their closest flavor,
-        For example, flavor('Landorus') is 'Landorus-Incarnate'.'''
+    def get_func_map(self) -> dict:
+        '''Returns a function map and their associated URLs.'''
 
-        if pokemon in self: return None
-
-        for listmon in self.list:
-            if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
-                return listmon
-            
-        return None
+        return {
+            constants.pokemon: [self.dt_pokemon, constants.poke_url],
+            constants.items: [self.dt_item, constants.item_url],
+            constants.moves: [self.dt_move, constants.move_url],
+            constants.abilities: [self.dt_ability, constants.ability_url]
+        }
     
-    def get_num_pokemon(self) -> int:
-        '''Returns how many Pokemon there are.'''
+    def dt(self, query: str) -> str:
+        '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
+        is a Pokemon, item, ability, or move.'''
+
+        query = FetchData.sanitize(query)
+
+        if query in constants.alias:
+            associated = constants.alias[query]
+            return self.dt_pokemon(associated, requests.get(constants.poke_url+associated))
         
-        return self.num_pokemon
-
-    def by_number(self, num_str: str) -> str:
-        '''Returns a Pokemon based on its dex number. Returns none if the input string is out of bounds.'''
-    
-        num = int(num_str)
-        if num < 1 or num > self.num_pokemon: return None
-        return self.df[self.df['id'] == num]['identifier'].values[0]
-    
-    def get_species_id(self, pokemon: str) -> int:
-        '''Returns the national dex number of the input Pokemon.'''
+        if query.isnumeric():
+            mon = constants.pokemon.by_number(query)
+            return self.dt_pokemon(mon, requests.get(constants.poke_url+mon)) if mon else FetchData.error_number(query)
         
-        return int(self.df[self.df['identifier'] == pokemon]['species_id'].values[0])
+        if flavor := constants.pokemon.flavor(query): 
+            return self.dt_pokemon(flavor, requests.get(constants.poke_url+flavor))
+
+        for k, v in self.funcs:
+            if query in k:
+                return v[0](query, requests.get(v[1]+query))
+        
+        for k, v in self.funcs:
+            if closest := k.close_match(query):
+                return FetchData.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
+
+        return f"i don't know what {query} is... check your spelling?"
+
+    def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
+        '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
+        name, generation, type, abilities, base stats, and base stat total.'''
+        
+        answer = ""
+        json = response.json()
+        stats, types, abilities = json['stats'], json['types'], json['abilities']
+
+        type = f"_{types[0]['type']['name'].title()}_"
+        if len(types) == 2: type += f"/_{types[1]['type']['name'].title()}_"
+
+        answer += f"**{pokemon.title()}** - **Dex #**: {constants.pokemon.get_species_id(pokemon)} | **{constants.type}:** {type} | **Weight:** {int(json['weight']) / 10:.2f} kg"
+
+        answer += "\n"
+        get_stats = []
+
+        total = 0
+
+        for i in range(len(constants.stat_names)):
+            get_stats.append(f"**{constants.stat_names[i]}**: {stats[i]['base_stat']}")
+            total += stats[i]['base_stat']
+
+        answer += f"{" | ".join(get_stats)} | **BST**: {total}\n" 
+
+        for i in range(len(abilities)):
+
+            ability_label = f"**Ab. {i+1}**" if not abilities[i]['is_hidden'] else "**HA**"
+            answer += f"{ability_label}: {FetchData.reverse_sanitize(abilities[i]['ability']['name'])}"
+
+            if i != len(abilities) - 1: answer += " | "
+
+        answer += "**Ab. 1**: N/A\n" if not abilities else "\n"
+        return FetchData.beautify(answer)
     
-    def randmon(self) -> int:
-        return random.randint(1, self.num_pokemon+1)
+    def dt_item(self, item: str, response: requests.models.Response) -> str:
+        '''Returns information on a Pokemon item. Information consists of a simple description of what the item does.'''
+
+        answer = ""
+        answer += f"**{FetchData.reverse_sanitize(item)}\n**"
+
+        json = response.json()
+        answer += f"{FetchData.get_effect(json)}\n"
+
+        return FetchData.beautify(answer)
+    
+    def dt_move(self, move: str, response: requests.models.Response) -> str:
+        '''Returns information on a Pokemon move. Information consists of the moves accuracy, PP, generation, and type.'''
+
+        answer = ""
+        answer += f"**{FetchData.reverse_sanitize(move)}** - "
+
+        accuracy = constants.moves.get_accuracy(move)
+        power = constants.moves.get_power(move)
+
+        json = response.json()
+
+        answer += f"**{constants.generation}**: {constants.moves.get_generation(move)} | "
+        answer += f"**{constants.type}:** _{json['type']['name'].title()}_ | "
+        answer += f"**Power**: {power if power else "-"} | "
+        answer += f"**Accuracy**: {accuracy if accuracy else "-"} | "
+        answer += f"**PP**: {constants.moves.get_pp(move)} | "
+        answer += f"**Category**: {json['damage_class']['name'].title()}"
+
+        answer += "\n"
+        effect = f"{FetchData.get_effect(json)}\n"
+        answer += effect if constants.placeholder not in effect else effect.replace(constants.placeholder, str(json['effect_chance']) + "%")
+
+        return FetchData.beautify(answer)
+
+    def dt_ability(self, ability: str, response: requests.models.Response) -> str:
+        '''Returns information on a Pokemon ability. Information consists of the ability's generation and effect.'''
+
+        answer = ""
+        answer += f"**{FetchData.reverse_sanitize(ability)}** "
+        answer += f"- **{constants.generation}**: {constants.abilities.get_generation(ability)}\n"
+
+        json = response.json()
+        answer += f"{FetchData.get_effect(json)}\n"
+
+        return FetchData.beautify(answer)
+    
+    @staticmethod
+    def reverse_sanitize(query: str) -> str:
+        '''Gets rid of dashes in a String and titles it.'''
+        
+        return query.replace("-", " ").title()
+    
+    @staticmethod
+    def sanitize(token: str) -> str:
+        '''Removes trailing spaces, replaces spaces with dashes, rearranges Pokemon with a modifier where the modifier
+        is typed first. For example, token "Mega Alakazam" becomes "alakazam-mega."'''
+
+        token = token.strip().lower().replace(" ", "-")
+        tokens = token.split("-")
+         
+        return token if tokens[0] not in constants.modifiers else tokens[1] + "-" + tokens[0]
+    
+    @staticmethod
+    def beautify(output: str) -> str:
+        '''Helper method to print bot output easily.'''
+
+        return f"{constants.hr}\n" + output + f"{constants.hr}"
+    
+    @staticmethod
+    def fuzzy(erroneous: str, correct: str) -> str:
+        '''Message for an approximate string match.'''
+
+        return f"ummmm... {erroneous}? perhaps you meant {correct}?\n"
+    
+    @staticmethod
+    def get_effect(json) -> str:
+        '''Returns the effect of a move, item, or ability in the system assigned language.
+        Function exists for error checking purposes, sometimes PokeAPI puts the English Desc. in different places.'''
+
+        effect = ""
+
+        for entry in json['effect_entries']:
+            if entry['language']['name'] == constants.language:
+                effect = f"{entry['effect']}"
+
+        if not json['effect_entries']:
+            for entry in json['flavor_text_entries']:
+                if entry['language']['name'] == constants.language:                        
+                    effect = f"{entry['text']}" if 'text' in entry else f"{entry['flavor_text']}"
+
+        return effect
+    
+    @staticmethod
+    def error_number(num_str: str) -> str:
+        return f"there are only {constants.pokemon.get_num_pokemon()} pokemon, {num_str} is way too big..."
