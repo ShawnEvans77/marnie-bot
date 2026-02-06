@@ -58,9 +58,10 @@ class FetchData:
         json = response.json()
         stats, types, abilities = json['stats'], json['types'], json['abilities']
 
-        answer += f"**{pokemon.title()}** - **Dex #**: {constants.pokemon.get_species_id(pokemon)} | **Weight:** {int(json['weight']) / 10:.2f} kg | **{constants.type}:** _{types[0]['type']['name'].title()}_"
+        type = f"_{types[0]['type']['name'].title()}_"
+        if len(types) == 2: type += f"/_{types[1]['type']['name'].title()}_"
 
-        if len(types) == 2: answer += f"/_{types[1]['type']['name'].title()}_"
+        answer += f"**{pokemon.title()}** - **Dex #**: {constants.pokemon.get_species_id(pokemon)} | **{constants.type}:** {type} | **Weight:** {int(json['weight']) / 10:.2f} kg"
 
         answer += "\n"
         get_stats = []
