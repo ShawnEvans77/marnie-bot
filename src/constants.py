@@ -31,10 +31,19 @@ items = il.ItemList()
 moves = ml.MoveList()
 abilities = al.AbilityList()
 
-#modifiers
+# modifiers
 modifiers = ("hisui", "mega", "primal", "origin", "galar", "alola")
 
-#aliases
+# colors
+colors = {
+    "galarian": "galar",
+    "alolan": "alola",
+    "hisuian": "hisui",
+}
+
+col_key = colors.keys()
+
+# aliases
 alias = {
     "zard": "charizard",
     "fridge": "rotom-frost",
@@ -53,8 +62,8 @@ alias = {
 line_length = 35
 hr = '-' * line_length
 
-#placeholder for moves with a chance for secondary effect
+# placeholder for moves with a chance for secondary effect
 placeholder = "$effect_chance%"
 
-#system language, english by default
+# system language, english by default
 language = "en"

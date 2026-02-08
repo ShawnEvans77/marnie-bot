@@ -144,6 +144,8 @@ class FetchData:
 
         token = token.strip().lower().replace(" ", "-")
         tokens = token.split("-")
+
+        if tokens[0] in constants.col_key: tokens[0] = constants.colors[tokens[0]]
          
         return token if tokens[0] not in constants.modifiers else tokens[1] + "-" + tokens[0]
     
