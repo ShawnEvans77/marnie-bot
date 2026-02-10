@@ -61,7 +61,7 @@ class Bot:
                     minutes = rem_min // 60
                     rem_sec = rem_min % 60
 
-                    response += f"{Bot.plural(hours, "hour")}, {Bot.plural(minutes, "minute")}, and {Bot.plural(rem_sec, "second")}\n"
+                    response += f" {Bot.plural(hours, "hour")}, {Bot.plural(minutes, "minute")}, and {Bot.plural(rem_sec, "second")}\n"
 
             await ctx.send(response)
 
