@@ -61,7 +61,7 @@ class Bot:
                     minutes = rem_min // 60
                     rem_sec = rem_min % 60
 
-                    response += f" {hours} hours, {minutes} minutes, and {rem_sec} seconds 😹\n"
+                    response += f"{Bot.plural(hours, "hour")}, {Bot.plural(minutes, "minute")}, and {Bot.plural(rem_sec, "second")}\n"
 
             await ctx.send(response)
 
@@ -70,3 +70,9 @@ class Bot:
 
         server.keep_alive()
         self.bot.run(self.token, log_handler=self.handler, log_level=logging.DEBUG)
+
+    @staticmethod
+    def plural(value: int, value_name: str) -> str:
+        '''Useful for writing unit names with appropiate plurality.'''
+
+        return f"{str(value)} {value_name}{"s" if value != 1 else ""}"
