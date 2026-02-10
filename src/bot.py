@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os, fetch_data as f, server
 import random
 import constants
+import datetime as d
 
 class Bot:
     '''The Bot Class represents your Discord Bot.'''
@@ -40,6 +41,29 @@ class Bot:
         @self.bot.command()
         async def help(ctx):
             await ctx.send(constants.help)
+
+        @self.bot.command()
+        async def muted(ctx):
+
+            response = ""
+
+            for member in ctx.guild.members:
+                if member.is_timed_out():
+                    response += f"{member.global_name.lower()} is timed out for"
+                    time = member.timed_out_until
+                    now = d.datetime.now(d.UTC)
+                    difference = time - now
+
+                    total = int(difference.total_seconds())
+
+                    hours = total // 3600
+                    rem_min = total % 3600
+                    minutes = rem_min // 60
+                    rem_sec = rem_min % 60
+
+                    response += f" {hours} hours, {minutes} minutes, and {rem_sec} seconds 😹\n"
+
+            await ctx.send(response)
 
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''
