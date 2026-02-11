@@ -44,17 +44,12 @@ class Bot:
 
         @self.bot.command()
         async def muted(ctx):
-
             response = ""
 
             for member in ctx.guild.members:
                 if member.is_timed_out():
                     response += f"{member.global_name.lower()} is timed out for"
-                    time = member.timed_out_until
-                    now = d.datetime.now(d.UTC)
-                    difference = time - now
-
-                    total = int(difference.total_seconds())
+                    total = int((member.timed_out_until-d.datetime.now(d.UTC)).total_seconds())
 
                     hours = total // 3600
                     rem_min = total % 3600
