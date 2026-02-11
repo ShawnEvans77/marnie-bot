@@ -49,7 +49,7 @@ class Bot:
             for member in ctx.guild.members:
                 if member.is_timed_out():
                     response += f"{member.global_name.lower()} is muted for"
-                    total = int(member.timed_out_until-d.datetime.now(d.UTC).total_seconds())
+                    total = int((member.timed_out_until-d.datetime.now(d.UTC)).total_seconds())
 
                     hours, rem_min = total // 3600, total % 3600
                     minutes, rem_sec = rem_min // 60, rem_min % 60
