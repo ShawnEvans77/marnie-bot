@@ -48,17 +48,15 @@ class Bot:
 
             for member in ctx.guild.members:
                 if member.is_timed_out():
-                    response += f"{member.global_name.lower()} is timed out for"
-                    total = int((member.timed_out_until-d.datetime.now(d.UTC)).total_seconds())
+                    response += f"{member.global_name.lower()} is muted for"
+                    total = int(member.timed_out_until-d.datetime.now(d.UTC).total_seconds())
 
-                    hours = total // 3600
-                    rem_min = total % 3600
-                    minutes = rem_min // 60
-                    rem_sec = rem_min % 60
+                    hours, rem_min = total // 3600, total % 3600
+                    minutes, rem_sec = rem_min // 60, rem_min % 60
 
                     response += f" {Bot.plural(hours, "hour")}, {Bot.plural(minutes, "minute")}, and {Bot.plural(rem_sec, "second")}\n"
 
-            await ctx.send(response)
+            await ctx.send(response if len(response) != 0 else "nobody is muted right now")
 
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''
