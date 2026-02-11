@@ -20,12 +20,6 @@ ability_url = f"{base_url}/ability/"
 generation = "Generation"
 type = "Type"
 
-# thresholds
-poke_threshold = 80
-item_threshold = 70
-ability_threshold = 70
-move_threshold = 70
-
 #collections
 pokemon = pd.Pokedex()
 items = il.ItemList()
