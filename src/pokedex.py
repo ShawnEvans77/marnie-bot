@@ -1,10 +1,10 @@
-import pandas, list as l, constants, random
+import pandas, list as l, thresholds, random
 
 class Pokedex(l.List):
     '''The Pokedex stores abilities from all Pokemon Games.'''
 
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/pokemon.csv'), constants.poke_threshold)
+        super().__init__(pandas.read_csv('assets/pokemon.csv'), thresholds.poke_threshold)
         self.num_pokemon = self.df['species_id'].max()
 
     def flavor(self, pokemon: str) -> str:
