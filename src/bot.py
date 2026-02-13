@@ -6,6 +6,8 @@ import os, fetch_data as f, server
 import random
 import constants
 import datetime as d
+import io
+import aiohttp
 
 class Bot:
     '''The Bot Class represents your Discord Bot.'''
@@ -57,6 +59,34 @@ class Bot:
                     response += f" {Bot.plural(hours, "hour")}, {Bot.plural(minutes, "minute")}, and {Bot.plural(rem_sec, "second")}\n"
 
             await ctx.send(response if len(response) != 0 else "nobody is muted right now")
+
+        @self.bot.command()
+        async def sprite(ctx, *, query):
+            response = self.fetcher.sprite(query, shiny=False)
+
+            if isinstance(response, list):
+                url, pokemon = response[0], response[1]
+                await ctx.send(file=(await self.sprite_handler(url, pokemon, shiny=False)))
+            else:
+                await ctx.send(response)
+
+        @self.bot.command()
+        async def shiny(ctx, *, query):
+            response = self.fetcher.sprite(query, shiny=True)
+
+            if isinstance(response, list):
+                url, pokemon = response[0], response[1]
+                await ctx.send(file = (await self.sprite_handler(url, pokemon, shiny=True)))
+            else:
+                await ctx.send(response)
+
+    async def sprite_handler(self, url: str, pokemon: str, shiny: bool) -> discord.File:
+         '''Returns appropiate sprite based on a given URL and Pokemon.'''
+    
+         async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                data = io.BytesIO(await resp.read())
+                return discord.File(data, f'{"shiny-" if shiny else ""}{pokemon}.png')
 
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''

@@ -62,3 +62,6 @@ placeholder = "$effect_chance%"
 
 # system language, english by default
 language = "en"
+
+#image url
+image_url = "https://raw.githubusercontent.com/PokeAPI"

@@ -1,4 +1,5 @@
-import requests, constants
+import requests, constants, collections
+from typing import List
 
 class FetchData:
     '''The Fetch Data class is a wrapper for PokeAPI. Queries should be sent to the dt() function, 
@@ -29,16 +30,7 @@ class FetchData:
 
         query = FetchData.sanitize(query)
 
-        if query in constants.alias:
-            associated = constants.alias[query]
-            return self.dt_pokemon(associated, requests.get(constants.poke_url+associated))
-        
-        if query.isnumeric():
-            mon = constants.pokemon.by_number(query)
-            return self.dt_pokemon(mon, requests.get(constants.poke_url+mon)) if mon else FetchData.error_number(query)
-        
-        if flavor := constants.pokemon.flavor(query): 
-            return self.dt_pokemon(flavor, requests.get(constants.poke_url+flavor))
+        if pokemonic_answer := FetchData.pokemonic_get(query, self.dt_pokemon): return pokemonic_answer
 
         for k, v in self.funcs:
             if query in k:
@@ -131,6 +123,54 @@ class FetchData:
 
         return FetchData.beautify(answer)
     
+    def get_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
+        '''Returns a URL to the sprite.'''
+
+        url = response.json()['sprites']['front_default']     
+        if not url: return f"sorry, {pokemon} has no sprite right now"
+        return [url, pokemon]
+    
+    def get_shiny_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
+        '''Returns a URL to the shiny sprite.'''
+
+        shiny_url = response.json()['sprites']['front_shiny']     
+        if not shiny_url: return f"sorry, {pokemon} has no shiny sprite right now"
+        return [shiny_url, pokemon]
+    
+    def sprite(self, query: str, shiny: bool) -> List | str:
+        '''Parses the query then returns the appropiate sprite.'''
+
+        query = FetchData.sanitize(query)
+
+        function_name = self.get_shiny_sprite if shiny else self.get_sprite
+
+        if pokemonic_answer := FetchData.pokemonic_get(query, function_name): return pokemonic_answer
+
+        if closest := constants.pokemon.close_match(query):
+            return function_name(closest, requests.get(constants.poke_url+closest))
+
+        if query in constants.pokemon:
+            return function_name(query, requests.get(constants.poke_url+query))
+        
+        return f"i don't think {query} is a pokemon... check your spelling?"
+    
+    @staticmethod
+    def pokemonic_get(query: str, function: collections.abc.Callable) -> requests.models.Response:
+        '''Returns an appropiate response if the input parameter is a Pokemon alias, dex number, or flavor.'''
+
+        if query in constants.alias:
+            associated = constants.alias[query]
+            return function(associated, requests.get(constants.poke_url+associated))
+        
+        if query.isnumeric():
+            mon = constants.pokemon.by_number(query)
+            return function(mon, requests.get(constants.poke_url+mon)) if mon else FetchData.error_number(query)
+        
+        if flavor := constants.pokemon.flavor(query): 
+            return function(flavor, requests.get(constants.poke_url+flavor))
+        
+        return None
+
     @staticmethod
     def reverse_sanitize(query: str) -> str:
         '''Gets rid of dashes in a String and titles it.'''
