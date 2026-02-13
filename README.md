@@ -50,6 +50,7 @@ Type !help to get a list of commands. The bot also supports !randmon for selecti
 
 <img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie.png"></img>
 <img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie_2.png"></img>
+<img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie-3.png"></img>
 
 ## Motivation
 
