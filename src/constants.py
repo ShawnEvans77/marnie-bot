@@ -3,8 +3,10 @@ import pokedex as pd, item_list as il, move_list as ml, ability_list as al
 # help command
 help = "!dt {query} - Returns information on Pokemon, Pokemon abilities, Pokemon items, or Pokemon moves.\n" \
        "!pick {args...} - Selects a random option given a list of options.\n" \
-       "!randmon - Returns a random Pokemon." \
-       "!muted - lists all timed out server members and the amount of time they are timed out for."
+       "!randmon - Returns a random Pokemon.\n" \
+       "!muted - lists all timed out server members and the amount of time they are timed out for.\n" \
+       "!sprite - Returns a Pokemon's sprite.\n" \
+       "!shiny - Returns a Pokemon's shiny sprite."
 
 # stat names
 stat_names = ["HP", "ATK", "DEF", "SP. ATK", "SP. DEF", "SPEED"]

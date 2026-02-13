@@ -45,7 +45,7 @@ a typo it will still try to parse what you said. You can invoke Pokemon by their
 
 If you're cloning this project, feel free to change the language by altering the language constants variable. "es" for Spanish. "fr" for French. View all supported languages [here](https://pokeapi.co/api/v2/language). The bot is the Queen's English by default.
 
-You can view a list of all currently muted server members with !muted.
+You can view a list of all currently muted server members with !muted. You can view a Pokemon's non-shiny and shiny sprite with !sprite and !shiny, respectively.
 
 Type !help to get a list of commands. The bot also supports !randmon for selecting a random Pokemon and !pick for picking a random option from a list of options.
 
