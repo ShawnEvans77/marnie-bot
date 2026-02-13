@@ -46,47 +46,37 @@ class Bot:
 
         @self.bot.command()
         async def muted(ctx):
-            response = ""
+            answer = ""
 
             for member in ctx.guild.members:
                 if member.is_timed_out():
-                    response += f"{member.global_name.lower()} is muted for"
+                    answer += f"{member.global_name.lower()} is muted for"
                     total = int((member.timed_out_until-d.datetime.now(d.UTC)).total_seconds())
 
                     hours, rem_min = total // 3600, total % 3600
                     minutes, rem_sec = rem_min // 60, rem_min % 60
 
-                    response += f" {Bot.plural(hours, "hour")}, {Bot.plural(minutes, "minute")}, and {Bot.plural(rem_sec, "second")}\n"
+                    answer += f" {Bot.plural(hours, "hour")}, {Bot.plural(minutes, "minute")}, and {Bot.plural(rem_sec, "second")}\n"
 
-            await ctx.send(response if len(response) != 0 else "nobody is muted right now")
+            await ctx.send(answer if len(answer) != 0 else "nobody is muted right now")
 
         @self.bot.command()
         async def sprite(ctx, *, query):
-            response = self.fetcher.sprite(query, shiny=False)
+            answer = self.fetcher.sprite(query, shiny=False)
 
-            if isinstance(response, list):
-                url, pokemon = response[0], response[1]
-                await ctx.send(file=(await self.sprite_handler(url, pokemon, shiny=False)))
+            if isinstance(answer, list):
+                await ctx.send(file=(await Bot.sprite_handler(answer[0], answer[1], shiny=False)))
             else:
-                await ctx.send(response)
+                await ctx.send(answer)
 
         @self.bot.command()
         async def shiny(ctx, *, query):
-            response = self.fetcher.sprite(query, shiny=True)
+            answer = self.fetcher.sprite(query, shiny=True)
 
-            if isinstance(response, list):
-                url, pokemon = response[0], response[1]
-                await ctx.send(file = (await self.sprite_handler(url, pokemon, shiny=True)))
+            if isinstance(answer, list):
+                await ctx.send(file = (await Bot.sprite_handler(answer[0], answer[1], shiny=True)))
             else:
-                await ctx.send(response)
-
-    async def sprite_handler(self, url: str, pokemon: str, shiny: bool) -> discord.File:
-         '''Returns appropiate sprite based on a given URL and Pokemon.'''
-    
-         async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                data = io.BytesIO(await resp.read())
-                return discord.File(data, f'{"shiny-" if shiny else ""}{pokemon}.png')
+                await ctx.send(answer)
 
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''
@@ -99,3 +89,11 @@ class Bot:
         '''Useful for writing unit names with appropiate plurality.'''
 
         return f"{str(value)} {value_name}{"s" if value != 1 else ""}"
+    
+    @staticmethod
+    async def sprite_handler(url: str, pokemon: str, shiny: bool) -> discord.File:
+         '''Returns appropiate sprite based on a given URL and Pokemon.'''
+        
+         async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                return discord.File(io.BytesIO(await resp.read()), f'{"shiny-" if shiny else ""}{pokemon}.png')

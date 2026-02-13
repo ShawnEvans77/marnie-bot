@@ -127,15 +127,13 @@ class FetchData:
         '''Returns a URL to the sprite.'''
 
         url = response.json()['sprites']['front_default']     
-        if not url: return f"sorry, {pokemon} has no sprite right now"
-        return [url, pokemon]
+        return [url, pokemon] if url else f"sorry, {pokemon} has no sprite right now"
     
     def get_shiny_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
         '''Returns a URL to the shiny sprite.'''
 
         shiny_url = response.json()['sprites']['front_shiny']     
-        if not shiny_url: return f"sorry, {pokemon} has no shiny sprite right now"
-        return [shiny_url, pokemon]
+        return [shiny_url, pokemon] if shiny_url else f"sorry, {pokemon} has no shiny sprite right now"
     
     def sprite(self, query: str, shiny: bool) -> List | str:
         '''Parses the query then returns the appropiate sprite.'''
