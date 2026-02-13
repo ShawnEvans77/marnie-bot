@@ -1,6 +1,8 @@
 # marnie 
 
-Marnie is a Discord bot for people who love Pokemon. She's called Marnie because who wouldn't want to be a part of Team Yell?
+Marnie is a Discord bot for people who love Pokemon. 
+
+She's called Marnie because who wouldn't want to be a part of Team Yell?
 
 The bot scrapes PokeAPI data to provide updated information on Pokemon game data. Useful if you have a Discord Server
 based around Pokemon Showdown and you want your own lightweight port of the website's commands. The primary information returned for queries on a Pokemon species are their stats, abilities, weight, generation, and type. Simple descriptions are returned for items and abilities. Generation, Power, PP, Accuracy, Type, and Damage Type are returned for moves. 
