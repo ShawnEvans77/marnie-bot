@@ -1,6 +1,6 @@
-import pandas, list as l, thresholds
+import pandas, list, thresholds
 
-class AbilityList(l.List):
+class AbilityList(list.List):
     '''The Ability List stores abilities from all Pokemon Games. '''
 
     def __init__(self):

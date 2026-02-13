@@ -1,6 +1,6 @@
-import pandas, list as l, thresholds
+import pandas, list, thresholds
 
-class ItemList(l.List):
+class ItemList(list.List):
     '''The Item List stores all items from all Pokemon Games.'''
 
     def __init__(self):

@@ -1,6 +1,6 @@
-import pandas, list as l, thresholds
+import pandas, list, thresholds
 
-class MoveList(l.List):
+class MoveList(list.List):
     '''The move list stores moves from all Pokemon Games.'''
     
     def __init__(self):

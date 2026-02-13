@@ -1,13 +1,6 @@
-import discord
+import discord, logging, os, fetch_data, server, random, constants, datetime, io, aiohttp
 from discord.ext import commands
-import logging
 from dotenv import load_dotenv
-import os, fetch_data as f, server
-import random
-import constants
-import datetime as d
-import io
-import aiohttp
 
 class Bot:
     '''The Bot Class represents your Discord Bot.'''
@@ -20,7 +13,7 @@ class Bot:
         self.intents.message_content = True
         self.intents.members = True
         self.bot = commands.Bot(command_prefix='!', intents=self.intents, help_command=None)
-        self.fetcher = f.FetchData()
+        self.fetcher = fetch_data.FetchData()
 
         @self.bot.event
         async def on_ready():            
@@ -51,7 +44,7 @@ class Bot:
             for member in ctx.guild.members:
                 if member.is_timed_out():
                     answer += f"{member.global_name.lower()} is muted for"
-                    total = int((member.timed_out_until-d.datetime.now(d.UTC)).total_seconds())
+                    total = int((member.timed_out_until-datetime.datetime.now(datetime.UTC)).total_seconds())
 
                     hours, rem_min = total // 3600, total % 3600
                     minutes, rem_sec = rem_min // 60, rem_min % 60

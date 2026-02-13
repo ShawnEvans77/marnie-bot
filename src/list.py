@@ -1,6 +1,6 @@
+import pandas
 from abc import ABC
 from thefuzz import fuzz
-import pandas
 
 class List(ABC):
     '''

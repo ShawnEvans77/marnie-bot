@@ -1,6 +1,6 @@
-import pandas, list as l, thresholds, random
+import pandas, list, thresholds, random
 
-class Pokedex(l.List):
+class Pokedex(list.List):
     '''The Pokedex stores abilities from all Pokemon Games.'''
 
     def __init__(self):
