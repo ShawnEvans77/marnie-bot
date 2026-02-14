@@ -1,10 +1,10 @@
-import pandas, list, thresholds
+import list, thresholds, constants
 
 class MoveList(list.List):
     '''The move list stores moves from all Pokemon Games.'''
     
     def __init__(self):
-        super().__init__('assets/moves.csv', thresholds.move_threshold)
+        super().__init__(f'{constants.asset_folder}/moves.csv', thresholds.move_threshold)
 
     def get_accuracy(self, move: str) -> str:
         '''Returns the accuracy of the input move it has one. If the move has no accuracy, like Swords Dance, this function returns
