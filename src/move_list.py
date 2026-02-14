@@ -25,4 +25,4 @@ class MoveList(list.List):
     def get_pp(self, move: str) -> str:
         '''Returns the amount of PP the input move has.'''
 
-        return int(self.df[self.df['identifier'] == move]['pp'].values[0])
+        return self.df[self.df['identifier'] == move]['pp'].values[0]
