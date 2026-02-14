@@ -1,4 +1,4 @@
-import requests, constants, collections
+import requests, constants, collections, pandas
 from typing import List
 
 class FetchData:
@@ -100,8 +100,8 @@ class FetchData:
 
         answer += f"**{constants.generation}**: {constants.moves.get_generation(move)} | "
         answer += f"**{constants.type}:** _{json['type']['name'].title()}_ | "
-        answer += f"**Power**: {power if power else "-"} | "
-        answer += f"**Accuracy**: {accuracy if accuracy else "-"} | "
+        answer += f"**Power**: {power if not pandas.isnull(power) else "-"} | "
+        answer += f"**Accuracy**: {accuracy if not pandas.isnull(accuracy) else "-"} | "
         answer += f"**PP**: {constants.moves.get_pp(move)} | "
         answer += f"**Category**: {json['damage_class']['name'].title()}"
 

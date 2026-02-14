@@ -5,7 +5,7 @@ class Pokedex(list.List):
 
     def __init__(self):
         super().__init__('assets/pokemon.csv', thresholds.poke_threshold)
-        self.num_pokemon = self.df['species_id'].max()
+        self.num_pokemon = pandas.to_numeric(self.df['species_id']).max()
 
     def flavor(self, pokemon: str) -> str:
         '''For Pokemon who do not exist in PokeAPI, convert them into their closest flavor,
@@ -27,9 +27,9 @@ class Pokedex(list.List):
     def by_number(self, num_str: str) -> str:
         '''Returns a Pokemon based on its dex number. Returns none if the input string is out of bounds.'''
     
-        num = int(num_str)
-        if num < 1 or num > self.num_pokemon: return None
-        return self.df[self.df['id'] == num]['identifier'].values[0]
+        numeric = int(num_str)
+        if numeric < 1 or numeric > self.num_pokemon: return None
+        return self.df[self.df['id'] == str(numeric)]['identifier'].values[0]
     
     def get_species_id(self, pokemon: str) -> str:
         '''Returns the national dex number of the input Pokemon.'''
