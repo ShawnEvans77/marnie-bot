@@ -85,8 +85,8 @@ class Bot:
     
     @staticmethod
     async def sprite_handler(url: str, pokemon: str, shiny: bool) -> discord.File:
-         '''Returns appropiate sprite based on a given URL and Pokemon.'''
+        '''Returns appropiate sprite based on a given URL and Pokemon.'''
         
-         async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
                 return discord.File(io.BytesIO(await resp.read()), f'{"shiny-" if shiny else ""}{pokemon}.png')
