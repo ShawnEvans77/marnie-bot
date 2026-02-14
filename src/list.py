@@ -13,8 +13,8 @@ class List(ABC):
         threshold - An int that indicates how close incorrect strings have to be to trigger a "did you mean" prompt.
     '''
     
-    def __init__(self, df: pandas.DataFrame, threshold: int):
-        self.df = df
+    def __init__(self, filepath: str, threshold: int):
+        self.df = pandas.read_csv(filepath, dtype=str)
         self.list = self.df['identifier'].values.tolist()
         self.threshold = threshold
 

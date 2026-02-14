@@ -4,16 +4,16 @@ class Pokedex(list.List):
     '''The Pokedex stores abilities from all Pokemon Games.'''
 
     def __init__(self):
-        super().__init__(pandas.read_csv('assets/pokemon.csv'), thresholds.poke_threshold)
+        super().__init__('assets/pokemon.csv', thresholds.poke_threshold)
         self.num_pokemon = self.df['species_id'].max()
 
     def flavor(self, pokemon: str) -> str:
         '''For Pokemon who do not exist in PokeAPI, convert them into their closest flavor,
         For example, flavor('Landorus') is 'Landorus-Incarnate'.'''
 
-        if pokemon in self: return None
-
         for listmon in self.list:
+            if pokemon == listmon:
+                return None
             if "-" in listmon and pokemon == listmon[0:listmon.index("-")]:
                 return listmon
             
@@ -31,10 +31,10 @@ class Pokedex(list.List):
         if num < 1 or num > self.num_pokemon: return None
         return self.df[self.df['id'] == num]['identifier'].values[0]
     
-    def get_species_id(self, pokemon: str) -> int:
+    def get_species_id(self, pokemon: str) -> str:
         '''Returns the national dex number of the input Pokemon.'''
         
-        return int(self.df[self.df['identifier'] == pokemon]['species_id'].values[0])
+        return self.df[self.df['identifier'] == pokemon]['species_id'].values[0]
     
     def randmon(self) -> int:
         '''Returns a random Pokemon by dex number.'''
