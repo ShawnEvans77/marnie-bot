@@ -14,7 +14,7 @@ class List(ABC):
     '''
     
     def __init__(self, filepath: str, threshold: int):
-        self.df = pandas.read_csv(filepath, dtype=str)
+        self.df = pandas.read_csv(filepath, dtype = str)
         self.list = self.df['identifier'].values.tolist()
         self.threshold = threshold
 
