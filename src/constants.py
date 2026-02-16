@@ -9,7 +9,8 @@ help = "!dt {query} - Returns information on Pokemon, Pokemon abilities, Pokemon
        "!randmon - Returns a random Pokemon.\n" \
        "!muted - lists all timed out server members and the amount of time they are timed out for.\n" \
        "!sprite - Returns a Pokemon's sprite.\n" \
-       "!shiny - Returns a Pokemon's shiny sprite."
+       "!shiny - Returns a Pokemon's shiny sprite.\n" \
+       "!randsprite - Returns a random Pokemon's sprite."
 
 # stat names
 stat_names = ["HP", "ATK", "DEF", "SP. ATK", "SP. DEF", "SPEED"]

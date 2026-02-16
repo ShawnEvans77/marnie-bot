@@ -58,7 +58,7 @@ class Bot:
             answer = self.fetcher.sprite(query, shiny=False)
 
             if isinstance(answer, list):
-                await ctx.send(file=(await Bot.sprite_handler(answer[0], answer[1], shiny=False)))
+                await ctx.send(file=(await Bot.sprite_handler(answer[0], answer[1])))
             else:
                 await ctx.send(answer)
 
@@ -67,9 +67,14 @@ class Bot:
             answer = self.fetcher.sprite(query, shiny=True)
 
             if isinstance(answer, list):
-                await ctx.send(file = (await Bot.sprite_handler(answer[0], answer[1], shiny=True)))
+                await ctx.send(file = (await Bot.sprite_handler(answer[0], answer[1])))
             else:
                 await ctx.send(answer)
+
+        @self.bot.command()
+        async def randsprite(ctx):
+            rand_sprite = self.fetcher.sprite(str(constants.pokemon.randmon()), shiny=False)
+            await ctx.send(file = (await Bot.sprite_handler(rand_sprite[0], rand_sprite[1])))
 
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''
@@ -84,9 +89,9 @@ class Bot:
         return f"{str(value)} {value_name}{"s" if value != 1 else ""}"
     
     @staticmethod
-    async def sprite_handler(url: str, pokemon: str, shiny: bool) -> discord.File:
+    async def sprite_handler(url: str, pokemon: str) -> discord.File:
         '''Returns appropiate sprite based on a given URL and Pokemon.'''
         
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
-                return discord.File(io.BytesIO(await resp.read()), f'{"shiny-" if shiny else ""}{pokemon}.png')
+                return discord.File(io.BytesIO(await resp.read()), f'{"shiny-" if "shiny" in url else ""}{pokemon}.png')
