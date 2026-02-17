@@ -1,4 +1,4 @@
-import discord, logging, os, fetch_data, server, random, constants, datetime, io, aiohttp
+import discord, logging, os, fetch_data, random, constants, datetime, io, aiohttp
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -79,7 +79,6 @@ class Bot:
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''
 
-        server.keep_alive()
         self.bot.run(self.token, log_handler=self.handler, log_level=logging.DEBUG)
 
     @staticmethod
