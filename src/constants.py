@@ -60,7 +60,7 @@ alias = {
 }
 
 # the line created in responses
-line_length = 35
+line_length = 50
 hr = '-' * line_length
 
 # placeholder for moves with a chance for secondary effect
