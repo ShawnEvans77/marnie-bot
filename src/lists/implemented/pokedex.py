@@ -1,5 +1,6 @@
 from ..abstracted import list
-from ...constants import filenames, folders, thresholds
+from ...constants.files import filenames, folders
+from ...constants.output import thresholds
 import pandas, random
 
 class Pokedex(list.List):

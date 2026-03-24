@@ -1,4 +1,4 @@
-from ..constants import filenames, folders
+from ..constants.files import filenames, folders
 import json
 
 class LearnSet:

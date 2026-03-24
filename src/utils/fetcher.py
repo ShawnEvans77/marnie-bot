@@ -1,5 +1,7 @@
 import requests, collections, pandas
-from ..constants import aliases, formatters, language, nationalities, objects, prefixes, urls
+from ..constants.api import urls, language
+from ..constants.output import aliases, formatters, nationalities, prefixes
+from ..constants.structs import objects
 from typing import List
 
 class Fetcher:

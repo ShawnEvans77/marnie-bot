@@ -1,6 +1,8 @@
 import discord, logging, os, random, datetime, io, aiohttp
 from discord.ext import commands
-from ..constants import help as h, filenames, folders, objects
+from ..constants.output import help as h
+from ..constants.files import filenames, folders
+from ..constants.structs import objects
 from ..utils import fetcher, learnset
 from ..servers import web_server
 from dotenv import load_dotenv

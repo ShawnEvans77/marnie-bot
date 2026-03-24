@@ -1,5 +1,6 @@
 from ..abstracted import list
-from ...constants import filenames, folders, thresholds
+from ...constants.files import filenames, folders
+from ...constants.output import thresholds
 
 class AbilityList(list.List):
     '''The Ability List stores abilities from all Pokemon Games. '''
