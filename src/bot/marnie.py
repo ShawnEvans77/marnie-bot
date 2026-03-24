@@ -1,7 +1,7 @@
 import discord, logging, os, random, datetime, io, aiohttp
 from discord.ext import commands
-from ..constants import help as h, objects
-from ..utils import fetcher
+from ..constants import help as h, filenames, folders, objects
+from ..utils import fetcher, learnset
 from ..servers import web_server
 from dotenv import load_dotenv
 
@@ -17,6 +17,7 @@ class Marnie:
         self.intents.members = True
         self.bot = commands.Bot(command_prefix='!', intents=self.intents, help_command=None)
         self.fetcher = fetcher.Fetcher()
+        self.learnset = learnset.LearnSet()
 
         @self.bot.event
         async def on_ready():            
@@ -27,6 +28,14 @@ class Marnie:
         @self.bot.command()
         async def dt(ctx, *, query: str):
             await ctx.send(self.fetcher.dt(query))
+
+        @self.bot.command()
+        async def learn(ctx, *, query: str):
+
+            if len((splitted := query.split(","))) != 2:
+                await ctx.send("!learn requires two arguments separated by a space, try again")
+            else:
+                await ctx.send(self.learnset.learn(splitted[0], splitted[1]))
 
         @self.bot.command()
         async def pick(ctx, *, query: str):

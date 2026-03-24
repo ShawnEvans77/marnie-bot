@@ -1,3 +1,6 @@
 '''The names for folders Marnie uses.'''
 
-asset_folder = 'assets'
+asset = 'assets'
+csv = 'csv'
+json = 'json'
+txt = 'text'
