@@ -1,6 +1,6 @@
-import fetch_data
+from ..utils import fetcher
 
-x = fetch_data.FetchData()
+x = fetcher.Fetcher()
 
 print("******************************************")
 print("Welcome to the Marnie Repl, used for testing !dt without deploying the bot to production.")

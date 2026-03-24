@@ -32,7 +32,7 @@ git clone https://github.com/ShawnEvans77/marnie-bot
 pip install -r requirements.txt
 ```
 ```
-py src/main.py
+py -m src.scripts.main
 ```
 
 .env is obviously .gitignore'd by default. Make sure to create it and put in your DISCORD_ENV if you want to host the bot yourself. 
