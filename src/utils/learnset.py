@@ -28,7 +28,7 @@ class LearnSet:
 
         learnable = self.learn_table[pokemon]['learnset']
 
-        return f"in gen 9, {LearnSet.reverse_sanitize(pokemon, api_pokemon)} {"can" if (move in learnable.keys() and "9" in learnable[move][0]) else "cannot"} learn {LearnSet.reverse_sanitize(move, api_moves)}"
+        return f"in gen 9, {LearnSet.reverse_sanitize(pokemon, api_pokemon)} {"**can**" if (move in learnable.keys() and "9" in learnable[move][0]) else "**cannot**"} learn {LearnSet.reverse_sanitize(move, api_moves)}."
     
     def learn(self, pokemon: str, move: str):
         '''Returns a string stating if the given Pokemon can learn the given move.'''
@@ -40,7 +40,7 @@ class LearnSet:
         
         note = ""
 
-        func_map = {show_pokemon: [(copy_mon := pokemon), api_pokemon], show_moves: [(copy_move := move), api_moves]}
+        func_map = {show_pokemon: [pokemon, api_pokemon], show_moves: [move, api_moves]}
         
         for k, v in func_map.items():
             if closest := k.close_match(v[0]):
