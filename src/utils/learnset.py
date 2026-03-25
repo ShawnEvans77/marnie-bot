@@ -17,7 +17,7 @@ class LearnSet:
             if query == item.replace("-", ""):
                 return item.replace("-", " ").title()
             
-        return item
+        return query.title()
     
     def sanitize(query: str):
         '''Removes trailing whitespace, removes central whitespace, sets everything to lowercase, removes dashes.'''
