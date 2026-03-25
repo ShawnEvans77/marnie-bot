@@ -57,6 +57,8 @@ class LearnSet:
         if pokemon not in show_pokemon:
             error += f"i don't think {pokemon} is a pokemon... check your spelling?"
 
+        error += "\n" if len(error) != 0 else ""
+
         if move not in show_moves:
             error += f"i don't think {move} is a move... check your spelling?"
 
