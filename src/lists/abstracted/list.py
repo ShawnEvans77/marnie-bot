@@ -26,7 +26,7 @@ class List(ABC):
     def close_match(self, incorrect: str) -> str:
         '''Returns the closest match to the input string using fuzzy string matching. 
         Useful for situations where the user mistypes an item.
-        Returns None if the input string does not have a closest match.'''
+        Returns None if the input string does not have a closest match or already exists in the list.'''
 
         closest_val = 0
         closest_item = None
@@ -40,7 +40,7 @@ class List(ABC):
                 closest_val = fuzz.ratio(incorrect, object)
                 closest_item = object
 
-        return closest_item
+        return closest_item if closest_item != incorrect else None
     
     def __iter__(self):
         '''Returns an iterable representation of this List.'''

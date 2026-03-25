@@ -1,6 +1,6 @@
-from ..abstracted import list
-from ...constants.files import filenames, folders
-from ...constants.output import thresholds
+from ...abstracted import list
+from ....constants.files import filenames, folders
+from ....constants.output import thresholds
 
 class MoveList(list.List):
     '''The move list stores moves from all Pokemon Games.'''

@@ -6,3 +6,4 @@ dex_csv = "pokemon.csv"
 learnset_json = "learnsets.json"
 
 move_txt = "moves.txt"
+pokemon_txt = "pokemon.txt"
