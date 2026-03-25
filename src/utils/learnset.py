@@ -1,5 +1,5 @@
 from ..constants.files import filenames, folders
-from ..constants.structs.objects import api_moves, show_moves, show_pokemon
+from ..constants.structs.objects import api_moves, api_pokemon, show_moves, show_pokemon
 import json
 
 class LearnSet:
@@ -10,14 +10,14 @@ class LearnSet:
         with open(f"{folders.asset}/{folders.json}/{filenames.learnset_json}", "r") as l:
             self.learn_table = json.load(l)
     
-    def reverse_sanitize(query: str):
+    def reverse_sanitize(query: str, struct):
         '''For printing out moves nicer.'''
 
-        for mon in api_moves:
-            if query == mon.replace("-", ""):
-                return mon.replace("-", " ").title()
+        for item in struct:
+            if query == item.replace("-", ""):
+                return item.replace("-", " ").title()
             
-        return mon
+        return item
     
     def sanitize(query: str):
         '''Removes trailing whitespace, removes central whitespace, sets everything to lowercase, removes dashes.'''
@@ -28,51 +28,36 @@ class LearnSet:
 
         learnable = self.learn_table[pokemon]['learnset']
 
-        return f"in gen 9, {pokemon} {"can" if (move in learnable.keys() and "9" in learnable[move][0]) else "cannot"} learn {LearnSet.reverse_sanitize(move)}"
-
+        return f"in gen 9, {LearnSet.reverse_sanitize(pokemon, api_pokemon)} {"can" if (move in learnable.keys() and "9" in learnable[move][0]) else "cannot"} learn {LearnSet.reverse_sanitize(move, api_moves)}"
+    
     def learn(self, pokemon: str, move: str):
         '''Returns a string stating if the given Pokemon can learn the given move.'''
         pokemon = LearnSet.sanitize(pokemon)
         move = LearnSet.sanitize(move)
 
-        if (pokemon in show_pokemon) and (move in show_moves):
+        if pokemon in show_pokemon and move in show_moves:
             return self.move_answer(pokemon, move)
         
         note = ""
 
-        func_map = {
-                    show_pokemon: (copy_mon := pokemon), 
-                    show_moves:   (copy_move := move)
-                    }
+        func_map = {show_pokemon: [(copy_mon := pokemon), api_pokemon], show_moves: [(copy_move := move), api_moves]}
         
         for k, v in func_map.items():
-            if closest := k.close_match(v):
-                note += f"idk what {v} is so imma guess you meant {closest}...\n"
-                func_map[k] = closest
+            if closest := k.close_match(v[0]):
+                note += f"idk what {v[0]} is so imma guess you meant {LearnSet.reverse_sanitize(closest, v[1])}...\n"
+                func_map[k][0] = closest
 
-        new_mon, new_move = func_map[show_pokemon], func_map[show_moves]
+        pokemon, move = func_map[show_pokemon][0], func_map[show_moves][0]
 
-        if ((pokemon != new_mon) and (move in show_moves)):
-        # or ((move != copy_move) and (pokemon in show_moves)) or ((move != copy_move) and (pokemon != copy_mon)):
-            return note + "\n" + self.move_answer(new_mon, move)
-
-        # if closest := show_pokemon.close_match(pokemon):
-        #     note += f"idk what {pokemon} is so imma assume you meant {closest}\n"
+        if pokemon in show_pokemon and move in show_moves:
+            return note + "\n" + self.move_answer(pokemon, move)
         
-        # if closest := show_moves.close_match(pokemon):
-        #     note += f"idk what {move} is so imma assume you meant {closest}\n"
+        error = ""
 
-        # if pokemon not in show_pokemon:
-        #     return f"i don't think {pokemon} is a pokemon... check your spelling?"
-        
-        # if move not in show_moves:
-        #     return f"i don't think {move} is a move... check your spelling?"
-        
+        if pokemon not in show_pokemon:
+            error += f"i don't think {pokemon} is a pokemon... check your spelling?"
 
+        if move not in show_moves:
+            error += f"i don't think {move} is a move... check your spelling?"
 
-
-        # return f"in gen 9, {pokemon} {"can" if (move in learnable.keys() and "9" in learnable[move][0]) else "cannot"} learn {LearnSet.reverse_sanitize(move)}"  
-    
-x = LearnSet()
-
-print(x.learn("pykachu", "flamethrower"))
+        return error
