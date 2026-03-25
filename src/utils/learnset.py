@@ -9,7 +9,8 @@ class LearnSet:
 
         with open(f"{folders.asset}/{folders.json}/{filenames.learnset_json}", "r") as l:
             self.learn_table = json.load(l)
-    
+
+    @staticmethod
     def reverse_sanitize(query: str, struct):
         '''For printing out moves nicer.'''
 
@@ -19,6 +20,7 @@ class LearnSet:
             
         return query.title()
     
+    @staticmethod
     def sanitize(query: str):
         '''Removes trailing whitespace, removes central whitespace, sets everything to lowercase, removes dashes.'''
 
