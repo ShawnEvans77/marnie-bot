@@ -41,3 +41,8 @@ class List(ABC):
                 closest_item = object
 
         return closest_item
+    
+    def __iter__(self):
+        '''Returns an iterable representation of this List.'''
+
+        return iter(self.list)

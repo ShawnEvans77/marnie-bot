@@ -1,4 +1,5 @@
 from ..constants.files import filenames, folders
+from ..constants.structs.objects import moves as api_moves
 import json
 
 class LearnSet:
@@ -14,6 +15,15 @@ class LearnSet:
         with open(f"{folders.asset}/{folders.txt}/{filenames.move_txt}", "r") as m:
             self.all_moves = m.read()
 
+    def reverse_sanitize(query: str):
+        '''For printing out moves nicer.'''
+
+        for mon in api_moves:
+            if query == mon.replace("-", ""):
+                return mon.replace("-", " ").title()
+            
+        return mon
+    
     def sanitize(query: str):
         '''Removes trailing whitespace, removes central whitespace, sets everything to lowercase, removes dashes.'''
 
@@ -32,4 +42,4 @@ class LearnSet:
         
         learnable = self.learn_table[pokemon]['learnset']
 
-        return f"in gen 9, {pokemon} {"can" if (move in learnable.keys() and "9" in learnable[move][0]) else "cannot"} learn {move}"  
+        return f"in gen 9, {pokemon} {"can" if (move in learnable.keys() and "9" in learnable[move][0]) else "cannot"} learn {LearnSet.reverse_sanitize(move)}"  
