@@ -1,4 +1,5 @@
 from ..constants.files import filenames, folders
+from ..constants.output import generations
 from ..constants.structs.objects import api_moves, api_pokemon, show_moves, show_pokemon
 import json
 
@@ -25,20 +26,26 @@ class LearnSet:
         '''Removes trailing whitespace, removes central whitespace, sets everything to lowercase, removes dashes.'''
 
         return query.strip().lower().replace("-", "").replace(" ", "")
-    
-    def move_answer(self, pokemon: str, move: str) -> str:
+     
+    def move_answer(self, pokemon: str, move: str, gen: str) -> str:
+
+        gen_num = gen[3]
 
         learnable = self.learn_table[pokemon]['learnset']
 
-        return f"in gen 9, {LearnSet.reverse_sanitize(pokemon, api_pokemon)} {"**can**" if (move in learnable.keys() and "9" in learnable[move][0]) else "**cannot**"} learn {LearnSet.reverse_sanitize(move, api_moves)}."
+        return f"in gen {gen_num}, {LearnSet.reverse_sanitize(pokemon, api_pokemon)} {"**can**" if (move in learnable.keys() and any(gen_num in move_data for move_data in learnable[move])) else "**cannot**"} learn {LearnSet.reverse_sanitize(move, api_moves)}."
     
-    def learn(self, pokemon: str, move: str) -> str:
+    def learn(self, pokemon: str, move: str, gen: str = "gen9") -> str:
         '''Returns a string stating if the given Pokemon can learn the given move.'''
+
+        if gen not in generations.gen_tuple:
+            return "generation must be in the form gen# where # is the generation number you want. ex: gen9"
+
         pokemon = LearnSet.sanitize(pokemon)
         move = LearnSet.sanitize(move)
 
         if pokemon in show_pokemon and move in show_moves:
-            return self.move_answer(pokemon, move)
+            return self.move_answer(pokemon, move, gen)
         
         note = ""
 
@@ -52,7 +59,7 @@ class LearnSet:
         pokemon, move = func_map[show_pokemon][0], func_map[show_moves][0]
 
         if pokemon in show_pokemon and move in show_moves:
-            return note + "\n" + self.move_answer(pokemon, move)
+            return note + "\n" + self.move_answer(pokemon, move, gen)
         
         error = ""
 

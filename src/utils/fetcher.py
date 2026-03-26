@@ -119,7 +119,7 @@ class Fetcher:
 
         answer = ""
         answer += f"**{Fetcher.reverse_sanitize(ability)}** "
-        answer += f"- **{formatters.generation}**: {objects.abilities.get_generation(ability)}\n"
+        answer += f"- **{formatters.generation}**: {objects.api_abilities.get_generation(ability)}\n"
 
         json = response.json()
         answer += f"{Fetcher.get_effect(json)}\n"

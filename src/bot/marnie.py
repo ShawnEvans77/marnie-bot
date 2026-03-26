@@ -34,8 +34,10 @@ class Marnie:
         @self.bot.command()
         async def learn(ctx, *, query: str):
 
-            if len((splitted := query.split(","))) != 2:
-                await ctx.send("!learn requires two arguments separated by a space, try again")
+            arg_num = len((splitted := query.split(",")))
+
+            if arg_num != 2 or arg_num != 3:
+                await ctx.send("!learn requires two or three arguments separated by a space, try again")
             else:
                 await ctx.send(self.learnset.learn(splitted[0], splitted[1]))
 
