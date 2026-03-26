@@ -38,8 +38,10 @@ class Marnie:
 
             if arg_num != 2 and arg_num != 3:
                 await ctx.send("!learn requires two or three arguments separated by a space, try again")
-            else:
+            elif arg_num == 2:
                 await ctx.send(self.learnset.learn(splitted[0], splitted[1]))
+            else:
+                await ctx.send(self.learnset.learn(splitted[0], splitted[1], splitted[2]))
 
         @self.bot.command()
         async def pick(ctx, *, query: str):
