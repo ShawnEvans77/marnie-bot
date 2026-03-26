@@ -11,7 +11,7 @@ class LearnSet:
             self.learn_table = json.load(l)
 
     @staticmethod
-    def reverse_sanitize(query: str, struct):
+    def reverse_sanitize(query: str, struct) -> str:
         '''For printing out moves nicer.'''
 
         for item in struct:
@@ -21,7 +21,7 @@ class LearnSet:
         return query.title()
     
     @staticmethod
-    def sanitize(query: str):
+    def sanitize(query: str) -> str:
         '''Removes trailing whitespace, removes central whitespace, sets everything to lowercase, removes dashes.'''
 
         return query.strip().lower().replace("-", "").replace(" ", "")
