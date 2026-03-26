@@ -32,7 +32,7 @@ class LearnSet:
 
         return f"in gen 9, {LearnSet.reverse_sanitize(pokemon, api_pokemon)} {"**can**" if (move in learnable.keys() and "9" in learnable[move][0]) else "**cannot**"} learn {LearnSet.reverse_sanitize(move, api_moves)}."
     
-    def learn(self, pokemon: str, move: str):
+    def learn(self, pokemon: str, move: str) -> str:
         '''Returns a string stating if the given Pokemon can learn the given move.'''
         pokemon = LearnSet.sanitize(pokemon)
         move = LearnSet.sanitize(move)
