@@ -50,7 +50,18 @@ The bot also supports !randmon for selecting a random Pokemon and !pick for pick
 <img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie_2.png"></img>
 <img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie-3.png"></img>
 
+## Commands
+All of the bot's commands are as follows:
+
+* !dt {query} - Returns information on Pokemon, Pokemon abilities, Pokemon items, or Pokemon moves.
+* !learn {pokemon, move} - Determines if a given Pokemon can learn the input move.
+* !pick {args...} - Selects a random option given a list of options.
+* !randmon - Returns a random Pokemon.
+* !muted - lists all timed out server members and the amount of time they are timed out for.\n" 
+* !sprite - Returns a Pokemon's sprite.
+* !shiny - Returns a Pokemon's shiny sprite.
+* !randsprite - Returns a random Pokemon's sprite.
+
 ## Motivation
 
-
-There are so many abhorrent vibe-coded ChatGPT wrapper SaaS B2B products which contain security lapses, so I wanted to go back to basics and develop something from scratch on my own. It's nothing crazy, but I'm proud of it. I learned a lot making this.
+I'm in a Discord Server and we needed a bot that supported these features. I made this bot myself to help out that Discord Server.
