@@ -36,7 +36,7 @@ class Marnie:
 
             arg_num = len((splitted := query.split(",")))
 
-            if arg_num != 2 or arg_num != 3:
+            if arg_num != 2 and arg_num != 3:
                 await ctx.send("!learn requires two or three arguments separated by a space, try again")
             else:
                 await ctx.send(self.learnset.learn(splitted[0], splitted[1]))
