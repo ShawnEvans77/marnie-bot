@@ -1,9 +1,8 @@
 import discord, logging, os, random, datetime, io, aiohttp
 from discord.ext import commands
 from ..constants.output import help as h
-from ..constants.files import filenames, folders
 from ..constants.structs import objects
-from ..utils import fetcher, learnset
+from ..utils import fetcher, weak_finder
 from ..servers import web_server
 from dotenv import load_dotenv
 
@@ -19,7 +18,7 @@ class Marnie:
         self.intents.members = True
         self.bot = commands.Bot(command_prefix='!', intents=self.intents, help_command=None)
         self.fetcher = fetcher.Fetcher()
-        self.learnset = learnset.LearnSet()
+        self.weak_finder = weak_finder.Weak()
 
         @self.bot.event
         async def on_ready():            
@@ -32,16 +31,8 @@ class Marnie:
             await ctx.send(self.fetcher.dt(query))
 
         @self.bot.command()
-        async def learn(ctx, *, query: str):
-
-            arg_num = len((splitted := query.split(",")))
-
-            if arg_num != 2 and arg_num != 3:
-                await ctx.send("!learn requires two or three arguments separated by a space, try again")
-            elif arg_num == 2:
-                await ctx.send(self.learnset.learn(splitted[0], splitted[1]))
-            else:
-                await ctx.send(self.learnset.learn(splitted[0], splitted[1], splitted[2]))
+        async def weak(ctx, *, query: str):
+            await ctx.send(self.weak_finder.weak(query))
 
         @self.bot.command()
         async def pick(ctx, *, query: str):
@@ -76,7 +67,7 @@ class Marnie:
             answer = self.fetcher.sprite(query, shiny=False)
 
             if isinstance(answer, list):
-                await ctx.send(file=(await Marnie.sprite_handler(answer[0], answer[1])))
+                await ctx.send(file=(await Marnie.sprite_handler(*answer)))
             else:
                 await ctx.send(answer)
 
@@ -85,14 +76,14 @@ class Marnie:
             answer = self.fetcher.sprite(query, shiny=True)
 
             if isinstance(answer, list):
-                await ctx.send(file = (await Marnie.sprite_handler(answer[0], answer[1])))
+                await ctx.send(file = (await Marnie.sprite_handler(*answer)))
             else:
                 await ctx.send(answer)
 
         @self.bot.command()
         async def randsprite(ctx):
             rand_sprite = self.fetcher.sprite(str(objects.pokemon.randmon()), shiny=False)
-            await ctx.send(file = (await Marnie.sprite_handler(rand_sprite[0], rand_sprite[1])))
+            await ctx.send(file = (await Marnie.sprite_handler(*rand_sprite)))
 
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''

@@ -21,10 +21,10 @@ class Fetcher:
         '''Returns a function map and their associated URLs.'''
 
         return {
-            objects.api_pokemon: [self.dt_pokemon, urls.poke_url],
-            objects.api_items: [self.dt_item, urls.item_url],
-            objects.api_moves: [self.dt_move, urls.move_url],
-            objects.api_abilities: [self.dt_ability, urls.ability_url]
+            objects.pokemon: [self.dt_pokemon, urls.poke_url],
+            objects.items: [self.dt_item, urls.item_url],
+            objects.moves: [self.dt_move, urls.move_url],
+            objects.abilities: [self.dt_ability, urls.ability_url]
         }
     
     def dt(self, query: str) -> str:
@@ -56,7 +56,7 @@ class Fetcher:
         type = f"_{types[0]['type']['name'].title()}_"
         if len(types) == 2: type += f"/_{types[1]['type']['name'].title()}_"
 
-        answer += f"**{pokemon.title()}** - **Dex #**: {objects.api_pokemon.get_species_id(pokemon)} | **{formatters.type}:** {type} | **Weight:** {int(json['weight']) / 10:.2f} kg"
+        answer += f"**{pokemon.title()}** - **Dex #**: {objects.pokemon.get_species_id(pokemon)} | **{formatters.type}:** {type} | **Weight:** {int(json['weight']) / 10:.2f} kg"
 
         answer += "\n"
         get_stats = []
@@ -96,16 +96,16 @@ class Fetcher:
         answer = ""
         answer += f"**{Fetcher.reverse_sanitize(move)}** - "
 
-        accuracy = objects.api_moves.get_accuracy(move)
-        power = objects.api_moves.get_power(move)
+        accuracy = objects.moves.get_accuracy(move)
+        power = objects.moves.get_power(move)
 
         json = response.json()
 
-        answer += f"**{formatters.generation}**: {objects.api_moves.get_generation(move)} | "
+        answer += f"**{formatters.generation}**: {objects.moves.get_generation(move)} | "
         answer += f"**{formatters.type}:** _{json['type']['name'].title()}_ | "
         answer += f"**Power**: {power if not pandas.isnull(power) else "-"} | "
         answer += f"**Accuracy**: {accuracy if not pandas.isnull(accuracy) else "-"} | "
-        answer += f"**PP**: {objects.api_moves.get_pp(move)} | "
+        answer += f"**PP**: {objects.moves.get_pp(move)} | "
         answer += f"**Category**: {json['damage_class']['name'].title()}"
 
         answer += "\n"
@@ -119,7 +119,7 @@ class Fetcher:
 
         answer = ""
         answer += f"**{Fetcher.reverse_sanitize(ability)}** "
-        answer += f"- **{formatters.generation}**: {objects.api_abilities.get_generation(ability)}\n"
+        answer += f"- **{formatters.generation}**: {objects.abilities.get_generation(ability)}\n"
 
         json = response.json()
         answer += f"{Fetcher.get_effect(json)}\n"
@@ -147,10 +147,10 @@ class Fetcher:
 
         if pokemonic_answer := Fetcher.pokemonic_get(query, function_name): return pokemonic_answer
 
-        if closest := objects.api_pokemon.close_match(query):
+        if closest := objects.pokemon.close_match(query):
             return function_name(closest, requests.get(urls.poke_url+closest))
 
-        if query in objects.api_pokemon:
+        if query in objects.pokemon:
             return function_name(query, requests.get(urls.poke_url+query))
         
         return f"i don't think {query} is a pokemon... check your spelling?"
@@ -164,10 +164,10 @@ class Fetcher:
             return function(associated, requests.get(urls.poke_url+associated))
         
         if query.isnumeric():
-            mon = objects.api_pokemon.by_number(query)
+            mon = objects.pokemon.by_number(query)
             return function(mon, requests.get(urls.poke_url+mon)) if mon else Fetcher.error_number(query)
         
-        if flavor := objects.api_pokemon.flavor(query): 
+        if flavor := objects.pokemon.flavor(query): 
             return function(flavor, requests.get(urls.poke_url+flavor))
         
         return None
@@ -222,4 +222,4 @@ class Fetcher:
     
     @staticmethod
     def error_number(num_str: str) -> str:
-        return f"there are only {objects.api_pokemon.get_num_pokemon()} pokemon, {num_str} is way too big..."
+        return f"there are only {objects.pokemon.get_num_pokemon()} pokemon, {num_str} is way too big..."

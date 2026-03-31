@@ -20,3 +20,5 @@ t_map = {
     'fairy': 17
 
 }
+
+rev_t_map = {v: k for k, v in t_map.items()}

@@ -54,7 +54,7 @@ The bot also supports !randmon for selecting a random Pokemon and !pick for pick
 All of the bot's commands are as follows:
 
 * !dt {query} - Returns information on Pokemon, Pokemon abilities, Pokemon items, or Pokemon moves.
-* !learn {pokemon, move} - Determines if a given Pokemon can learn the input move.
+* !weak {type} - Lists a type's weaknesses, resistances, and immunities.
 * !pick {args...} - Selects a random option given a list of options.
 * !randmon - Returns a random Pokemon.
 * !muted - lists all timed out server members and the amount of time they are timed out for.\n" 
