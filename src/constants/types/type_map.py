@@ -22,3 +22,4 @@ t_map = {
 }
 
 rev_t_map = {v: k for k, v in t_map.items()}
+all_types = t_map.keys()

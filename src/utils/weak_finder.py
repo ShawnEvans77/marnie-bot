@@ -64,7 +64,6 @@ class Weak:
 
         for i in range(len(weak_res_imm.label_list)):
             answer += f"**{weak_res_imm.label_list[i]}:** {", ".join(matrix[i]) if matrix[i] else "None"}"
-
             answer += "\n" if i != len(weak_res_imm.label_list) - 1 else ""
 
         return answer
@@ -87,9 +86,9 @@ class Weak:
     def weak(self, *args) -> str:
         '''Returns all of the weaknesses, resistances, and immunities of a given Pokemon.'''
 
-        args = tuple(arg.strip().lower() for arg in args)
+        args = list(arg.strip().lower() for arg in args)
 
-        if all(arg in tm.t_map.keys() for arg in args):
+        if all(arg in tm.all_types for arg in args):
             return self.get_weak(*args, title=self.title_type(*args))
                 
         if pokemonic_answer := (static_f.Fetcher.pokemonic_get(args[0], f.fetcher.get_type)):
@@ -103,27 +102,15 @@ class Weak:
         if closest_mon := objects.pokemon.close_match(args[0]):
             answer += f"i dunno know what pokemon {args[0]} is so i'll guess that you meant {closest_mon}\n\n"
             return answer + self.get_weak(*self.get_pokemon_type(closest_mon)[1], title=f"{closest_mon.title()}")
-        
-        args_list = [a for a in args]
-        
-        for i in range(len(args_list)):
-            if closest_type := objects.types.close_match(args_list[i]):
-                answer += f"i dunno know what type {args_list[0]} is so i'll guess that you meant {closest_type}\n"
-                args_list[i] = closest_type
+                
+        for i in range(len(args)):
+            if closest_type := objects.types.close_match(args[i]):
+                answer += f"i dunno know what type {args[i]} is so i'll guess that you meant {closest_type}\n"
+                args[i] = closest_type
 
         answer += "\n" if len(answer) > 0 else ""
 
-        if all(arg in tm.t_map.keys() for arg in args_list):
-            return answer + self.get_weak(*args_list, title=self.title_type(*args_list))
-        
-        error = ""
-        
-        if args[0] not in tm.t_map.keys():
-            error += f"i don't think {args[0]} is a type or a pokemon... check your spelling?"
-
-        error += "\n" if len(error) > 0 else ""
-
-        if len(args) == 2 and args[1] not in tm.t_map.keys():
-            error += f"i don't think {args[1]} is a move... check your spelling?"
-
-        return error
+        if all(arg in tm.all_types for arg in args):
+            return answer + self.get_weak(*args, title=self.title_type(*args))
+                
+        return "\n".join(f"i don't think {arg} is a type or a pokemon... check your spelling?" for arg in args if arg not in tm.all_types)
