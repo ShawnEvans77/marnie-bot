@@ -32,7 +32,12 @@ class Marnie:
 
         @self.bot.command()
         async def weak(ctx, *, query: str):
-            await ctx.send(self.weak_finder.weak(query))
+            tokens = query.split(",").strip()
+
+            if len(tokens) == 1 or len(tokens) == 2:
+                await ctx.send(self.weak_finder.weak(query))
+            else:
+                await ctx.send("!weak requires one or two types as arguments, try again")
 
         @self.bot.command()
         async def pick(ctx, *, query: str):

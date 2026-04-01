@@ -1,0 +1,54 @@
+fire:
+
+Weaknesses: Ground, Rock, Water
+Resistances: Bug, Fairy, Fire, Grass, Ice, Steel
+Immunities: None
+
+ground:
+
+Weaknesses: Grass, Ice, Water
+Resistances: Poison, Rock
+Immunities: Electric
+
+fire/ground:
+
+Weaknesses: Ground, **Water**
+Resistances: Bug, Fairy, Fire, Poison, Steel
+Immunities: Electric
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------
+
+Fire:
+
+Weaknesses: Ground, Rock, Water
+Resistances: Bug, Fairy, Fire, Grass, Ice, Steel
+Immunities: None
+
+Water:
+
+Weaknesses: Electric, Grass
+Resistances: Fire, Ice, Steel, Water
+Immunities: None
+
+Fire/Water:
+
+Fire/Water:
+Weaknesses: Electric, Ground, Rock
+Resistances: Bug, Fairy, **Fire**, **Ice**, **Steel**
+Immunities: None

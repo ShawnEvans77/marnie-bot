@@ -44,17 +44,28 @@ class Fetcher:
                 return Fetcher.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
 
         return f"i don't know what {query} is... check your spelling?"
+    
+    def get_type(self, pokemon: str, json) -> List:
+        types = json['types']
+        answer = []
 
+        answer.append(types[0]['type']['name'])
+        if len(types) == 2: answer.append(types[1]['type']['name'])
+
+        return answer
+    
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
         name, generation, type, abilities, base stats, and base stat total.'''
         
         answer = ""
         json = response.json()
-        stats, types, abilities = json['stats'], json['types'], json['abilities']
+        stats, types, abilities = json['stats'], self.get_type(pokemon, json), json['abilities']
 
-        type = f"_{types[0]['type']['name'].title()}_"
-        if len(types) == 2: type += f"/_{types[1]['type']['name'].title()}_"
+        type = ""
+        type += f"_{types[0].title()}_"
+
+        if len(types) == 2: type += f"/_{types[1].title()}_"
 
         answer += f"**{pokemon.title()}** - **Dex #**: {objects.pokemon.get_species_id(pokemon)} | **{formatters.type}:** {type} | **Weight:** {int(json['weight']) / 10:.2f} kg"
 
@@ -146,18 +157,15 @@ class Fetcher:
         function_name = self.get_shiny_sprite if shiny else self.get_sprite
 
         if pokemonic_answer := Fetcher.pokemonic_get(query, function_name): return pokemonic_answer
-
+  
         if closest := objects.pokemon.close_match(query):
             return function_name(closest, requests.get(urls.poke_url+closest))
 
-        if query in objects.pokemon:
-            return function_name(query, requests.get(urls.poke_url+query))
-        
         return f"i don't think {query} is a pokemon... check your spelling?"
     
     @staticmethod
     def pokemonic_get(query: str, function: collections.abc.Callable) -> requests.models.Response:
-        '''Returns an appropiate response if the input parameter is a Pokemon alias, dex number, or flavor.'''
+        '''Returns an appropiate response if the input parameter is a Pokemon, Pokemon alias, dex number, or flavor.'''
 
         if query in aliases.alias_map:
             associated = aliases.alias_map[query]
@@ -169,6 +177,9 @@ class Fetcher:
         
         if flavor := objects.pokemon.flavor(query): 
             return function(flavor, requests.get(urls.poke_url+flavor))
+
+        if query in objects.pokemon:
+            return function(query, requests.get(urls.poke_url+query))
         
         return None
 

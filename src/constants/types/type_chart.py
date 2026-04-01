@@ -2,10 +2,10 @@ import src.constants.types.type_map as tm
 
 num_types = 18
 
-normal_dmg = 1
-super_dmg = 2
+normal_dmg = 1.0
+super_dmg = 2.0
 resist_dmg = 0.5
-no_dmg = 0
+no_dmg = 0.0
 
 type_matrix = [[normal_dmg] * num_types for _ in range(num_types)]
 
@@ -79,7 +79,7 @@ ice_arr[tm.t_map['ice']] = resist_dmg
 ice_arr[tm.t_map['ground']] = super_dmg
 ice_arr[tm.t_map['flying']] = super_dmg
 ice_arr[tm.t_map['dragon']] = super_dmg
-ice_arr[tm.t_map['steel']] = super_dmg
+ice_arr[tm.t_map['steel']] = resist_dmg
 
 # fighting
 
