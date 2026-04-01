@@ -50,6 +50,8 @@ Where command is the name of the command and query is your query. For example, i
 !weak fire
 ```
 
+Note that not all commands will use a query. Some commands, like muted, can be invoked by simply typing !muted.
+
 Marnie implements [fuzzy string matching](https://en.wikipedia.org/wiki/Approximate_string_matching), so she'll still try and parse your typos. 
 
 Here are some examples of what she can output:
