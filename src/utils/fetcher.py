@@ -53,7 +53,7 @@ class Fetcher:
         answer.append(types[0]['type']['name'])
         if len(types) == 2: answer.append(types[1]['type']['name'])
 
-        return answer
+        return [json['name'], answer]
     
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
@@ -61,12 +61,12 @@ class Fetcher:
         
         answer = ""
         json = response.json()
-        stats, types, abilities = json['stats'], self.get_type(pokemon, json), json['abilities']
+        stats, types, abilities = json['stats'], self.get_type(pokemon, response), json['abilities']
 
         type = ""
-        type += f"_{types[0].title()}_"
+        type += f"_{types[1][0].title()}_"
 
-        if len(types) == 2: type += f"/_{types[1].title()}_"
+        if len(types[1]) == 2: type += f"/_{types[1][1].title()}_"
 
         answer += f"**{pokemon.title()}** - **Dex #**: {objects.pokemon.get_species_id(pokemon)} | **{formatters.type}:** {type} | **Weight:** {int(json['weight']) / 10:.2f} kg"
 
