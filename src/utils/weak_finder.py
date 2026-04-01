@@ -3,7 +3,7 @@ from src.utils import fetcher as static_f
 from ..constants.output import weak_res_imm
 from ..constants.structs import objects
 from ..constants.requesting import fetch as f
-from typing import List, Tuple
+from typing import List
 
 class Weak:
     '''Utility class for finding a type's weaknesses, resistances, and immunities, in that order.'''
@@ -121,7 +121,7 @@ class Weak:
         return f"{pokemon_name.title()} - ({self.title_type(*types)})"
 
     @staticmethod
-    def remove_special(type: str) -> str:
+    def remove_special(type_name: str) -> str:
         '''Used for comparing Strings alphabetically without worrying about special characters.'''
 
-        return [c for c in type if c.isalpha()]
+        return [c for c in type_name if c.isalpha()]
