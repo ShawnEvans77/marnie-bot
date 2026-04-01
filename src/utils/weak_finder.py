@@ -87,8 +87,6 @@ class Weak:
     def weak(self, *args) -> str:
         '''Returns all of the weaknesses, resistances, and immunities of a given Pokemon.'''
 
-        print(args)
-
         args = tuple(arg.strip().lower() for arg in args)
 
         if all(arg in tm.t_map.keys() for arg in args):
