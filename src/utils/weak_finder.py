@@ -101,7 +101,7 @@ class Weak:
         answer = ""
         
         if closest_mon := objects.pokemon.close_match(args[0]):
-            answer += f"i dunno know what pokemon {args[0]} is so i'll guess that you meant {closest_mon}\n\n"
+            answer += f"i dunno know what pokemon {args[0]} is so i'll guess that you meant {closest_mon}\n"
             mon_type = self.get_pokemon_type(closest_mon)[1]
             return answer + self.format_matrix(self.build_matrix(*mon_type, title=f"{closest_mon.title()}"))
         
@@ -109,8 +109,10 @@ class Weak:
         
         for i in range(len(args_list)):
             if closest_type := objects.types.close_match(args_list[i]):
-                answer += f"i dunno know what type {args_list[0]} is so i'll guess that you meant {closest_type}\n\n"
+                answer += f"i dunno know what type {args_list[0]} is so i'll guess that you meant {closest_type}\n"
                 args_list[i] = closest_type
+
+        answer += "\n" if len(answer) > 0 else ""
 
         if all(arg in tm.t_map.keys() for arg in args_list):
             return answer + self.get_weak(*args_list, title=self.title_type(*args_list))
