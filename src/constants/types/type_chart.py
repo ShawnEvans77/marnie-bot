@@ -1,4 +1,5 @@
 import src.constants.types.type_map as tm
+import numpy
 
 num_types = 18
 
@@ -7,9 +8,14 @@ super_dmg = 2.0
 resist_dmg = 0.5
 no_dmg = 0.0
 
-type_matrix = [[normal_dmg] * num_types for _ in range(num_types)]
+double_super_dmg = super_dmg*2
+double_resist_dmg = resist_dmg/2
+
+type_matrix = numpy.empty(shape=(num_types,num_types))
+type_matrix.fill(normal_dmg)
 
 # [attacker][defender]
+
 # normal
 
 norm_arr = type_matrix[tm.t_map['normal']]

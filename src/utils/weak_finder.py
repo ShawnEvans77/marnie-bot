@@ -4,6 +4,7 @@ from ..constants.output import weak_res_imm
 from ..constants.structs import objects
 from ..constants.requesting import fetch as f
 from typing import List, Tuple
+import numpy
 
 class Weak:
     '''Utility class for finding a type's weaknesses, resistances, and immunities, in that order.'''
@@ -46,28 +47,28 @@ class Weak:
     def match_dmg_type(self, type_1: str, dmg_type: float) -> List:
         '''Finds all the weaknesses and resistances of a single typed Pokemon.'''
 
-        weak_list = []
-         
-        for i in range(tc.num_types):
-            if tc.type_matrix[i][tm.t_map[type_1]] == dmg_type:
-                weak_list.append(tm.rev_t_map[i].capitalize())
-
-        return sorted(weak_list)
+        weak_indices = numpy.sort(numpy.where(tc.type_matrix[:, tm.t_map[type_1]] == dmg_type))[0]        
+        return [tm.rev_t_map[i].capitalize() for i in weak_indices]
        
     def match_dmg_type_two(self, type_1: str, type_2: str, dmg_type: float) -> List:
         '''Finds all the weaknesses and resistances of a dual typed Pokemon. Bolds double resistances or weaknesses.'''
-        
+
+        double_effect = tc.double_super_dmg if dmg_type == tc.super_dmg else tc.double_resist_dmg
+
+        products = numpy.multiply(tc.type_matrix[:, tm.t_map[type_1]], tc.type_matrix[:, tm.t_map[type_1]])
+        print(products)
+
         weak_list = []  
-        double_effect = tc.super_dmg*2 if dmg_type == tc.super_dmg else tc.resist_dmg/2
 
-        for i in range(tc.num_types):
-            t_mat = tc.type_matrix[i]
-            calc_dmg = t_mat[tm.t_map[type_1]] * t_mat[tm.t_map[type_2]]
-
-            if calc_dmg == double_effect and dmg_type != 0:
+        for i in range(products.size):
+            
+            if products[i] == double_effect:
+                print(f"DOUBLE: {products[i]}")
                 weak_list.append(f"**{tm.rev_t_map[i].capitalize()}**")   
-            elif calc_dmg == dmg_type:
+            elif products[i] == dmg_type:
                 weak_list.append(tm.rev_t_map[i].capitalize())
+
+        print(weak_list)
 
         return sorted(weak_list, key=Weak.remove_special)
 
@@ -90,7 +91,7 @@ class Weak:
         matrix = title_matrix[1]
 
         for i in range(len(weak_res_imm.label_list)):
-            answer += f"**{weak_res_imm.label_list[i]}:** {", ".join(matrix[i]) if matrix[i] else "None"}"
+            answer += f"**{weak_res_imm.label_list[i]}:** {", ".join(matrix[i]) if matrix[i] != 0 else "None"}"
             answer += "\n" if i != len(weak_res_imm.label_list) - 1 else ""
 
         return answer
@@ -125,3 +126,8 @@ class Weak:
         '''Used for comparing Strings alphabetically without worrying about special characters.'''
 
         return [c for c in type if c.isalpha()]
+    
+
+
+x = Weak()
+print(x.weak("fairy", "dragon"))
