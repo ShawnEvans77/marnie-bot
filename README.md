@@ -4,7 +4,7 @@ Marnie is a Discord bot for people who love Pokemon! I called her Marnie because
 
 If you have a Discord Server based around Pokemon Showdown and you want a bot emulating that site's command, Marnie is the bot for you!
 
-I try to keep the bot online as much as I can!
+I try to keep her online as much as I can!
 
 ## Installation
 
@@ -36,7 +36,7 @@ py -m src.scripts.main
 
 .env is obviously .gitignore'd by default. Do not commit your API tokens to GitHub! If you want to use her locally, you would need to create .env and put your API Token in there. 
 
-You can change the bot's language by editing language.py. View all supported languages [here](https://pokeapi.co/api/v2/language). Marnie's default language is the Queen's English.
+You can change her language by editing language.py. View all supported languages [here](https://pokeapi.co/api/v2/language). Marnie's default language is the Queen's English.
 ## Usage
 Commands are typed in this form:
 
@@ -60,7 +60,7 @@ Here are some examples of what she can output:
 <img src="https://i.imgur.com/Zgz91u3.png">
 
 ## Commands
-All of the bot's commands are as follows:
+All of her commands are as follows:
 
 * !dt {query} - Returns information on Pokemon, Pokemon abilities, Pokemon items, or Pokemon moves.
 * !weak {type} - Lists a type's weaknesses, resistances, and immunities. You can query a dual type Pokemon by sending two types seperated by slashes or commas to the command. For example, !dt fire/water or !dt fire,water.
