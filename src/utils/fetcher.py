@@ -45,7 +45,8 @@ class Fetcher:
 
         return f"i don't know what {query} is... check your spelling?"
     
-    def get_type(self, pokemon: str, json) -> List:
+    def get_type(self, pokemon: str, response: requests.models.Response) -> List:
+        json = response.json()
         types = json['types']
         answer = []
 
@@ -157,6 +158,9 @@ class Fetcher:
         function_name = self.get_shiny_sprite if shiny else self.get_sprite
 
         if pokemonic_answer := Fetcher.pokemonic_get(query, function_name): return pokemonic_answer
+
+        if query in objects.pokemon:
+            return function_name(query, requests.get(urls.poke_url+query))
   
         if closest := objects.pokemon.close_match(query):
             return function_name(closest, requests.get(urls.poke_url+closest))
@@ -164,8 +168,8 @@ class Fetcher:
         return f"i don't think {query} is a pokemon... check your spelling?"
     
     @staticmethod
-    def pokemonic_get(query: str, function: collections.abc.Callable) -> requests.models.Response:
-        '''Returns an appropiate response if the input parameter is a Pokemon, Pokemon alias, dex number, or flavor.'''
+    def pokemonic_get(query: str, function: collections.abc.Callable):
+        '''Calls and returns the value of the appropiate function if the input parameter is a Pokemon, Pokemon alias, dex number, or flavor.'''
 
         if query in aliases.alias_map:
             associated = aliases.alias_map[query]
@@ -177,11 +181,14 @@ class Fetcher:
         
         if flavor := objects.pokemon.flavor(query): 
             return function(flavor, requests.get(urls.poke_url+flavor))
-
-        if query in objects.pokemon:
-            return function(query, requests.get(urls.poke_url+query))
         
         return None
+    
+    @staticmethod
+    def request_pokemon(pokemon: str) -> requests.models.Response:
+        '''Used for making Pokemon request calls outside of the class.'''
+
+        return requests.get(urls.poke_url+pokemon)
 
     @staticmethod
     def reverse_sanitize(query: str) -> str:

@@ -1,6 +1,7 @@
 import discord, logging, os, random, datetime, io, aiohttp
 from discord.ext import commands
 from ..constants.output import help as h
+from ..constants.requesting import fetch
 from ..constants.structs import objects
 from ..utils import fetcher, weak_finder
 from ..servers import web_server
@@ -17,7 +18,6 @@ class Marnie:
         self.intents.message_content = True
         self.intents.members = True
         self.bot = commands.Bot(command_prefix='!', intents=self.intents, help_command=None)
-        self.fetcher = fetcher.Fetcher()
         self.weak_finder = weak_finder.Weak()
 
         @self.bot.event
@@ -28,7 +28,7 @@ class Marnie:
 
         @self.bot.command()
         async def dt(ctx, *, query: str):
-            await ctx.send(self.fetcher.dt(query))
+            await ctx.send(fetch.fetcher.dt(query))
 
         @self.bot.command()
         async def weak(ctx, *, query: str):
@@ -45,7 +45,7 @@ class Marnie:
 
         @self.bot.command()
         async def randmon(ctx):
-            await ctx.send(self.fetcher.dt(str(objects.pokemon.randmon())))
+            await ctx.send(fetch.fetcher.dt(str(objects.pokemon.randmon())))
 
         @self.bot.command()
         async def help(ctx):
