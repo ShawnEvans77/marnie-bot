@@ -58,7 +58,7 @@ All of the bot's commands are as follows:
 * !weak {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon.
 * !pick {args...} - Selects a random option given a list of options.
 * !randmon - Returns a random Pokemon.
-* !muted - lists all timed out server members and the amount of time they are timed out for.\n" 
+* !muted - lists all timed out server members and the amount of time they are timed out for.
 * !sprite - Returns a Pokemon's sprite.
 * !shiny - Returns a Pokemon's shiny sprite.
 * !randsprite - Returns a random Pokemon's sprite.

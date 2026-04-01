@@ -96,12 +96,12 @@ class Weak:
         return answer
     
     def get_weak(self, title: str, *types: str) -> str:
-        '''Helper function for getting a list of a Pokemon's weaknesses, resistances, and immunities based on its type.'''
+        '''Helper function for getting a list of a given type's weaknesses, resistances, and immunities.'''
 
         return self.format_matrix(self.build_matrix(title, *types))
     
     def get_weak_pokemon(self, pokemon_name: str, *types: str) -> str:
-        '''Helper function for getting a list of a Pokemon's weaknesses, resistances, and immunities, based on a Pokemon's name alone.'''
+        '''Helper function for getting a list of a Pokemon's weaknesses, resistances, and immunities.'''
 
         return self.get_weak(self.title_pokemon(pokemon_name, *types), *types)
     
