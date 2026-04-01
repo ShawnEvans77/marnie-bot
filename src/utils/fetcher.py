@@ -179,8 +179,8 @@ class Fetcher:
         
         if query.isnumeric():
             mon = objects.pokemon.by_number(query)
-            return function(mon, requests.get(urls.poke_url+mon)) if mon else Fetcher.error_number(query)
-        
+            return function(mon, requests.get(urls.poke_url+mon)) if mon else None
+                    
         if flavor := objects.pokemon.flavor(query): 
             return function(flavor, requests.get(urls.poke_url+flavor))
         

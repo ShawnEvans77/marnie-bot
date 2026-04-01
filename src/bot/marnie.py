@@ -70,7 +70,7 @@ class Marnie:
 
         @self.bot.command()
         async def sprite(ctx, *, query):
-            answer = self.fetcher.sprite(query, shiny=False)
+            answer = fetch.fetcher.sprite(query, shiny=False)
 
             if isinstance(answer, list):
                 await ctx.send(file=(await Marnie.sprite_handler(*answer)))
@@ -79,7 +79,7 @@ class Marnie:
 
         @self.bot.command()
         async def shiny(ctx, *, query):
-            answer = self.fetcher.sprite(query, shiny=True)
+            answer = fetch.fetcher.sprite(query, shiny=True)
 
             if isinstance(answer, list):
                 await ctx.send(file = (await Marnie.sprite_handler(*answer)))
@@ -88,7 +88,7 @@ class Marnie:
 
         @self.bot.command()
         async def randsprite(ctx):
-            rand_sprite = self.fetcher.sprite(str(objects.pokemon.randmon()), shiny=False)
+            rand_sprite = fetch.fetcher.sprite(str(objects.pokemon.randmon()), shiny=False)
             await ctx.send(file = (await Marnie.sprite_handler(*rand_sprite)))
 
     def start(self):
