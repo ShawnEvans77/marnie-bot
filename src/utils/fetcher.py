@@ -46,6 +46,8 @@ class Fetcher:
         return f"i don't know what {query} is... check your spelling?"
     
     def get_type(self, pokemon: str, response: requests.models.Response) -> List:
+        '''Fetches the types from a Pokemon HTTP Response. Returns a list containing the Pokemon's name and types.'''
+        
         json = response.json()
         types = json['types']
         answer = []
@@ -53,7 +55,7 @@ class Fetcher:
         answer.append(types[0]['type']['name'])
         if len(types) == 2: answer.append(types[1]['type']['name'])
 
-        return [json['name'], answer]
+        return [pokemon, answer]
     
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
