@@ -57,7 +57,7 @@ Marnie implements [fuzzy string matching](https://en.wikipedia.org/wiki/Approxim
 Here are some examples of what she can output:
 
 <img src="https://i.imgur.com/jT8NyIg.png"></img>
-<img src="https://raw.githubusercontent.com/ShawnEvans77/marnie-bot/refs/heads/main/marnie-3.png"></img>
+<img src="https://i.imgur.com/om3QHvX.png"></img>
 <img src="https://i.imgur.com/gLRHjVb.png">
 <img src="https://i.imgur.com/Zgz91u3.png">
 
