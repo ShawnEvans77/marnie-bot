@@ -12,4 +12,9 @@ alias_map = {
     "biden": "musharna",
     "perc": "scrafty-mega",
     "itami": "snorlax",
+    "obama": "abomasnow",
+    "birdjesus": "pidgeot",
+    "chomp": "garchomp",
+    "dnite": "dragonite",
+    "pikablu": "marill",
 }
