@@ -1,0 +1,1 @@
+label_list = ["Weaknesses", "Resistances", "Immunities"]
