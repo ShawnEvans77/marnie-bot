@@ -54,7 +54,8 @@ The bot also supports !randmon for selecting a random Pokemon and !pick for pick
 All of the bot's commands are as follows:
 
 * !dt {query} - Returns information on Pokemon, Pokemon abilities, Pokemon items, or Pokemon moves.
-* !weak {type} - Lists a type's weaknesses, resistances, and immunities.
+* !weak {type} - Lists a type's weaknesses, resistances, and immunities. You can query a dual type Pokemon by sending two types seperated by slashes or commas to the command. For example, !dt fire/water or !dt fire,water.
+* !weak {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon.
 * !pick {args...} - Selects a random option given a list of options.
 * !randmon - Returns a random Pokemon.
 * !muted - lists all timed out server members and the amount of time they are timed out for.\n" 

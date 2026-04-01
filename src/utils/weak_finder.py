@@ -103,7 +103,7 @@ class Weak:
         if closest_mon := objects.pokemon.close_match(args[0]):
             answer += f"i dunno know what pokemon {args[0]} is so i'll guess that you meant {closest_mon}\n"
             mon_type = self.get_pokemon_type(closest_mon)[1]
-            return answer + self.format_matrix(self.build_matrix(*mon_type, title=f"{closest_mon.title()}"))
+            return answer + self.get_weak(*mon_type, title=f"{closest_mon.title()}")
         
         args_list = [a for a in args]
         
