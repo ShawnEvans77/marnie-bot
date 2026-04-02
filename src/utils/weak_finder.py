@@ -1,8 +1,8 @@
 from ..constants.types import type_chart as tc, type_map as tm
-from src.utils import fetcher as static_f
 from ..constants.output import weak_res_imm
 from ..constants.structs import objects
 from ..constants.requesting import fetch as f
+from src.utils import fetcher as static_f
 from typing import List
 
 class Weak:

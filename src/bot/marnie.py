@@ -1,11 +1,11 @@
-import discord, logging, os, random, datetime, io, aiohttp
 from discord.ext import commands
 from ..constants.output import help as h
 from ..constants.requesting import fetch
 from ..constants.structs import objects
-from ..utils import fetcher, weak_finder
+from ..utils import weak_finder
 from ..servers import web_server
 from dotenv import load_dotenv
+import discord, logging, os, random, datetime, io, aiohttp
 
 class Marnie:
     '''The Marnie Class represents your Discord Bot.'''
