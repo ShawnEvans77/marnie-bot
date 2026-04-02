@@ -41,8 +41,3 @@ class List(ABC):
                 closest_item = object
 
         return closest_item if closest_item != incorrect else None
-    
-    def __iter__(self):
-        '''Returns an iterable representation of this List.'''
-
-        return iter(self.list)
