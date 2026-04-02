@@ -68,15 +68,15 @@ Here are some examples of what she can output:
 ## Commands
 All of her commands are as follows:
 
-* !dt {query} - Returns information on Pokemon, Pokemon abilities, Pokemon items, or Pokemon moves.
-* !weak {type} - Lists a type's weaknesses, resistances, and immunities. You can query a dual type Pokemon by sending two types seperated by slashes or commas to the command. For example, !dt fire/water or !dt fire,water.
-* !weak {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon.
-* !pick {args...} - Selects a random option given a list of options.
-* !randmon - Returns a random Pokemon.
-* !muted - lists all timed out server members and the amount of time they are timed out for.
-* !sprite - Returns a Pokemon's sprite.
-* !shiny - Returns a Pokemon's shiny sprite.
-* !randsprite - Returns a random Pokemon's sprite.
+* !**dt** {query} - Returns information on a Pokemon, Pokemon ability, Pokemon item, or Pokemon move.
+* !**weak** {type} - Lists weaknesses, resistances, and immunities of a given type. You can query a dual type by sending two types seperated by slashes or commas to the command. For example, !dt fire/water or !dt fire,water.
+* !**weak** {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon.
+* !**pick** {args...} - Selects a random option given a list of options.
+* !**randmon** - Returns the information of a random Pokemon.
+* !**muted** - Lists all timed out server members and the amount of time they are timed out for.
+* !**sprite** {pokemon} - Returns a Pokemon's sprite.
+* !**shiny** {pokemon} ** - Returns a Pokemon's shiny sprite.\n" \
+* !**randsprite** - Returns a random Pokemon's sprite."
 
 ## Motivation
 
