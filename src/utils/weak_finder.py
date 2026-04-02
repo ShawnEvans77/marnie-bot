@@ -17,19 +17,19 @@ class Weak:
         args = list(arg.strip().lower() for arg in args)
 
         if all(arg in tm.all_types for arg in args):
-            return self.get_weak(self.title_type(*args), *args)
+            return self.get_weak(Weak.title_type(*args), *args)
                 
         if pokemonic_answer := (static_f.Fetcher.pokemonic_get(args[0], f.fetcher.get_type)):
             return self.get_weak_pokemon(pokemonic_answer[0], *pokemonic_answer[1])
         
         if (sanitized_pokemon := (static_f.Fetcher.sanitize(args[0]))) in objects.pokemon:
-            return self.get_weak_pokemon(sanitized_pokemon, *self.get_pokemon_type(sanitized_pokemon)[1])
+            return self.get_weak_pokemon(sanitized_pokemon, *Weak.get_pokemon_type(sanitized_pokemon)[1])
 
         answer = ""
         
         if closest_mon := objects.pokemon.close_match(args[0]):
             answer += f"i dunno know what pokemon {args[0]} is so i'll guess that you meant {closest_mon}\n\n"
-            return answer + self.get_weak_pokemon(closest_mon, *self.get_pokemon_type(closest_mon)[1])
+            return answer + self.get_weak_pokemon(closest_mon, *Weak.get_pokemon_type(closest_mon)[1])
 
         for i in range(len(args)):
             if closest_type := objects.types.close_match(args[i]):
@@ -39,7 +39,7 @@ class Weak:
         answer += "\n" if len(answer) > 0 else ""
 
         if all(arg in tm.all_types for arg in args):
-            return answer + self.get_weak(self.title_type(*args), *args)
+            return answer + self.get_weak(Weak.title_type(*args), *args)
                 
         return "\n".join(f"i don't think {arg} is a type or a pokemon... check your spelling?" for arg in args if arg not in tm.all_types)
     
@@ -103,22 +103,25 @@ class Weak:
     def get_weak_pokemon(self, pokemon_name: str, *types: str) -> str:
         '''Helper function for getting a list of a Pokemon's weaknesses, resistances, and immunities.'''
 
-        return self.get_weak(self.title_pokemon(pokemon_name, *types), *types)
+        return self.get_weak(Weak.title_pokemon(pokemon_name, *types), *types)
     
-    def get_pokemon_type(self, pokemon: str) -> List:
+    @staticmethod
+    def get_pokemon_type(pokemon: str) -> List:
         '''Makes an HTTP request to get a Pokemon's type if needed.'''
 
         return f.fetcher.get_type(pokemon, static_f.Fetcher.request_pokemon(pokemon))
     
-    def title_type(self, *types: str) -> str:
+    @staticmethod
+    def title_type(*types: str) -> str:
         '''Titles types properly.'''
 
         return "/".join(type.title() for type in types)
     
-    def title_pokemon(self, pokemon_name: str, *types: str) -> str:
+    @staticmethod
+    def title_pokemon(pokemon_name: str, *types: str) -> str:
         '''Properly titles a Pokemon and its type.'''
 
-        return f"{pokemon_name.title()} - ({self.title_type(*types)})"
+        return f"{pokemon_name.title()} - ({Weak.title_type(*types)})"
 
     @staticmethod
     def remove_special(type_name: str) -> str:
