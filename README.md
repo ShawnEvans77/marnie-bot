@@ -75,8 +75,8 @@ All of her commands are as follows:
 * !**randmon** - Returns the information of a random Pokemon.
 * !**muted** - Lists all timed out server members and the amount of time they are timed out for.
 * !**sprite** {pokemon} - Returns a Pokemon's sprite.
-* !**shiny** {pokemon} - Returns a Pokemon's shiny sprite.\n" \
-* !**randsprite** - Returns a random Pokemon's sprite."
+* !**shiny** {pokemon} - Returns a Pokemon's shiny sprite.
+* !**randsprite** - Returns a random Pokemon's sprite.
 
 ## Motivation
 
