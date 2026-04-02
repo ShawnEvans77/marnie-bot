@@ -2,7 +2,7 @@
 
 Marnie is a Discord bot for people who love Pokemon! I called her Marnie because who wouldn't want to be a part of Team Yell?
 
-If you have a Discord Server based around Pokemon Showdown and you want a bot emulating that site's command, Marnie is the bot for you!
+If you have a Discord Server based around Pokemon Showdown and you want a bot emulating that site's commands, Marnie is the bot for you!
 
 I try to keep her online as much as I can!
 
