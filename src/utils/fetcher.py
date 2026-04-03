@@ -31,6 +31,7 @@ class Fetcher:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
         is a Pokemon, item, ability, or move.'''
 
+        original = query
         query = Fetcher.sanitize(query)
 
         if pokemonic_answer := Fetcher.pokemonic_get(query, self.dt_pokemon): return pokemonic_answer
@@ -41,9 +42,9 @@ class Fetcher:
         
         for k, v in self.funcs:
             if closest := k.close_match(query):
-                return Fetcher.fuzzy(query, closest) + v[0](closest, requests.get(v[1]+closest))
+                return Fetcher.fuzzy(original, closest) + v[0](closest, requests.get(v[1]+closest))
 
-        return f"i don't know what {query} is... check your spelling?"
+        return f"i don't know what {original} is... check your spelling?"
     
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
@@ -208,7 +209,7 @@ class Fetcher:
 
         if tokens[0] in nationalities.nat_key: tokens[0] = nationalities.nat_map[tokens[0]]
 
-        if (token not in prefix_moves.mega_tuple) and (tokens[0] in prefixes.pre_tuple) and (len(tokens) >= 2):
+        if (token not in prefix_moves.prefix_tuple) and (tokens[0] in prefixes.pre_tuple) and (len(tokens) >= 2):
             answer = tokens[1] + "-" + tokens[0]
 
             if len(tokens) >= 3:
