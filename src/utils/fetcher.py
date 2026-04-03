@@ -134,7 +134,7 @@ class Fetcher:
     def sprite(self, query: str, shiny: bool) -> List | str:
         '''Parses the query then returns the appropiate sprite.'''
 
-        query = Fetcher.sanitize(query)
+        query = Fetcher.mon_sanitize(Fetcher.sanitize(query))
 
         function_name = self.get_shiny_sprite if shiny else self.get_sprite
 
