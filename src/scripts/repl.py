@@ -5,6 +5,7 @@ print("Welcome to the Marnie REPL!")
 print("Use this to test !dt and !weak without deploying the bot to production.")
 print()
 print("Enter your prompt after the >>>. Type exit() to quit.")
+print()
 prompt = input(">>> ").lower().strip()
 
 while prompt != "exit()":

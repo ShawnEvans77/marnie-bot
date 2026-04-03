@@ -68,7 +68,7 @@ Here are some examples of what she can output:
 ## Commands
 All of her commands are as follows:
 
-* !**dt** {query} - Returns information on a Pokemon, Pokemon ability, Pokemon item, or Pokemon move.
+* !**dt** {query} - Returns information on a Pokemon, Pokemon ability, Pokemon item, or Pokemon move. Pokemon can be queried by their name or dex number.
 * !**weak** {type} - Lists weaknesses, resistances, and immunities of a given type. You can query a dual type by sending two types seperated by slashes or commas to the command. For example, !dt fire/water or !dt fire,water.
 * !**weak** {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon.
 * !**pick** {args...} - Selects a random option given a list of options.
@@ -94,11 +94,13 @@ Welcome to the Marnie REPL!
 Use this to test !dt and !weak without deploying the bot to production.
 
 Enter your prompt after the >>>. Type exit() to quit.
->>> !dt arceus
+
+>>> !dt mega alakasham
+ummmm... "mega alakasham"? perhaps you meant alakazam-mega?
 --------------------------------------------------
-**Arceus** - **Dex #**: 493 | **Type:** _Normal_ | **Weight:** 320.00 kg
-**HP**: 120 | **ATK**: 120 | **DEF**: 120 | **SP. ATK**: 120 | **SP. DEF**: 120 | **SPEED**: 120 | **BST**: 720
-**Ab. 1**: Multitype
+**Alakazam-Mega** - **Dex #**: 65 | **Type:** _Psychic_ | **Weight:** 48.00 kg
+**HP**: 55 | **ATK**: 50 | **DEF**: 65 | **SP. ATK**: 175 | **SP. DEF**: 105 | **SPEED**: 150 | **BST**: 600
+**Ab. 1**: Trace
 --------------------------------------------------
 
 >>> !weak dragonair
