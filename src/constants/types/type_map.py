@@ -1,3 +1,5 @@
+'''Mapping of type names to indices in the type matrix.'''
+
 t_map = {
     
     'normal': 0,

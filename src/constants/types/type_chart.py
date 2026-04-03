@@ -1,3 +1,5 @@
+'''Matrix representing the weaknesses and resistances of all eighteen types.'''
+
 import src.constants.types.type_map as tm
 
 num_types = 18
