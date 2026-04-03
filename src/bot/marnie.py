@@ -69,7 +69,7 @@ class Marnie:
                     hours, rem_min = total // 3600, total % 3600
                     minutes, rem_sec = rem_min // 60, rem_min % 60
 
-                    answer += f" {Marnie.plural(hours, "hour")}, {Marnie.plural(minutes, "minute")}, and {Marnie.plural(rem_sec, "second")}\n. what a {random.choice(insults.insult_tup)}!"
+                    answer += f" {Marnie.plural(hours, "hour")}, {Marnie.plural(minutes, "minute")}, and {Marnie.plural(rem_sec, "second")}. what a {random.choice(insults.insult_tup)}.\n"
 
             await ctx.send(answer if len(answer) != 0 else "nobody is muted right now")
 
