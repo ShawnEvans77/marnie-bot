@@ -27,7 +27,7 @@ class Marnie:
         @self.bot.command()
         async def dt(ctx, *, query: str=None):
 
-            if query != None:
+            if query is not None:
                 await ctx.send(get_objs.fetcher.dt(query))
             else:
                 await ctx.send("how can i do ``!dt`` on **nothing**?\n\nyou have to send a query to ``!dt``, silly!\n\nremember, if you wanna use ``!dt``, you type !dt then a Pokemon, Pokemon move, Pokemon ability, or item. for example: ``!dt morpeko``.")
