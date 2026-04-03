@@ -75,27 +75,27 @@ class Marnie:
 
         @self.bot.command()
         async def sprite(ctx, *, query: str=None):
-            answer = get_objs.fetcher.sprite(query, shiny=False)
 
             if query is not None:
+                answer = get_objs.fetcher.sprite(query, shiny=False)
                 if isinstance(answer, list):
                     await ctx.send(file=(await Marnie.sprite_handler(*answer)))
                 else:
                     await ctx.send(answer)
             else:
-                await ctx.send("how can i find a sprite **without knowing** the pokemon to find a sprite for?\n\nremember, if you wanna use the ``!sprite`` command, you type ``!sprite`` then the name of the Pokemon whose sprite you want. for example,``!sprite pikachu``.")
+                await ctx.send("how can i find a sprite **without knowing** the pokemon to find a sprite for?\n\nremember, if you wanna use the ``!sprite`` command, you type ``!sprite`` then the name of the Pokemon whose sprite you want. for example, ``!sprite pikachu``.")
 
         @self.bot.command()
         async def shiny(ctx, *, query: str=None):
-            answer = get_objs.fetcher.sprite(query, shiny=True)
 
             if query is not None:
+                answer = get_objs.fetcher.sprite(query, shiny=True)
                 if isinstance(answer, list):
                     await ctx.send(file = (await Marnie.sprite_handler(*answer)))
                 else:
                     await ctx.send(answer)
             else:
-                await ctx.send("how can i find a shiny sprite **without knowing** the pokemon to find a sprite for?\n\nremember, if you wanna use the ``!shiny`` command, you type ``!shiny`` then the name of the Pokemon whose shiny sprite you want. for example,``!shiny goodra``.")
+                await ctx.send("how can i find a shiny sprite **without knowing** the pokemon to find a sprite for?\n\nremember, if you wanna use the ``!shiny`` command, you type ``!shiny`` then the name of the Pokemon whose shiny sprite you want. for example, ``!shiny goodra``.")
 
         @self.bot.command()
         async def randsprite(ctx):
