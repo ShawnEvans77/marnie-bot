@@ -206,8 +206,7 @@ class Fetcher:
         token = token.strip().lower().replace(" ", "-")
         tokens = token.split("-")
 
-        if tokens[0] in nationalities.nat_key: 
-            tokens[0] = nationalities.nat_map[tokens[0]]
+        if tokens[0] in nationalities.nat_key: tokens[0] = nationalities.nat_map[tokens[0]]
 
         if tokens[0] in prefixes.pre_tuple and len(tokens) >= 2:
             answer = tokens[1] + "-" + tokens[0]
@@ -215,10 +214,10 @@ class Fetcher:
             if len(tokens) >= 3:
                 rest_tup = (word for word in tokens[2:])
                 answer += ("-"+"-".join(rest_tup))
-
+                
             return answer
-         
-        return token
+        else:
+            return token
              
     @staticmethod
     def beautify(output: str) -> str:
