@@ -2,6 +2,11 @@
 
 alias_map = {
     "zard": "charizard",
+    "zardy": "charizard-mega-y",
+    "zardx": "charizard-mega-x",
+    "raichux": "raichu-mega-x",
+    "raichuy": "raichu-mega-y",
+    "lucarioz": "lucario-mega-z",
     "fridge": "rotom-frost",
     "lando": "landorus-incarnate",
     "landot": "landorus-therian",
