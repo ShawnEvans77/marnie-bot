@@ -45,30 +45,18 @@ class Fetcher:
 
         return f"i don't know what {query} is... check your spelling?"
     
-    def get_type(self, pokemon: str, response: requests.models.Response) -> List:
-        '''Fetches the types from a Pokemon HTTP Response. Returns a list containing the Pokemon's name and types.'''
-        
-        json = response.json()
-        types = json['types']
-        answer = []
-
-        answer.append(types[0]['type']['name'])
-        if len(types) == 2: answer.append(types[1]['type']['name'])
-
-        return [pokemon, answer]
-    
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
         name, generation, type, abilities, base stats, and base stat total.'''
         
         answer = ""
         json = response.json()
-        stats, types, abilities = json['stats'], self.get_type(pokemon, response), json['abilities']
+        stats, types, abilities = json['stats'], json['types'], json['abilities']
 
         type = ""
-        type += f"_{types[1][0].title()}_"
+        type += f"_{types[0]['type']['name'].title()}_"
 
-        if len(types[1]) == 2: type += f"/_{types[1][1].title()}_"
+        if len(types) == 2: type += f"/_{types[1]['type']['name'].title()}_"
 
         answer += f"**{pokemon.title()}** - **Dex #**: {objects.pokemon.get_species_id(pokemon)} | **{formatters.type}:** {type} | **Weight:** {int(json['weight']) / 10:.2f} kg"
 
@@ -140,18 +128,6 @@ class Fetcher:
 
         return Fetcher.beautify(answer)
     
-    def get_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
-        '''Returns a URL to the sprite.'''
-
-        url = response.json()['sprites']['front_default']     
-        return [url, pokemon] if url else f"sorry, {pokemon} has no sprite right now"
-    
-    def get_shiny_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
-        '''Returns a URL to the shiny sprite.'''
-
-        shiny_url = response.json()['sprites']['front_shiny']     
-        return [shiny_url, pokemon] if shiny_url else f"sorry, {pokemon} has no shiny sprite right now"
-    
     def sprite(self, query: str, shiny: bool) -> List | str:
         '''Parses the query then returns the appropiate sprite.'''
 
@@ -168,6 +144,30 @@ class Fetcher:
             return function_name(closest, requests.get(urls.poke_url+closest))
 
         return f"i don't think {query} is a pokemon... check your spelling?"
+    
+    def get_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
+        '''Returns a URL to the sprite.'''
+
+        url = response.json()['sprites']['front_default']     
+        return [url, pokemon] if url else f"sorry, {pokemon} has no sprite right now"
+    
+    def get_shiny_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
+        '''Returns a URL to the shiny sprite.'''
+
+        shiny_url = response.json()['sprites']['front_shiny']     
+        return [shiny_url, pokemon] if shiny_url else f"sorry, {pokemon} has no shiny sprite right now"
+    
+    def get_type(self, pokemon: str, response: requests.models.Response) -> List:
+        '''Fetches the types from a Pokemon HTTP Response. Returns a list containing the Pokemon's name and types.'''
+        
+        json = response.json()
+        types = json['types']
+        answer = []
+
+        answer.append(types[0]['type']['name'])
+        if len(types) == 2: answer.append(types[1]['type']['name'])
+
+        return [pokemon, answer]
     
     @staticmethod
     def pokemonic_get(query: str, function: collections.abc.Callable):
