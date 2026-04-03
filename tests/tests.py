@@ -1,8 +1,8 @@
-import src.constants.requesting.fetch as fetch
+import src.constants.getters.get_objs as get_objs
 
-tests = ["galarian articuno", "alolan vulpix", "1026", "445", "321", "112", "001", "fishious-rend", "blaze", "fire punch", "heavy duty boots", "poke-ball", "arceus", "tera shell", "dragon dance", "swords dance", "pikachu", "diance", "diance-mega", "leftovers", "choice band", "choice scarf",
+mon_tests = ["galarian articuno", "alolan vulpix", "1026", "445", "321", "112", "001", "fishious-rend", "blaze", "fire punch", "heavy duty boots", "poke-ball", "arceus", "tera shell", "dragon dance", "swords dance", "pikachu", "diance", "diance-mega", "leftovers", "choice band", "choice scarf",
          "bulbasaur", "vensaur", "mega rayquaza", "cinccino"]
 
-for test in tests:
-    print(fetch.fetcher.dt(test))
+for mon_tests in mon_tests:
+    print(get_objs.fetcher.dt(mon_tests))
     print()

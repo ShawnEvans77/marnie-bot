@@ -1,8 +1,7 @@
 from discord.ext import commands
-from ..constants.output import help as h
-from ..constants.requesting import fetch
+from ..constants.output import help as h, insults
+from ..constants.getters import get_objs
 from ..constants.structs import objects
-from ..utils import weak_finder
 from ..servers import web_server
 from dotenv import load_dotenv
 import discord, logging, os, random, datetime, io, aiohttp
@@ -18,7 +17,6 @@ class Marnie:
         self.intents.message_content = True
         self.intents.members = True
         self.bot = commands.Bot(command_prefix='!', intents=self.intents, help_command=None)
-        self.weak_finder = weak_finder.Weak()
 
         @self.bot.event
         async def on_ready():            
@@ -27,26 +25,33 @@ class Marnie:
             print(f"-------------------------------")
 
         @self.bot.command()
-        async def dt(ctx, *, query: str):
-            await ctx.send(fetch.fetcher.dt(query))
+        async def dt(ctx, *, query: str=None):
 
-        @self.bot.command()
-        async def weak(ctx, *, query: str):
-            tokens = query.split(",")
-            tokens = query.split("/") if len(tokens) != 2 else tokens
-
-            if len(tokens) == 1 or len(tokens) == 2:
-                await ctx.send(self.weak_finder.weak(*tokens))
+            if query != None:
+                await ctx.send(get_objs.fetcher.dt(query))
             else:
-                await ctx.send("!weak requires one or two types as arguments, or one pokemon as an argument, try again")
+                await ctx.send("how can i do ``!dt`` on **nothing**?\n\nyou have to send a query to ``!dt``, silly!\n\nremember, if you wanna use ``!dt``, you type !dt then a Pokemon, Pokemon move, Pokemon ability, or item. for example: ``!dt morpeko``.")
 
         @self.bot.command()
-        async def pick(ctx, *, query: str):
-            await ctx.send(f"i randomly selected: {random.choice(query.split(",")).strip()}")
+        async def weak(ctx, *, query: str=None):
+
+            if query != None:
+                split_char = ',' if ',' in query else '/'
+                await ctx.send(get_objs.weaker.weak(*query.split(split_char)))
+            else:
+                await ctx.send("how can i do ``!weak`` on **nothing**?\n\nyou have to send a type or a pokemon to ``!weak``, silly!\n\nremember, if you wanna use the ``!weak`` command, you type ``!weak`` then a type combo or a pokemon. for instance, you could type ``!weak morpeko``, or you could type ``!weak fire/flying``.")
+
+        @self.bot.command()
+        async def pick(ctx, *, query: str=None):
+
+            if query != None:
+                await ctx.send(f"i randomly selected: {random.choice(query.split(",")).strip()}")
+            else:
+                await ctx.send("how can i ``!pick`` from **no options**?\n\nremember, if you wanna use the ``!weak`` command, you type a set of comma separated values after ``!pick``. for example: ``!pick socks, shoes``")
 
         @self.bot.command()
         async def randmon(ctx):
-            await ctx.send(fetch.fetcher.dt(str(objects.pokemon.randmon())))
+            await ctx.send(get_objs.fetcher.dt(str(objects.pokemon.randmon())))
 
         @self.bot.command()
         async def help(ctx):
@@ -58,19 +63,19 @@ class Marnie:
 
             for member in ctx.guild.members:
                 if member.is_timed_out():
-                    answer += f"{member.global_name.lower()} is muted for"
+                    answer += f"**{member.global_name.lower()}** is muted for"
                     total = int((member.timed_out_until-datetime.datetime.now(datetime.UTC)).total_seconds())
 
                     hours, rem_min = total // 3600, total % 3600
                     minutes, rem_sec = rem_min // 60, rem_min % 60
 
-                    answer += f" {Marnie.plural(hours, "hour")}, {Marnie.plural(minutes, "minute")}, and {Marnie.plural(rem_sec, "second")}\n"
+                    answer += f" {Marnie.plural(hours, "hour")}, {Marnie.plural(minutes, "minute")}, and {Marnie.plural(rem_sec, "second")}\n. what a {random.choice(insults.insult_tup)}!"
 
             await ctx.send(answer if len(answer) != 0 else "nobody is muted right now")
 
         @self.bot.command()
         async def sprite(ctx, *, query):
-            answer = fetch.fetcher.sprite(query, shiny=False)
+            answer = get_objs.fetcher.sprite(query, shiny=False)
 
             if isinstance(answer, list):
                 await ctx.send(file=(await Marnie.sprite_handler(*answer)))
@@ -79,7 +84,7 @@ class Marnie:
 
         @self.bot.command()
         async def shiny(ctx, *, query):
-            answer = fetch.fetcher.sprite(query, shiny=True)
+            answer = get_objs.fetcher.sprite(query, shiny=True)
 
             if isinstance(answer, list):
                 await ctx.send(file = (await Marnie.sprite_handler(*answer)))
@@ -88,7 +93,7 @@ class Marnie:
 
         @self.bot.command()
         async def randsprite(ctx):
-            rand_sprite = fetch.fetcher.sprite(str(objects.pokemon.randmon()), shiny=False)
+            rand_sprite = get_objs.fetcher.sprite(str(objects.pokemon.randmon()), shiny=False)
             await ctx.send(file = (await Marnie.sprite_handler(*rand_sprite)))
 
     def start(self):

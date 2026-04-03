@@ -78,6 +78,41 @@ All of her commands are as follows:
 * !**shiny** {pokemon} - Returns a Pokemon's shiny sprite.
 * !**randsprite** - Returns a random Pokemon's sprite.
 
+# REPL
+
+You can invoke Marnie's REPL by typing the following:
+
+```
+py -m src.scripts.repl
+```
+
+This brings up a REPL where you can test commands without deploying the bot to production. I often use the REPL for debugging.
+
+```
+************************************************************************
+Welcome to the Marnie REPL!
+Use this to test !dt and !weak without deploying the bot to production.
+
+Enter your prompt after the >>>. Type exit() to quit.
+>>> !dt arceus
+--------------------------------------------------
+**Arceus** - **Dex #**: 493 | **Type:** _Normal_ | **Weight:** 320.00 kg
+**HP**: 120 | **ATK**: 120 | **DEF**: 120 | **SP. ATK**: 120 | **SP. DEF**: 120 | **SPEED**: 120 | **BST**: 720
+**Ab. 1**: Multitype
+--------------------------------------------------
+
+>>> !weak dragonair
+Dragonair - (Dragon):
+**Weaknesses:** Dragon, Fairy, Ice
+**Resistances:** Electric, Fire, Grass, Water
+**Immunities:** None
+
+>>> exit()
+
+Thanks for using the Marnie repl.
+******************************************
+```
+
 ## Motivation
 
 I'm in a Discord Server and we needed a bot that supported these features. I made this bot myself to help out that Discord Server.

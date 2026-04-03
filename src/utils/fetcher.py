@@ -1,5 +1,5 @@
 from ..constants.api import urls, language
-from ..constants.output import aliases, formatters, nationalities, prefix_objects, prefixes
+from ..constants.output import aliases, formatters, nationalities, prefixes
 from ..constants.structs import objects
 from typing import List
 import requests, collections, pandas
@@ -46,7 +46,7 @@ class Fetcher:
             if  (k == objects.pokemon and (closest := k.close_match(Fetcher.mon_sanitize(query)))) or (closest := k.close_match(query)):
                 return Fetcher.fuzzy(original, closest) + v[0](closest, requests.get(v[1]+closest))
 
-        return f"i don't know what {original} is... check your spelling?"
+        return f"i don't know what \"{original}\" is... check your spelling?"
     
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
@@ -209,13 +209,13 @@ class Fetcher:
     
     @staticmethod
     def mon_sanitize(token: str) -> str:
-        '''Rearranges Pokemon with a modifier where the modifier is typed first. For example, token "Mega Alakazam" becomes "alakazam-mega.'''
+        '''Rearranges Pokemon with a modifier where the modifier is typed first. For example, token "Mega Alakazam" becomes Alakazam-Mega. Parses queries like "Galarian Zapdos" into "Zapdos-Galar" so the API can recognize it.'''
 
         tokens = token.split("-")
         
         if tokens[0] in nationalities.nat_key: tokens[0] = nationalities.nat_map[tokens[0]]
 
-        if (token not in prefix_objects.prefix_tuple) and (tokens[0] in prefixes.pre_tuple) and (len(tokens) >= 2):
+        if (tokens[0] in prefixes.pre_tuple) and (len(tokens) >= 2):
             answer = tokens[1] + "-" + tokens[0]
 
             if len(tokens) >= 3:
@@ -236,7 +236,7 @@ class Fetcher:
     def fuzzy(erroneous: str, correct: str) -> str:
         '''Message for an approximate string match.'''
 
-        return f"ummmm... {erroneous}? perhaps you meant {correct}?\n"
+        return f"ummmm... \"{erroneous}\"? perhaps you meant {correct}?\n"
     
     @staticmethod
     def get_effect(json) -> str:

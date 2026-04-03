@@ -1,7 +1,7 @@
 from ..constants.types import type_chart as tc, type_map as tm
 from ..constants.output import weak_res_imm
 from ..constants.structs import objects
-from ..constants.requesting import fetch as f
+from ..constants.getters import get_objs
 from src.utils import fetcher as static_f
 from typing import List
 
@@ -14,26 +14,32 @@ class Weak:
     def weak(self, *args: str) -> str:
         '''Returns all of the weaknesses, resistances, and immunities of a given Pokemon.'''
 
-        args = list(arg.strip().lower() for arg in args)
+        num_args = len(args)
+
+        if num_args != 1 and num_args != 2:
+            return f"you can only send a maximum of **two** types or **one** pokemon to ``!weak``... you sent {num_args} arguments..."
+
+        orig_args = tuple(arg for arg in args)
+        args = list(static_f.Fetcher.sanitize(arg) for arg in args)
 
         if all(arg in tm.all_types for arg in args):
             return self.get_weak(Weak.title_type(*args), *args)
                 
-        if pokemonic_answer := (static_f.Fetcher.pokemonic_get(args[0], f.fetcher.get_type)):
+        if pokemonic_answer := (static_f.Fetcher.pokemonic_get(args[0], get_objs.fetcher.get_type)):
             return self.get_weak_pokemon(pokemonic_answer[0], *pokemonic_answer[1])
-        
-        if (sanitized_pokemon := (static_f.Fetcher.sanitize(args[0]))) in objects.pokemon:
+                
+        if (sanitized_pokemon := (static_f.Fetcher.mon_sanitize(args[0]))) in objects.pokemon:
             return self.get_weak_pokemon(sanitized_pokemon, *Weak.get_pokemon_type(sanitized_pokemon)[1])
 
         answer = ""
         
-        if closest_mon := objects.pokemon.close_match(args[0]):
-            answer += f"i dunno know what pokemon {args[0]} is so i'll guess that you meant {closest_mon}\n\n"
+        if closest_mon := objects.pokemon.close_match(sanitized_pokemon):
+            answer += f"i dunno know what pokemon \"{orig_args[0]}\" is so i'll guess that you meant {closest_mon}\n\n"
             return answer + self.get_weak_pokemon(closest_mon, *Weak.get_pokemon_type(closest_mon)[1])
 
-        for i in range(len(args)):
+        for i in range(num_args):
             if closest_type := objects.types.close_match(args[i]):
-                answer += f"i dunno know what type {args[i]} is so i'll guess that you meant {closest_type}\n"
+                answer += f"i dunno know what type \"{orig_args[i]}\" is so i'll guess that you meant {closest_type}\n"
                 args[i] = closest_type
 
         answer += "\n" if len(answer) > 0 else ""
@@ -41,7 +47,7 @@ class Weak:
         if all(arg in tm.all_types for arg in args):
             return answer + self.get_weak(Weak.title_type(*args), *args)
                 
-        return "\n".join(f"i don't think {arg} is a type or a pokemon... check your spelling?" for arg in args if arg not in tm.all_types)
+        return "\n".join(f"i don't think \"{orig_arg}\" is a type or a pokemon... check your spelling?" for orig_arg in orig_args if orig_arg not in tm.all_types)
     
     def match_dmg_type(self, type_1: str, dmg_type: float) -> List:
         '''Finds all the weaknesses and resistances of a single typed Pokemon.'''
@@ -109,7 +115,7 @@ class Weak:
     def get_pokemon_type(pokemon: str) -> List:
         '''Makes an HTTP request to get a Pokemon's type if needed.'''
 
-        return f.fetcher.get_type(pokemon, static_f.Fetcher.request_pokemon(pokemon))
+        return get_objs.fetcher.get_type(pokemon, static_f.Fetcher.request_pokemon(pokemon))
     
     @staticmethod
     def title_type(*types: str) -> str:
