@@ -6,6 +6,6 @@ command = "* !**dt** {query} - Returns information on a Pokemon, Pokemon ability
           "* !**pick** {args...} - Selects a random option given a list of options.\n" \
           "* !**randmon** - Returns the information of a random Pokemon.\n" \
           "* !**muted** - Lists all timed out server members and the amount of time they are timed out for.\n" \
-          "* !**sprite** {pokemon} - Returns a Pokemon's sprite.\n" \
-          "* !**shiny** {pokemon} - Returns a Pokemon's shiny sprite.\n" \
+          "* !**sprite** {pokemon} - Returns a Pokemon's sprite. Like !dt, you can query Pokemon by their name or dex number.\n" \
+          "* !**shiny** {pokemon} - Returns a Pokemon's shiny sprite. Like !dt, you can query Pokemon by their name or dex number.\n" \
           "* !**randsprite** - Returns a random Pokemon's sprite."

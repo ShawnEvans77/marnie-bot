@@ -35,7 +35,7 @@ class Marnie:
         @self.bot.command()
         async def weak(ctx, *, query: str=None):
 
-            if query != None:
+            if query is not None:
                 split_char = ',' if ',' in query else '/'
                 await ctx.send(get_objs.weaker.weak(*query.split(split_char)))
             else:
@@ -44,7 +44,7 @@ class Marnie:
         @self.bot.command()
         async def pick(ctx, *, query: str=None):
 
-            if query != None:
+            if query is not None:
                 await ctx.send(f"i randomly selected: {random.choice(query.split(",")).strip()}")
             else:
                 await ctx.send("how can i ``!pick`` from **no options**?\n\nremember, if you wanna use the ``!weak`` command, you type a set of comma separated values after ``!pick``. for example: ``!pick socks, shoes``")
@@ -74,22 +74,28 @@ class Marnie:
             await ctx.send(answer if len(answer) != 0 else "nobody is muted right now")
 
         @self.bot.command()
-        async def sprite(ctx, *, query):
+        async def sprite(ctx, *, query: str=None):
             answer = get_objs.fetcher.sprite(query, shiny=False)
 
-            if isinstance(answer, list):
-                await ctx.send(file=(await Marnie.sprite_handler(*answer)))
+            if query is not None:
+                if isinstance(answer, list):
+                    await ctx.send(file=(await Marnie.sprite_handler(*answer)))
+                else:
+                    await ctx.send(answer)
             else:
-                await ctx.send(answer)
+                await ctx.send("how can i find a sprite **without knowing** the pokemon to find a sprite for?\n\nremember, if you wanna use the ``!sprite`` command, you type ``!sprite`` then the name of the Pokemon whose sprite you want. for example,``!sprite pikachu``.")
 
         @self.bot.command()
-        async def shiny(ctx, *, query):
+        async def shiny(ctx, *, query: str=None):
             answer = get_objs.fetcher.sprite(query, shiny=True)
 
-            if isinstance(answer, list):
-                await ctx.send(file = (await Marnie.sprite_handler(*answer)))
+            if query is not None:
+                if isinstance(answer, list):
+                    await ctx.send(file = (await Marnie.sprite_handler(*answer)))
+                else:
+                    await ctx.send(answer)
             else:
-                await ctx.send(answer)
+                await ctx.send("how can i find a shiny sprite **without knowing** the pokemon to find a sprite for?\n\nremember, if you wanna use the ``!shiny`` command, you type ``!shiny`` then the name of the Pokemon whose shiny sprite you want. for example,``!shiny goodra``.")
 
         @self.bot.command()
         async def randsprite(ctx):

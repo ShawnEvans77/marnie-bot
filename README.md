@@ -74,8 +74,8 @@ All of her commands are as follows:
 * !**pick** {args...} - Selects a random option given a list of options.
 * !**randmon** - Returns the information of a random Pokemon.
 * !**muted** - Lists all timed out server members and the amount of time they are timed out for.
-* !**sprite** {pokemon} - Returns a Pokemon's sprite.
-* !**shiny** {pokemon} - Returns a Pokemon's shiny sprite.
+* !**sprite** {pokemon} - Returns a Pokemon's sprite. Like !dt, you can query Pokemon by their name or dex number.
+* !**shiny** {pokemon} - Returns a Pokemon's shiny sprite. Like !dt, you can query Pokemon by their name or dex number.
 * !**randsprite** - Returns a random Pokemon's sprite.
 
 # REPL
