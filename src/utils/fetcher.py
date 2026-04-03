@@ -1,5 +1,5 @@
 from ..constants.api import urls, language
-from ..constants.output import aliases, formatters, nationalities, prefixes
+from ..constants.output import aliases, formatters, mega_moves, nationalities, prefixes
 from ..constants.structs import objects
 from typing import List
 import requests, collections, pandas
@@ -208,13 +208,13 @@ class Fetcher:
 
         if tokens[0] in nationalities.nat_key: tokens[0] = nationalities.nat_map[tokens[0]]
 
-        if tokens[0] in prefixes.pre_tuple and len(tokens) >= 2:
+        if (token not in mega_moves.mega_tuple) and (tokens[0] in prefixes.pre_tuple) and (len(tokens) >= 2):
             answer = tokens[1] + "-" + tokens[0]
 
             if len(tokens) >= 3:
                 rest_tup = (word for word in tokens[2:])
                 answer += ("-"+"-".join(rest_tup))
-                
+
             return answer
         else:
             return token
