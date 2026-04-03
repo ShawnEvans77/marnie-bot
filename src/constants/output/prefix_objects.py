@@ -3,7 +3,7 @@
 from ...constants.structs import objects
 from src.constants.output import prefixes
 
-ob_tuple = (objects.pokemon, objects.items, objects.moves, objects.abilities)
+ob_tuple = (objects.items, objects.moves, objects.abilities)
 prefix_list = []
 
 for ob in ob_tuple:
