@@ -38,10 +38,12 @@ class Fetcher:
 
         for k, v in self.funcs:
             if query in k:
+                query = query if k != objects.pokemon else Fetcher.mon_sanitization(query)
                 return v[0](query, requests.get(v[1]+query))
         
         for k, v in self.funcs:
             if closest := k.close_match(query):
+                query = query if k != objects.pokemon else Fetcher.mon_sanitization(query)
                 return Fetcher.fuzzy(original, closest) + v[0](closest, requests.get(v[1]+closest))
 
         return f"i don't know what {original} is... check your spelling?"
@@ -201,13 +203,15 @@ class Fetcher:
     
     @staticmethod
     def sanitize(token: str) -> str:
-        '''Removes trailing spaces, replaces spaces with dashes, rearranges Pokemon with a modifier where the modifier
-        is typed first. For example, token "Mega Alakazam" becomes "alakazam-mega."'''
+        '''Removes trailing spaces, replaces spaces with dashes.'''
 
-        token = token.strip().lower().replace(" ", "-")
+        return token.strip().lower().replace(" ", "-")
+      
+    @staticmethod
+    def mon_sanitization(token: str) -> str:
+        '''Rearranges Pokemon with a modifier where the modifier is typed first. For example, token "Mega Alakazam" becomes "alakazam-mega."'''
+
         tokens = token.split("-")
-
-        if tokens[0] in nationalities.nat_key: tokens[0] = nationalities.nat_map[tokens[0]]
 
         if (token not in prefix_objects.prefix_tuple) and (tokens[0] in prefixes.pre_tuple) and (len(tokens) >= 2):
             answer = tokens[1] + "-" + tokens[0]
@@ -219,7 +223,7 @@ class Fetcher:
             return answer
         else:
             return token
-             
+
     @staticmethod
     def beautify(output: str) -> str:
         '''Helper method to print bot output easily.'''
