@@ -4,4 +4,4 @@ COPY . .
 
 RUN pip install -r requirements.txt
 
-CMD ["python3","-m","src.scripts.main"]
+CMD ["python3","-m","app.main"]

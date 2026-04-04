@@ -1,4 +1,4 @@
-from ..bot import marnie
+from src.bot import marnie
 
 def main():
     marnie.Marnie().start()

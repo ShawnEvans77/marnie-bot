@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ```
 
 ```
-py -m src.scripts.main
+py -m app.main
 ```
 
 If you would like to run the program's tests, do:
