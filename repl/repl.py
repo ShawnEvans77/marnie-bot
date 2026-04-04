@@ -1,7 +1,7 @@
-from ..constants.getters import get_objs
+from src.constants.getters import get_objs
 
 print("************************************************************************")
-print("Welcome to the Marnie REPL!")
+print("Welcome to the Marnie REPL! <3")
 print("Use this to test !dt and !weak without deploying the bot to production.")
 print()
 print("Enter your prompt after the >>>. Type exit() to quit.")
@@ -33,5 +33,5 @@ while prompt != "exit()":
     prompt = input(">>> ").lower().strip()  
 
 print()
-print("Thanks for using the Marnie repl.")
+print("Thanks for using the Marnie REPL! <3")
 print("************************************************************************")

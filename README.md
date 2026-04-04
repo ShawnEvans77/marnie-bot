@@ -83,14 +83,14 @@ All of her commands are as follows:
 You can invoke Marnie's REPL by typing the following:
 
 ```
-py -m src.scripts.repl
+py -m repl.repl
 ```
 
 This brings up a REPL where you can test commands without deploying the bot to production. I often use the REPL for debugging.
 
 ```
 ************************************************************************
-Welcome to the Marnie REPL!
+Welcome to the Marnie REPL! <3
 Use this to test !dt and !weak without deploying the bot to production.
 
 Enter your prompt after the >>>. Type exit() to quit.
@@ -111,7 +111,7 @@ Dragonair - (Dragon):
 
 >>> exit()
 
-Thanks for using the Marnie repl.
+Thanks for using the Marnie REPL! <3
 ************************************************************************
 ```
 
