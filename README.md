@@ -35,7 +35,7 @@ py -m src.scripts.main
 If you would like to run the program's tests, do:
 
 ```
-py -m tests.tests
+pytest tests
 ```
 
 .env is obviously .gitignore'd by default. Do not commit your API tokens to GitHub! If you want to use her locally, you would need to create .env and put your API Token in there. 
