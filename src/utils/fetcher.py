@@ -31,22 +31,23 @@ class Fetcher:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
         is a Pokemon, item, ability, or move.'''
 
-        original = query
-        query = Fetcher.sanitize(query)
+        original_query, sanitized_query = query, Fetcher.sanitize(query)
 
-        if pokemonic_answer := Fetcher.pokemonic_get(query, self.dt_pokemon): return pokemonic_answer
+        if pokemonic_answer := Fetcher.pokemonic_get(sanitized_query, self.dt_pokemon): return pokemonic_answer
+
+        mon_sanitized_query = Fetcher.mon_sanitize(sanitized_query)
 
         for k, v in self.funcs:
             if query in k:
                 return v[0](query, requests.get(v[1]+query))
-            elif (k == objects.pokemon and (mon := Fetcher.mon_sanitize(query)) in k):
-                return v[0](mon, requests.get(v[1]+mon))
+            elif k == objects.pokemon and mon_sanitized_query in k:
+                return v[0](mon_sanitized_query, requests.get(v[1]+mon_sanitized_query))
 
         for k, v in self.funcs:
-            if  (k == objects.pokemon and (closest := k.close_match(Fetcher.mon_sanitize(query)))) or (closest := k.close_match(query)):
-                return Fetcher.fuzzy(original, closest) + v[0](closest, requests.get(v[1]+closest))
+            if  (k == objects.pokemon and (closest := k.close_match(mon_sanitized_query))) or (closest := k.close_match(query)):
+                return Fetcher.fuzzy(original_query, closest) + v[0](closest, requests.get(v[1]+closest))
 
-        return f"i don't know what \"{original}\" is... check your spelling?"
+        return f"i don't know what \"{original_query}\" is... check your spelling?"
     
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
@@ -133,20 +134,20 @@ class Fetcher:
     
     def sprite(self, query: str, shiny: bool) -> List | str:
         '''Parses the query then returns the appropiate sprite.'''
-
-        query = Fetcher.mon_sanitize(Fetcher.sanitize(query))
+        
+        original_query, mon_sanitized_query = query, Fetcher.mon_sanitize(Fetcher.sanitize(query))
 
         function_name = self.get_shiny_sprite if shiny else self.get_sprite
 
-        if pokemonic_answer := Fetcher.pokemonic_get(query, function_name): return pokemonic_answer
+        if pokemonic_answer := Fetcher.pokemonic_get(mon_sanitized_query, function_name): return pokemonic_answer
 
         if query in objects.pokemon:
-            return function_name(query, requests.get(urls.poke_url+query))
+            return function_name(mon_sanitized_query, requests.get(urls.poke_url+mon_sanitized_query))
   
-        if closest := objects.pokemon.close_match(query):
+        if closest := objects.pokemon.close_match(mon_sanitized_query):
             return function_name(closest, requests.get(urls.poke_url+closest))
 
-        return f"i don't think {query} is a pokemon... check your spelling?"
+        return f"i don't think {original_query} is a pokemon... check your spelling?"
     
     def get_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
         '''Returns a URL to the sprite.'''
