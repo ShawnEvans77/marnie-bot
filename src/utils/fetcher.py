@@ -38,13 +38,13 @@ class Fetcher:
         mon_sanitized_query = Fetcher.mon_sanitize(sanitized_query)
 
         for k, v in self.funcs:
-            if query in k:
-                return v[0](query, requests.get(v[1]+query))
+            if sanitized_query in k:
+                return v[0](sanitized_query, requests.get(v[1]+sanitized_query))
             elif k == objects.pokemon and mon_sanitized_query in k:
                 return v[0](mon_sanitized_query, requests.get(v[1]+mon_sanitized_query))
 
         for k, v in self.funcs:
-            if  (k == objects.pokemon and (closest := k.close_match(mon_sanitized_query))) or (closest := k.close_match(query)):
+            if  (k == objects.pokemon and (closest := k.close_match(mon_sanitized_query))) or (closest := k.close_match(sanitized_query)):
                 return Fetcher.fuzzy(original_query, closest) + v[0](closest, requests.get(v[1]+closest))
 
         return f"i don't know what \"{original_query}\" is... check your spelling?"
