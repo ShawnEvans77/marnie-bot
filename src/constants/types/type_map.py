@@ -1,27 +1,12 @@
 '''Mapping of type names to indices in the type matrix.'''
+from ..structs.objects import types
 
-t_map = {
-    
-    'normal': 0,
-    'fire': 1,
-    'water': 2,
-    'grass': 3,
-    'electric': 4,
-    'ice': 5,
-    'fighting': 6,
-    'poison': 7,
-    'ground': 8,
-    'flying': 9,
-    'psychic': 10,
-    'bug': 11,
-    'rock': 12,
-    'ghost': 13,
-    'dragon': 14,
-    'dark': 15,
-    'steel': 16,
-    'fairy': 17
+t_map = {}
+i = 0
 
-}
+for type in types:
+    t_map[type] = i
+    i += 1
 
 rev_t_map = {v: k for k, v in t_map.items()}
 all_types = t_map.keys()
