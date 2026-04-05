@@ -11,7 +11,8 @@ no_dmg = 0.0
 
 type_matrix = [[normal_dmg] * num_types for _ in range(num_types)]
 
-# [attacker][defender]
+# ----------------------------------- [attacker][defender]
+
 # normal
 
 norm_arr = type_matrix[tm.t_map['normal']]
