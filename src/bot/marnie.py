@@ -1,5 +1,5 @@
 from discord.ext import commands
-from ..constants.output import help as h, insults
+from ..constants.output import help as h
 from ..constants.getters import get_objs
 from ..constants.structs import objects
 from ..servers import web_server
@@ -69,7 +69,7 @@ class Marnie:
                     hours, rem_min = total // 3600, total % 3600
                     minutes, rem_sec = rem_min // 60, rem_min % 60
 
-                    answer += f" {Marnie.plural(hours, "hour")}, {Marnie.plural(minutes, "minute")}, and {Marnie.plural(rem_sec, "second")}. what a {random.choice(insults.insult_tup)}.\n"
+                    answer += f" {Marnie.plural(hours, "hour")}, {Marnie.plural(minutes, "minute")}, and {Marnie.plural(rem_sec, "second")}\n"
 
             await ctx.send(answer if len(answer) != 0 else "nobody is muted right now")
 
