@@ -21,7 +21,7 @@ class Marnie:
         "ok", "okay", "got", "get", "one", "two", "really", "much", "thing",
         "know", "new", "even", "people",
     })
-    wc_message_limit = 5000
+    wc_message_limit = 10000
     wc_cache = {}
 
     def __init__(self):
@@ -43,14 +43,6 @@ class Marnie:
         async def on_message(message):
             Marnie.update_wc_cache_with_message(message)
             await self.bot.process_commands(message)
-
-        @self.bot.event
-        async def on_message_delete(message):
-            Marnie.invalidate_wc_cache(message.channel.id, message.id)
-
-        @self.bot.event
-        async def on_message_edit(before, after):
-            Marnie.invalidate_wc_cache(after.channel.id, after.id)
 
         @self.bot.command()
         async def dt(ctx, *, query: str = None):
@@ -384,18 +376,6 @@ class Marnie:
 
         Marnie.add_wc_entry(cache, Marnie.build_wc_entry(message))
 
-    @staticmethod
-    def invalidate_wc_cache(channel_id: int, message_id: int):
-        '''Drops a channel cache if a cached message was edited or deleted.'''
-
-        cache = Marnie.wc_cache.get(channel_id)
-        if cache is None:
-            return
-
-        for entry in cache["messages"]:
-            if entry["id"] == message_id:
-                del Marnie.wc_cache[channel_id]
-                break
 
     @staticmethod
     def wc_color_func(*args, **kwargs) -> str:
