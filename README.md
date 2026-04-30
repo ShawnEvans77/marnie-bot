@@ -54,7 +54,7 @@ Where command is the name of the command and query is your query. For example, i
 !weak fire
 ```
 
-Note that not all commands will use a query. Some commands, like muted, can be invoked by simply typing !muted.
+Note that not all commands will use a query. Some commands, like muted and randmon, can be invoked by simply typing `!muted` or `!randmon`.
 
 Marnie implements [fuzzy string matching](https://en.wikipedia.org/wiki/Approximate_string_matching), so she'll still try and parse your typos. 
 
@@ -71,9 +71,10 @@ All of her commands are as follows:
 * !**dt** {query} - Returns information on a Pokemon, Pokemon ability, Pokemon item, or Pokemon move. Pokemon can be queried by their name or dex number.
 * !**weak** {type} - Lists weaknesses, resistances, and immunities of a given type. You can query a dual type by sending two types seperated by slashes or commas to the command. For example, !dt fire/water or !dt fire,water. Like !dt, you can query Pokemon by their name or dex number.
 * !**weak** {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon.
-* !**wc** {query} - Sends a word cloud image from up to 10000 recent channel messages. Query can be a server username or nickname, and filters to that person's words inside the same 10000-message window.
 * !**pick** {args...} - Selects a random option given a list of options.
 * !**randmon** - Returns the information of a random Pokemon.
+* !**id** {user} - Returns a Discord ID. With no query, it returns your own. With a query, it looks up a username or nickname.
+* !**wc** {query} - Sends a word cloud image from up to 10000 recent channel messages. Query can be a server username or nickname, and filters to that person's words inside the same 10000-message window.
 * !**muted** - Lists all timed out server members and the amount of time they are timed out for.
 * !**sprite** {pokemon} - Returns a Pokemon's sprite. Like !dt, you can query Pokemon by their name or dex number.
 * !**shiny** {pokemon} - Returns a Pokemon's shiny sprite. Like !dt, you can query Pokemon by their name or dex number.

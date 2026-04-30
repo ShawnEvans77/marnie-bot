@@ -5,6 +5,7 @@ command = "* !**dt** {query} - Returns information on a Pokemon, Pokemon ability
           "* !**weak** {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon. Like !dt, you can query Pokemon by their name or dex number.\n" \
           "* !**pick** {args...} - Selects a random option given a list of options.\n" \
           "* !**randmon** - Returns the information of a random Pokemon.\n" \
+          "* !**id** {user} - Returns a Discord ID. With no query, it returns your own. With a query, it looks up a username or nickname.\n" \
           "* !**wc** {query} - Sends a word cloud image from up to 10000 recent channel messages. Query can be a server username or nickname, and filters to that person's words inside the same 10000-message window.\n" \
           "* !**muted** - Lists all timed out server members and the amount of time they are timed out for.\n" \
           "* !**sprite** {pokemon} - Returns a Pokemon's sprite. Like !dt, you can query Pokemon by their name or dex number.\n" \

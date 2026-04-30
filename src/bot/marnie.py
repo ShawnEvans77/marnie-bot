@@ -74,6 +74,20 @@ class Marnie:
             await ctx.send(get_objs.fetcher.dt(str(objects.pokemon.randmon())))
 
         @self.bot.command()
+        async def id(ctx, *, query: str = None):
+            if query is None:
+                await ctx.send(f"your discord id is ``{ctx.author.id}``.")
+                return
+
+            user = Marnie.find_member(ctx.guild, query) if ctx.guild is not None else Marnie.find_user(self.bot.users, query)
+            if user is None:
+                await ctx.send(f"i couldn't find anybody named \"{query}\"... check their spelling?")
+                return
+
+            display_name = getattr(user, "display_name", None) or user.global_name or user.name
+            await ctx.send(f"**{display_name}**'s discord id is ``{user.id}``.")
+
+        @self.bot.command()
         async def wc(ctx, *, query: str = None):
             async with ctx.typing():
                 target_member = None
@@ -207,6 +221,32 @@ class Marnie:
         partial_matches = [
             member for member in guild.members
             if any(cleaned in value for value in names_for(member))
+        ]
+        if partial_matches:
+            return partial_matches[0]
+
+        return None
+
+    @staticmethod
+    def find_user(users, query: str) -> discord.User | None:
+        '''Finds a Discord user by username or global name outside a guild context.'''
+
+        cleaned = query.strip().lstrip("@").casefold()
+
+        def names_for(user: discord.User) -> list[str]:
+            return [
+                value.casefold()
+                for value in [user.name, user.global_name]
+                if value
+            ]
+
+        exact_matches = [user for user in users if cleaned in names_for(user)]
+        if exact_matches:
+            return exact_matches[0]
+
+        partial_matches = [
+            user for user in users
+            if any(cleaned in value for value in names_for(user))
         ]
         if partial_matches:
             return partial_matches[0]
