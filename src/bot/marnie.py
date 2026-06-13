@@ -1,5 +1,5 @@
 from discord.ext import commands
-from ..constants.output import help as h
+from ..constants.output import help as h, wordcloud as wc
 from ..constants.getters import get_objs
 from ..constants.structs import objects
 from ..servers import web_server
@@ -7,22 +7,17 @@ from dotenv import load_dotenv
 from collections import Counter, deque
 from io import BytesIO
 from PIL import Image
-from wordcloud import STOPWORDS, WordCloud
-import discord, logging, os, random, datetime, io, aiohttp, re
+from wordcloud import WordCloud
+import discord, logging, os, random, datetime, io, aiohttp, re, asyncio
 
 
 class Marnie:
     '''The Marnie Class represents your Discord Bot.'''
 
-    wc_stopwords = STOPWORDS.union({
-        "im", "ive", "ill", "id", "dont", "didnt", "doesnt", "cant", "couldnt",
-        "thats", "theres", "youre", "youve", "youll", "theyre", "weve", "whats",
-        "would", "could", "also", "like", "just", "yeah", "yes", "nah", "lol",
-        "ok", "okay", "got", "get", "one", "two", "really", "much", "thing",
-        "know", "new", "even", "people",
-    })
+    wc_stopwords = wc.stopwords
     wc_message_limit = 10000
     wc_cache = {}
+    last_spoken_channels = {}
 
     def __init__(self):
         load_dotenv()
@@ -41,8 +36,23 @@ class Marnie:
 
         @self.bot.event
         async def on_message(message):
+            Marnie.remember_last_spoken_channel(message)
             Marnie.update_wc_cache_with_message(message)
             await self.bot.process_commands(message)
+
+        @self.bot.event
+        async def on_member_update(before, after):
+            was_timed_out = Marnie.is_timed_out(before)
+            is_timed_out = Marnie.is_timed_out(after)
+
+            if was_timed_out and not is_timed_out:
+                await Marnie.announce_mute_cease(after)
+                return
+
+            if was_timed_out or not is_timed_out:
+                return
+
+            await Marnie.announce_mute_start(after)
 
         @self.bot.command()
         async def dt(ctx, *, query: str = None):
@@ -94,12 +104,12 @@ class Marnie:
 
                 if query is not None:
                     if ctx.guild is None:
-                        await ctx.send(file=Marnie.wordcloud_status_image())
+                        await ctx.send("error: i can only look up a user's messages inside a server.")
                         return
 
                     target_member = Marnie.find_member(ctx.guild, query)
                     if target_member is None:
-                        await ctx.send(file=Marnie.wordcloud_status_image())
+                        await ctx.send(f"error: user \"{query}\" not recognized.")
                         return
 
                 try:
@@ -109,7 +119,11 @@ class Marnie:
                     return
 
                 if not frequencies:
-                    await ctx.send(file=Marnie.wordcloud_status_image())
+                    if target_member is not None:
+                        display_name = target_member.display_name or target_member.global_name or target_member.name
+                        await ctx.send(f"error: {display_name}'s messages do not exist in the last {Marnie.wc_message_limit} messages.")
+                    else:
+                        await ctx.send(file=Marnie.wordcloud_status_image())
                     return
 
                 await ctx.send(file=Marnie.wordcloud_image(frequencies))
@@ -124,14 +138,9 @@ class Marnie:
 
             for member in ctx.guild.members:
                 if member.is_timed_out():
-                    display_name = member.global_name or member.display_name or member.name
+                    display_name = Marnie.display_name(member)
                     answer += f"**{display_name.lower()}** is muted for"
-                    total = int((member.timed_out_until - datetime.datetime.now(datetime.UTC)).total_seconds())
-
-                    hours, rem_min = total // 3600, total % 3600
-                    minutes, rem_sec = rem_min // 60, rem_min % 60
-
-                    answer += f" {Marnie.plural(hours, 'hour')}, {Marnie.plural(minutes, 'minute')}, and {Marnie.plural(rem_sec, 'second')}\n"
+                    answer += f" {Marnie.mute_duration(member.timed_out_until)}\n"
 
             await ctx.send(answer if len(answer) != 0 else "nobody is muted right now")
 
@@ -175,6 +184,126 @@ class Marnie:
         '''Useful for writing unit names with appropiate plurality.'''
 
         return f"{value} {value_name}{'s' if value != 1 else ''}"
+
+    @staticmethod
+    def display_name(user) -> str:
+        '''Returns a user's best available display name.'''
+
+        return user.global_name or getattr(user, "display_name", None) or user.name
+
+    @staticmethod
+    def is_timed_out(member: discord.Member) -> bool:
+        '''Returns whether a member is currently timed out.'''
+
+        return member.timed_out_until is not None and member.timed_out_until > datetime.datetime.now(datetime.UTC)
+
+    @staticmethod
+    def mute_duration(timed_out_until: datetime.datetime) -> str:
+        '''Formats a timeout duration the same way the muted command does.'''
+
+        total = max(0, int((timed_out_until - datetime.datetime.now(datetime.UTC)).total_seconds()))
+        days, rem_hours = total // 86400, total % 86400
+        hours, rem_min = rem_hours // 3600, rem_hours % 3600
+        minutes, rem_sec = rem_min // 60, rem_min % 60
+        duration_parts = []
+
+        if days > 0:
+            duration_parts.append(Marnie.plural(days, 'day'))
+        if hours > 0:
+            duration_parts.append(Marnie.plural(hours, 'hour'))
+        if minutes > 0:
+            duration_parts.append(Marnie.plural(minutes, 'minute'))
+        if rem_sec > 0 or not duration_parts:
+            duration_parts.append(Marnie.plural(rem_sec, 'second'))
+
+        if len(duration_parts) == 1:
+            return duration_parts[0]
+
+        if len(duration_parts) == 2:
+            return " and ".join(duration_parts)
+
+        return f"{', '.join(duration_parts[:-1])}, and {duration_parts[-1]}"
+
+    @staticmethod
+    def remember_last_spoken_channel(message):
+        '''Stores the last server channel a member spoke in.'''
+
+        if message.guild is None or message.author.bot:
+            return
+
+        Marnie.last_spoken_channels[(message.guild.id, message.author.id)] = message.channel.id
+
+    @staticmethod
+    def can_send(channel, guild: discord.Guild) -> bool:
+        '''Returns whether Marnie can send messages in a channel.'''
+
+        if channel is None or guild.me is None:
+            return False
+
+        permissions = channel.permissions_for(guild.me)
+        return permissions.view_channel and (permissions.send_messages or getattr(permissions, "send_messages_in_threads", False))
+
+    @staticmethod
+    def mute_announcement_channel(guild: discord.Guild, member: discord.Member):
+        '''Finds the best channel for announcing a member timeout.'''
+
+        channel_id = Marnie.last_spoken_channels.get((guild.id, member.id))
+        get_channel_or_thread = getattr(guild, "get_channel_or_thread", None)
+        channel = get_channel_or_thread(channel_id) if get_channel_or_thread and channel_id else guild.get_channel(channel_id)
+
+        if Marnie.can_send(channel, guild):
+            return channel
+
+        general = discord.utils.get(guild.text_channels, name="general")
+        return general if Marnie.can_send(general, guild) else None
+
+    @staticmethod
+    async def announce_mute_start(member: discord.Member):
+        '''Announces that a member was timed out.'''
+
+        channel = Marnie.mute_announcement_channel(member.guild, member)
+        if channel is None:
+            return
+
+        moderator = await Marnie.mute_moderator(member)
+        muted_name = Marnie.display_name(member).lower()
+        moderator_name = Marnie.display_name(moderator).lower() if moderator else "unknown"
+        duration = Marnie.mute_duration(member.timed_out_until)
+
+        await channel.send(
+            f"**{muted_name}** was muted by **{moderator_name}** for {duration}",
+            allowed_mentions=discord.AllowedMentions.none(),
+        )
+
+    @staticmethod
+    async def announce_mute_cease(member: discord.Member):
+        '''Announces that a member is no longer timed out.'''
+
+        channel = Marnie.mute_announcement_channel(member.guild, member)
+        if channel is None:
+            return
+
+        muted_name = Marnie.display_name(member).lower()
+        await channel.send(
+            f"**{muted_name}** is no longer muted",
+            allowed_mentions=discord.AllowedMentions.none(),
+        )
+
+    @staticmethod
+    async def mute_moderator(member: discord.Member):
+        '''Finds who timed a member out from the audit log, if Marnie can read it.'''
+
+        await asyncio.sleep(1)
+
+        try:
+            async for entry in member.guild.audit_logs(limit=5, action=discord.AuditLogAction.member_update):
+                entry_age = datetime.datetime.now(datetime.UTC) - entry.created_at
+                if getattr(entry.target, "id", None) == member.id and entry_age.total_seconds() <= 30:
+                    return entry.user
+        except (discord.Forbidden, discord.HTTPException):
+            return None
+
+        return None
 
     @staticmethod
     def sanitize_wc_text(text: str) -> str:
