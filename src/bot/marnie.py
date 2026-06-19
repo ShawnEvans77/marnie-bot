@@ -8,8 +8,7 @@ from collections import Counter, deque
 from io import BytesIO
 from PIL import Image
 from wordcloud import WordCloud
-import discord, logging, os, random, datetime, io, aiohttp, re, asyncio
-
+import discord, logging, os, random, datetime, io, aiohttp, re
 
 class Marnie:
     '''The Marnie Class represents your Discord Bot.'''
@@ -265,13 +264,11 @@ class Marnie:
         if channel is None:
             return
 
-        moderator = await Marnie.mute_moderator(member)
         muted_name = Marnie.display_name(member).lower()
-        moderator_name = Marnie.display_name(moderator).lower() if moderator else "unknown"
         duration = Marnie.mute_duration(member.timed_out_until)
 
         await channel.send(
-            f"**{muted_name}** was muted by **{moderator_name}** for {duration}",
+            f"**{muted_name}** was muted for {duration}",
             allowed_mentions=discord.AllowedMentions.none(),
         )
 
@@ -288,22 +285,6 @@ class Marnie:
             f"**{muted_name}** is no longer muted",
             allowed_mentions=discord.AllowedMentions.none(),
         )
-
-    @staticmethod
-    async def mute_moderator(member: discord.Member):
-        '''Finds who timed a member out from the audit log, if Marnie can read it.'''
-
-        await asyncio.sleep(1)
-
-        try:
-            async for entry in member.guild.audit_logs(limit=5, action=discord.AuditLogAction.member_update):
-                entry_age = datetime.datetime.now(datetime.UTC) - entry.created_at
-                if getattr(entry.target, "id", None) == member.id and entry_age.total_seconds() <= 30:
-                    return entry.user
-        except (discord.Forbidden, discord.HTTPException):
-            return None
-
-        return None
 
     @staticmethod
     def sanitize_wc_text(text: str) -> str:
