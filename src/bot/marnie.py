@@ -8,7 +8,7 @@ from collections import Counter, deque
 from io import BytesIO
 from PIL import Image
 from wordcloud import WordCloud
-import discord, logging, os, random, datetime, io, aiohttp, re
+import discord, logging, os, random, datetime, io, aiohttp, re, asyncio
 
 class Marnie:
     '''The Marnie Class represents your Discord Bot.'''
@@ -17,6 +17,7 @@ class Marnie:
     wc_message_limit = 10000
     wc_cache = {}
     last_spoken_channels = {}
+    mute_cease_tasks = {}
 
     def __init__(self):
         load_dotenv()
@@ -32,6 +33,7 @@ class Marnie:
             print(f"-------------------------------")
             print(f"marnie bot fully operational! <3")
             print(f"-------------------------------")
+            Marnie.schedule_existing_mute_ceases(self.bot)
 
         @self.bot.event
         async def on_message(message):
@@ -45,13 +47,20 @@ class Marnie:
             is_timed_out = Marnie.is_timed_out(after)
 
             if was_timed_out and not is_timed_out:
+                Marnie.cancel_mute_cease(after)
                 await Marnie.announce_mute_cease(after)
                 return
 
-            if was_timed_out or not is_timed_out:
+            if was_timed_out and is_timed_out:
+                if before.timed_out_until != after.timed_out_until:
+                    Marnie.schedule_mute_cease(after)
+                return
+
+            if not is_timed_out:
                 return
 
             await Marnie.announce_mute_start(after)
+            Marnie.schedule_mute_cease(after)
 
         @self.bot.command()
         async def dt(ctx, *, query: str = None):
@@ -255,6 +264,67 @@ class Marnie:
 
         general = discord.utils.get(guild.text_channels, name="general")
         return general if Marnie.can_send(general, guild) else None
+
+    @staticmethod
+    def mute_task_key(member: discord.Member) -> tuple[int, int]:
+        '''Returns the cache key for a member's scheduled mute cease task.'''
+
+        return (member.guild.id, member.id)
+
+    @staticmethod
+    def cancel_mute_cease(member: discord.Member):
+        '''Cancels a scheduled mute cease announcement for a member.'''
+
+        task = Marnie.mute_cease_tasks.pop(Marnie.mute_task_key(member), None)
+        if task is not None:
+            task.cancel()
+
+    @staticmethod
+    def schedule_mute_cease(member: discord.Member):
+        '''Schedules a mute cease announcement for when the current timeout expires.'''
+
+        if member.timed_out_until is None:
+            return
+
+        Marnie.cancel_mute_cease(member)
+        task = asyncio.create_task(Marnie.announce_mute_cease_after_timeout(member.guild, member.id, member.timed_out_until))
+        Marnie.mute_cease_tasks[Marnie.mute_task_key(member)] = task
+
+    @staticmethod
+    def schedule_existing_mute_ceases(bot: commands.Bot):
+        '''Schedules mute cease announcements for timed-out members already in cache.'''
+
+        for guild in bot.guilds:
+            for member in guild.members:
+                if Marnie.is_timed_out(member):
+                    Marnie.schedule_mute_cease(member)
+
+    @staticmethod
+    async def fetch_fresh_member(guild: discord.Guild, member_id: int) -> discord.Member | None:
+        '''Fetches a fresh member object when possible.'''
+
+        try:
+            return await guild.fetch_member(member_id)
+        except (discord.Forbidden, discord.NotFound, discord.HTTPException):
+            return guild.get_member(member_id)
+
+    @staticmethod
+    async def announce_mute_cease_after_timeout(guild: discord.Guild, member_id: int, timed_out_until: datetime.datetime):
+        '''Sleeps until a timeout expires, then announces if the member is no longer muted.'''
+
+        delay = max(0, (timed_out_until - datetime.datetime.now(datetime.UTC)).total_seconds())
+
+        try:
+            await asyncio.sleep(delay)
+            member = await Marnie.fetch_fresh_member(guild, member_id)
+            if member is not None and not Marnie.is_timed_out(member):
+                await Marnie.announce_mute_cease(member)
+        except asyncio.CancelledError:
+            return
+        finally:
+            key = (guild.id, member_id)
+            if Marnie.mute_cease_tasks.get(key) is asyncio.current_task():
+                Marnie.mute_cease_tasks.pop(key, None)
 
     @staticmethod
     async def announce_mute_start(member: discord.Member):
