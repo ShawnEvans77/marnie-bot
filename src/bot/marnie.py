@@ -62,6 +62,11 @@ class Marnie:
             await Marnie.announce_mute_start(after)
             Marnie.schedule_mute_cease(after)
 
+        @self.bot.event
+        async def on_member_remove(member):
+            Marnie.cancel_mute_cease(member)
+            Marnie.last_spoken_channels.pop((member.guild.id, member.id), None)
+
         @self.bot.command()
         async def dt(ctx, *, query: str = None):
 
@@ -146,9 +151,13 @@ class Marnie:
 
             for member in ctx.guild.members:
                 if member.is_timed_out():
-                    display_name = Marnie.display_name(member)
+                    present_member = await Marnie.fetch_fresh_member(ctx.guild, member.id)
+                    if present_member is None or not Marnie.is_timed_out(present_member):
+                        continue
+
+                    display_name = Marnie.display_name(present_member)
                     answer += f"**{display_name.lower()}** is muted for"
-                    answer += f" {Marnie.mute_duration(member.timed_out_until)}\n"
+                    answer += f" {Marnie.mute_duration(present_member.timed_out_until)}\n"
 
             await ctx.send(answer if len(answer) != 0 else "nobody is muted right now")
 
@@ -305,7 +314,9 @@ class Marnie:
 
         try:
             return await guild.fetch_member(member_id)
-        except (discord.Forbidden, discord.NotFound, discord.HTTPException):
+        except discord.NotFound:
+            return None
+        except (discord.Forbidden, discord.HTTPException):
             return guild.get_member(member_id)
 
     @staticmethod
