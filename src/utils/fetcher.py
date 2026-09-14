@@ -141,7 +141,7 @@ class Fetcher:
 
         if pokemonic_answer := Fetcher.pokemonic_get(mon_sanitized_query, function_name): return pokemonic_answer
 
-        if query in objects.pokemon:
+        if mon_sanitized_query in objects.pokemon:
             return function_name(mon_sanitized_query, requests.get(urls.poke_url+mon_sanitized_query))
   
         if closest := objects.pokemon.close_match(mon_sanitized_query):
