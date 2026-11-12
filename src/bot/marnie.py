@@ -12,7 +12,7 @@ from io import BytesIO
 from PIL import Image
 from thefuzz import fuzz
 from wordcloud import WordCloud
-import discord, logging, os, random, datetime, io, aiohttp, re, asyncio, unicodedata
+import discord, logging, os, random, datetime, io, aiohttp, re, asyncio, requests, unicodedata
 
 class Marnie:
     '''The Marnie Class represents your Discord Bot.'''
@@ -96,6 +96,17 @@ class Marnie:
             Marnie.schedule_mute_cease(after)
 
         @self.bot.event
+        async def on_command_error(ctx, error):
+            original = getattr(error, "original", error)
+
+            if isinstance(original, requests.RequestException):
+                await ctx.send(Marnie.pokeapi_error_message(original))
+                return
+
+            # Everything else is logged the same way discord.py does when there is no handler.
+            logging.getLogger("discord.ext.commands.bot").error("Ignoring exception in command %s", ctx.command, exc_info=error)
+
+        @self.bot.event
         async def on_member_remove(member):
             Marnie.cancel_mute_cease(member)
             Marnie.last_spoken_channels.pop((member.guild.id, member.id), None)
@@ -104,7 +115,7 @@ class Marnie:
         async def dt(ctx, *, query: str = None):
 
             if query is not None:
-                await ctx.send(get_objs.fetcher.dt(query))
+                await ctx.send(await Marnie.lookup(get_objs.fetcher.dt, query))
             else:
                 await ctx.send("how can i do ``!dt`` on **nothing**?\n\nyou have to send a query to ``!dt``, silly!\n\nremember, if you wanna use ``!dt``, you type !dt then a Pokemon, Pokemon move, Pokemon ability, or item. for example: ``!dt morpeko``.")
 
@@ -113,7 +124,7 @@ class Marnie:
 
             if query is not None:
                 split_char = ',' if ',' in query else '/'
-                await ctx.send(get_objs.weaker.weak(*query.split(split_char)))
+                await ctx.send(await Marnie.lookup(get_objs.weaker.weak, *query.split(split_char)))
             else:
                 await ctx.send("how can i do ``!weak`` on **nothing**?\n\nyou have to send a type or a pokemon to ``!weak``, silly!\n\nremember, if you wanna use the ``!weak`` command, you type ``!weak`` then a type combo or a pokemon. for instance, you could type ``!weak morpeko``, or you could type ``!weak fire/flying``.")
 
@@ -127,7 +138,7 @@ class Marnie:
 
         @self.bot.command()
         async def randmon(ctx):
-            await ctx.send(get_objs.fetcher.dt(str(objects.pokemon.randmon())))
+            await ctx.send(await Marnie.lookup(get_objs.fetcher.dt, str(objects.pokemon.randmon())))
 
         @self.bot.command()
         async def id(ctx, *, query: str = None):
@@ -205,7 +216,7 @@ class Marnie:
         async def sprite(ctx, *, query: str = None):
 
             if query is not None:
-                answer = get_objs.fetcher.sprite(query, shiny=False)
+                answer = await Marnie.lookup(get_objs.fetcher.sprite, query, False)
                 if isinstance(answer, list):
                     await ctx.send(file=(await Marnie.sprite_handler(*answer)))
                 else:
@@ -217,7 +228,7 @@ class Marnie:
         async def shiny(ctx, *, query: str = None):
 
             if query is not None:
-                answer = get_objs.fetcher.sprite(query, shiny=True)
+                answer = await Marnie.lookup(get_objs.fetcher.sprite, query, True)
                 if isinstance(answer, list):
                     await ctx.send(file=(await Marnie.sprite_handler(*answer)))
                 else:
@@ -227,14 +238,14 @@ class Marnie:
 
         @self.bot.command()
         async def randsprite(ctx):
-            rand_sprite = get_objs.fetcher.sprite(str(objects.pokemon.randmon()), shiny=False)
+            rand_sprite = await Marnie.lookup(get_objs.fetcher.sprite, str(objects.pokemon.randmon()), False)
             await ctx.send(file=(await Marnie.sprite_handler(*rand_sprite)))
 
         @self.bot.command()
         async def art(ctx, *, query: str = None):
 
             if query is not None:
-                answer = get_objs.fetcher.art(query)
+                answer = await Marnie.lookup(get_objs.fetcher.art, query)
                 if isinstance(answer, list):
                     await ctx.send(file=(await Marnie.sprite_handler(*answer)))
                 else:
@@ -244,7 +255,7 @@ class Marnie:
 
         @self.bot.command()
         async def randart(ctx):
-            answer = get_objs.fetcher.art(str(random.randint(1, objects.pokemon.get_num_pokemon())))
+            answer = await Marnie.lookup(get_objs.fetcher.art, str(random.randint(1, objects.pokemon.get_num_pokemon())))
             if isinstance(answer, list):
                 await ctx.send(file=(await Marnie.sprite_handler(*answer)))
             else:
@@ -312,6 +323,26 @@ class Marnie:
 
         web_server.keep_alive()
         self.bot.run(self.token, log_handler=self.handler, log_level=logging.DEBUG)
+
+    @staticmethod
+    async def lookup(function, *args):
+        '''Runs a PokeAPI lookup in a worker thread, so the bot keeps answering everyone else
+        while it waits for PokeAPI.'''
+
+        return await asyncio.to_thread(function, *args)
+
+    @staticmethod
+    def pokeapi_error_message(error: requests.RequestException) -> str:
+        '''What Marnie says when a PokeAPI lookup fails.'''
+
+        if isinstance(error, requests.Timeout):
+            return "sorry, pokeapi is taking too long to answer right now... try again in a bit?"
+
+        response = getattr(error, "response", None)
+        if isinstance(error, requests.HTTPError) and response is not None and response.status_code == 404:
+            return "sorry, pokeapi doesn't have any data on that one..."
+
+        return "sorry, i couldn't reach pokeapi right now... try again in a bit?"
 
     @staticmethod
     def plural(value: int, value_name: str) -> str:

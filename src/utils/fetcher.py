@@ -2,7 +2,22 @@ from ..constants.api import urls, language
 from ..constants.output import aliases, formatters, nationalities, prefixes
 from ..constants.structs import objects
 from typing import List
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import requests, collections, pandas
+
+def build_session() -> requests.Session:
+    '''Builds the one session every PokeAPI request goes through. A session keeps its connection
+    open between requests, so only the first lookup pays to set the connection up.
+    A request that fails because the connection dropped, or because PokeAPI had a brief
+    server error, is tried one more time.'''
+
+    session = requests.Session()
+    retries = Retry(total=1, backoff_factor=0.2, status_forcelist=(502, 503, 504), allowed_methods=("GET",))
+    adapter = HTTPAdapter(max_retries=retries)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
 
 class Fetcher:
     '''The Fetcher class is a wrapper for PokeAPI. Queries should be sent to the dt() function, 
@@ -12,7 +27,22 @@ class Fetcher:
     
     Attributes:
         funcs - A set-like object mapping collections to their associated function names and URLs.
+        session - The shared connection to PokeAPI.
+        timeout - How many seconds one request may take before it is given up on.
     '''
+
+    session = build_session()
+    timeout = 10
+
+    @staticmethod
+    def get(url: str) -> requests.models.Response:
+        '''Makes a PokeAPI request on the shared session. Nothing is remembered between calls,
+        so the data is always fresh. Raises a requests.RequestException if PokeAPI can't be
+        reached, takes too long, or answers with an error.'''
+
+        response = Fetcher.session.get(url, timeout=Fetcher.timeout)
+        response.raise_for_status()
+        return response
 
     def __init__(self):
         self.funcs = self.get_func_map().items()
@@ -39,13 +69,13 @@ class Fetcher:
 
         for k, v in self.funcs:
             if sanitized_query in k:
-                return v[0](sanitized_query, requests.get(v[1]+sanitized_query))
+                return v[0](sanitized_query, Fetcher.get(v[1]+sanitized_query))
             elif k == objects.pokemon and mon_sanitized_query in k:
-                return v[0](mon_sanitized_query, requests.get(v[1]+mon_sanitized_query))
+                return v[0](mon_sanitized_query, Fetcher.get(v[1]+mon_sanitized_query))
 
         for k, v in self.funcs:
             if  (k == objects.pokemon and (closest := k.close_match(mon_sanitized_query))) or (closest := k.close_match(sanitized_query)):
-                return Fetcher.fuzzy(original_query, closest) + v[0](closest, requests.get(v[1]+closest))
+                return Fetcher.fuzzy(original_query, closest) + v[0](closest, Fetcher.get(v[1]+closest))
 
         return f"i don't know what \"{original_query}\" is... check your spelling?"
     
@@ -150,10 +180,10 @@ class Fetcher:
         if pokemonic_answer := Fetcher.pokemonic_get(mon_sanitized_query, function_name): return pokemonic_answer
 
         if mon_sanitized_query in objects.pokemon:
-            return function_name(mon_sanitized_query, requests.get(urls.poke_url+mon_sanitized_query))
+            return function_name(mon_sanitized_query, Fetcher.get(urls.poke_url+mon_sanitized_query))
   
         if closest := objects.pokemon.close_match(mon_sanitized_query):
-            return function_name(closest, requests.get(urls.poke_url+closest))
+            return function_name(closest, Fetcher.get(urls.poke_url+closest))
 
         return f"i don't think {original_query} is a pokemon... check your spelling?"
     
@@ -194,14 +224,14 @@ class Fetcher:
 
         if query in aliases.alias_map:
             associated = aliases.alias_map[query]
-            return function(associated, requests.get(urls.poke_url+associated))
+            return function(associated, Fetcher.get(urls.poke_url+associated))
         
         if query.isnumeric():
             mon = objects.pokemon.by_number(query)
-            return function(mon, requests.get(urls.poke_url+mon)) if mon else None
+            return function(mon, Fetcher.get(urls.poke_url+mon)) if mon else None
                     
         if flavor := objects.pokemon.flavor(query): 
-            return function(flavor, requests.get(urls.poke_url+flavor))
+            return function(flavor, Fetcher.get(urls.poke_url+flavor))
         
         return None
     
@@ -209,7 +239,7 @@ class Fetcher:
     def request_pokemon(pokemon: str) -> requests.models.Response:
         '''Used for making Pokemon request calls outside of the class.'''
 
-        return requests.get(urls.poke_url+pokemon)
+        return Fetcher.get(urls.poke_url+pokemon)
 
     @staticmethod
     def reverse_sanitize(query: str) -> str:
