@@ -13,9 +13,16 @@ import discord, logging, os, random, datetime, io, aiohttp, re, asyncio
 class Marnie:
     '''The Marnie Class represents your Discord Bot.'''
 
+    command_prefix = '!'
     wc_stopwords = wc.stopwords
     wc_message_limit = 10000
+    wc_token_pattern = re.compile(r"[^\W\d_][^\W_]*(?:['\-][^\W_]+)*")
     wc_cache = {}
+    wc_locks = {}
+    wc_warm_queue = None
+    wc_warm_task = None
+    wc_warm_pending = set()
+    wc_warm_skipped = set()
     last_spoken_channels = {}
     mute_cease_tasks = {}
 
@@ -26,7 +33,7 @@ class Marnie:
         self.intents = discord.Intents.default()
         self.intents.message_content = True
         self.intents.members = True
-        self.bot = commands.Bot(command_prefix='!', intents=self.intents, help_command=None)
+        self.bot = commands.Bot(command_prefix=Marnie.command_prefix, intents=self.intents, help_command=None)
 
         @self.bot.event
         async def on_ready():
@@ -39,7 +46,20 @@ class Marnie:
         async def on_message(message):
             Marnie.remember_last_spoken_channel(message)
             Marnie.update_wc_cache_with_message(message)
+            Marnie.schedule_wc_warmup(message.channel)
             await self.bot.process_commands(message)
+
+        @self.bot.event
+        async def on_raw_message_edit(payload):
+            Marnie.edit_wc_cache_message(payload.channel_id, payload.message)
+
+        @self.bot.event
+        async def on_raw_message_delete(payload):
+            Marnie.delete_wc_cache_messages(payload.channel_id, [payload.message_id])
+
+        @self.bot.event
+        async def on_raw_bulk_message_delete(payload):
+            Marnie.delete_wc_cache_messages(payload.channel_id, payload.message_ids)
 
         @self.bot.event
         async def on_member_update(before, after):
@@ -139,7 +159,7 @@ class Marnie:
                         await ctx.send(file=Marnie.wordcloud_status_image())
                     return
 
-                await ctx.send(file=Marnie.wordcloud_image(frequencies))
+                await ctx.send(file=await asyncio.to_thread(Marnie.wordcloud_image, frequencies))
 
         @self.bot.command()
         async def help(ctx):
@@ -375,22 +395,27 @@ class Marnie:
         return without_urls.replace("\n", " ").strip()
 
     @staticmethod
-    def tokenize_wc_text(text: str) -> list[str]:
-        '''Returns lowercase word tokens for the word cloud.'''
+    def tokenize_wc_text_unfiltered(text: str) -> list[str]:
+        '''Returns lowercase word tokens without stopword filtering for fallback clouds.
+
+        Words may contain any letters (so "Pokémon" stays whole) and digits after the
+        first letter. Inner apostrophes and hyphens are kept; stray ones at the edges are not.'''
 
         normalized_text = text.lower().replace("’", "'")
-        tokens = re.findall(r"[a-zA-Z][a-zA-Z'\-]*", normalized_text)
-        normalized_tokens = [token.replace("'", "") for token in tokens]
-        return [token for token in normalized_tokens if token not in Marnie.wc_stopwords and len(token) > 1]
+        normalized_tokens = [token.replace("'", "") for token in Marnie.wc_token_pattern.findall(normalized_text)]
+        return [token for token in normalized_tokens if len(token) > 1]
 
     @staticmethod
-    def tokenize_wc_text_unfiltered(text: str) -> list[str]:
-        '''Returns lowercase word tokens without stopword filtering for fallback clouds.'''
+    def tokenize_wc_text(text: str) -> list[str]:
+        '''Returns lowercase word tokens for the word cloud, without stopwords.'''
 
-        normalized_text = text.lower().replace("’", "'")
-        tokens = re.findall(r"[a-zA-Z][a-zA-Z'\-]*", normalized_text)
-        normalized_tokens = [token.replace("'", "") for token in tokens]
-        return [token for token in normalized_tokens if len(token) > 1]
+        return Marnie.filter_wc_stopwords(Marnie.tokenize_wc_text_unfiltered(text))
+
+    @staticmethod
+    def filter_wc_stopwords(tokens: list[str]) -> list[str]:
+        '''Drops stopwords from an already-tokenized message.'''
+
+        return [token for token in tokens if token not in Marnie.wc_stopwords]
 
     @staticmethod
     def find_member(guild: discord.Guild, query: str) -> discord.Member | None:
@@ -446,40 +471,18 @@ class Marnie:
 
     @staticmethod
     async def collect_word_counts(channel, target_member: discord.Member | None) -> Counter:
-        '''Scans recent accessible history and returns word frequencies.'''
-
-        frequencies = Counter()
-        fallback_frequencies = Counter()
+        '''Brings the channel's wc cache up to date and returns word frequencies.'''
 
         channel_cache = await Marnie.refresh_wc_cache(channel)
 
         if target_member is None:
-            return channel_cache["message_counts"].copy() if channel_cache["message_counts"] else channel_cache["fallback_message_counts"].copy()
+            return (channel_cache["message_counts"] or channel_cache["fallback_message_counts"]).copy()
 
-        author_counts = channel_cache["author_counts"].get(target_member.id, Counter()).copy()
-        fallback_author_counts = channel_cache["fallback_author_counts"].get(target_member.id, Counter()).copy()
-        return author_counts if author_counts else fallback_author_counts
+        author_counts = channel_cache["author_counts"].get(target_member.id)
+        if author_counts:
+            return author_counts.copy()
 
-    @staticmethod
-    def add_message_to_word_counts(message, frequencies: Counter, fallback_frequencies: Counter) -> bool:
-        '''Adds one message into the running wc counters.'''
-
-        if message.author.bot or not message.content:
-            return False
-
-        cleaned_text = Marnie.sanitize_wc_text(message.content)
-        fallback_tokens = Marnie.tokenize_wc_text_unfiltered(cleaned_text)
-
-        if not fallback_tokens:
-            return False
-
-        fallback_frequencies.update(fallback_tokens)
-
-        tokens = Marnie.tokenize_wc_text(cleaned_text)
-        if tokens:
-            frequencies.update(tokens)
-
-        return True
+        return channel_cache["fallback_author_counts"].get(target_member.id, Counter()).copy()
 
     @staticmethod
     def empty_wc_cache() -> dict:
@@ -487,6 +490,8 @@ class Marnie:
 
         return {
             "messages": deque(),
+            "by_id": {},
+            "newest_id": None,
             "message_counts": Counter(),
             "fallback_message_counts": Counter(),
             "author_counts": {},
@@ -495,28 +500,41 @@ class Marnie:
 
     @staticmethod
     def build_wc_entry(message) -> dict:
-        '''Builds the cached representation for one message in the wc window.'''
+        '''Builds the cached representation for one message in the wc window.
 
-        counts = Counter()
-        fallback_counts = Counter()
+        Bot messages, empty messages, and commands count toward the window but add no words.
+        A message made only of stopwords is stored as a fallback entry.'''
+
         author_id = None
+        counts = None
+        fallback = False
 
-        if not message.author.bot and message.content:
-            cleaned_text = Marnie.sanitize_wc_text(message.content)
-            fallback_tokens = Marnie.tokenize_wc_text_unfiltered(cleaned_text)
+        if not message.author.bot and message.content and not message.content.startswith(Marnie.command_prefix):
+            all_tokens = Marnie.tokenize_wc_text_unfiltered(Marnie.sanitize_wc_text(message.content))
 
-            if fallback_tokens:
-                fallback_counts = Counter(fallback_tokens)
+            if all_tokens:
                 author_id = message.author.id
-                tokens = Marnie.tokenize_wc_text(cleaned_text)
-                counts = Counter(tokens)
+                tokens = Marnie.filter_wc_stopwords(all_tokens)
+                fallback = not tokens
+                counts = Counter(tokens or all_tokens)
 
         return {
             "id": message.id,
             "author_id": author_id,
             "counts": counts,
-            "fallback_counts": fallback_counts,
+            "fallback": fallback,
         }
+
+    @staticmethod
+    def adjust_wc_counter(counter: Counter, counts: Counter, direction: int):
+        '''Adds (direction=1) or removes (direction=-1) counts, dropping words that reach zero.'''
+
+        for word, amount in counts.items():
+            new_amount = counter.get(word, 0) + amount * direction
+            if new_amount > 0:
+                counter[word] = new_amount
+            else:
+                counter.pop(word, None)
 
     @staticmethod
     def apply_wc_entry(cache: dict, entry: dict, direction: int):
@@ -525,74 +543,90 @@ class Marnie:
         if entry["author_id"] is None:
             return
 
-        if entry["counts"]:
-            counts = entry["counts"]
-            cache["message_counts"].update(counts) if direction == 1 else cache["message_counts"].subtract(counts)
-            author_counter = cache["author_counts"].setdefault(entry["author_id"], Counter())
-            author_counter.update(counts) if direction == 1 else author_counter.subtract(counts)
-            if direction == -1:
-                cache["message_counts"] += Counter()
-                author_counter += Counter()
-                if not author_counter:
-                    del cache["author_counts"][entry["author_id"]]
-        elif entry["fallback_counts"]:
-            counts = entry["fallback_counts"]
-            cache["fallback_message_counts"].update(counts) if direction == 1 else cache["fallback_message_counts"].subtract(counts)
-            author_counter = cache["fallback_author_counts"].setdefault(entry["author_id"], Counter())
-            author_counter.update(counts) if direction == 1 else author_counter.subtract(counts)
-            if direction == -1:
-                cache["fallback_message_counts"] += Counter()
-                author_counter += Counter()
-                if not author_counter:
-                    del cache["fallback_author_counts"][entry["author_id"]]
+        if entry["fallback"]:
+            total_counts, author_counters = cache["fallback_message_counts"], cache["fallback_author_counts"]
+        else:
+            total_counts, author_counters = cache["message_counts"], cache["author_counts"]
+
+        Marnie.adjust_wc_counter(total_counts, entry["counts"], direction)
+
+        author_counter = author_counters.setdefault(entry["author_id"], Counter())
+        Marnie.adjust_wc_counter(author_counter, entry["counts"], direction)
+        if not author_counter:
+            del author_counters[entry["author_id"]]
 
     @staticmethod
-    def add_wc_entry(cache: dict, entry: dict):
-        '''Adds one message entry and trims the rolling window back to the limit.'''
+    def add_wc_message(cache: dict, message) -> bool:
+        '''Adds one message to the rolling window, unless it is already there, then trims the window back to the limit.'''
 
+        if message.id in cache["by_id"]:
+            return False
+
+        entry = Marnie.build_wc_entry(message)
         cache["messages"].append(entry)
+        cache["by_id"][entry["id"]] = entry
+        if cache["newest_id"] is None or entry["id"] > cache["newest_id"]:
+            cache["newest_id"] = entry["id"]
         Marnie.apply_wc_entry(cache, entry, direction=1)
 
         while len(cache["messages"]) > Marnie.wc_message_limit:
             removed_entry = cache["messages"].popleft()
+            cache["by_id"].pop(removed_entry["id"], None)
             Marnie.apply_wc_entry(cache, removed_entry, direction=-1)
+
+        return True
+
+    @staticmethod
+    def wc_lock(channel_id: int) -> asyncio.Lock:
+        '''Returns the lock that keeps one channel's cache from being fetched twice at once.'''
+
+        lock = Marnie.wc_locks.get(channel_id)
+        if lock is None:
+            lock = Marnie.wc_locks[channel_id] = asyncio.Lock()
+        return lock
 
     @staticmethod
     async def rebuild_wc_cache(channel) -> dict:
-        '''Rebuilds the cache so it exactly matches the latest wc window.'''
+        '''Rebuilds the cache from the latest wc window. Callers must hold the channel's wc lock.'''
 
         cache = Marnie.empty_wc_cache()
         recent_messages = [message async for message in channel.history(limit=Marnie.wc_message_limit)]
 
+        # history() without `after` is newest-first; add oldest-first so the window trims correctly.
         for message in reversed(recent_messages):
-            Marnie.add_wc_entry(cache, Marnie.build_wc_entry(message))
+            Marnie.add_wc_message(cache, message)
 
         Marnie.wc_cache[channel.id] = cache
         return cache
 
     @staticmethod
     async def refresh_wc_cache(channel) -> dict:
-        '''Refreshes the rolling channel cache.'''
+        '''Brings the rolling channel cache up to date, building it first if needed.'''
 
-        cache = Marnie.wc_cache.get(channel.id)
-        if cache is None:
-            return await Marnie.rebuild_wc_cache(channel)
+        async with Marnie.wc_lock(channel.id):
+            cache = Marnie.wc_cache.get(channel.id)
 
-        newest_cached_id = cache["messages"][-1]["id"] if cache["messages"] else None
-        new_messages = [
-            message async for message in channel.history(
-                limit=Marnie.wc_message_limit,
-                after=discord.Object(id=newest_cached_id) if newest_cached_id else None,
-            )
-        ]
+            if cache is None or cache["newest_id"] is None:
+                cache = await Marnie.rebuild_wc_cache(channel)
+                if cache["newest_id"] is None:
+                    return cache
 
-        if len(new_messages) >= Marnie.wc_message_limit:
-            return await Marnie.rebuild_wc_cache(channel)
+            # Catches messages missed while the bot was disconnected or the rebuild was running.
+            new_messages = [
+                message async for message in channel.history(
+                    limit=Marnie.wc_message_limit,
+                    after=discord.Object(id=cache["newest_id"]),
+                    oldest_first=True,
+                )
+            ]
 
-        for message in reversed(new_messages):
-            Marnie.add_wc_entry(cache, Marnie.build_wc_entry(message))
+            if len(new_messages) >= Marnie.wc_message_limit:
+                return await Marnie.rebuild_wc_cache(channel)
 
-        return cache
+            for message in new_messages:
+                Marnie.add_wc_message(cache, message)
+
+            return cache
 
     @staticmethod
     def update_wc_cache_with_message(message):
@@ -602,15 +636,84 @@ class Marnie:
         if cache is None:
             return
 
-        if any(entry["id"] == message.id for entry in cache["messages"]):
+        Marnie.add_wc_message(cache, message)
+
+    @staticmethod
+    def edit_wc_cache_message(channel_id: int, message):
+        '''Replaces an edited message's words in the channel's wc cache.'''
+
+        cache = Marnie.wc_cache.get(channel_id)
+        if cache is None:
             return
 
-        Marnie.add_wc_entry(cache, Marnie.build_wc_entry(message))
+        entry = cache["by_id"].get(message.id)
+        if entry is None:
+            return
+
+        Marnie.apply_wc_entry(cache, entry, direction=-1)
+        entry.update(Marnie.build_wc_entry(message))
+        Marnie.apply_wc_entry(cache, entry, direction=1)
+
+    @staticmethod
+    def delete_wc_cache_messages(channel_id: int, message_ids):
+        '''Removes deleted messages' words, keeping their slots so the window does not shift.'''
+
+        cache = Marnie.wc_cache.get(channel_id)
+        if cache is None:
+            return
+
+        for message_id in message_ids:
+            entry = cache["by_id"].get(message_id)
+            if entry is None:
+                continue
+
+            Marnie.apply_wc_entry(cache, entry, direction=-1)
+            entry.update(author_id=None, counts=None, fallback=False)
+
+    @staticmethod
+    def schedule_wc_warmup(channel):
+        '''Queues a background wc cache build the first time a server channel gets a message.'''
+
+        guild = getattr(channel, "guild", None)
+        if guild is None or guild.me is None:
+            return
+
+        channel_id = channel.id
+        if channel_id in Marnie.wc_cache or channel_id in Marnie.wc_warm_pending or channel_id in Marnie.wc_warm_skipped:
+            return
+
+        if not channel.permissions_for(guild.me).read_message_history:
+            return
+
+        if Marnie.wc_warm_queue is None:
+            Marnie.wc_warm_queue = asyncio.Queue()
+
+        Marnie.wc_warm_pending.add(channel_id)
+        Marnie.wc_warm_queue.put_nowait(channel)
+
+        if Marnie.wc_warm_task is None or Marnie.wc_warm_task.done():
+            Marnie.wc_warm_task = asyncio.create_task(Marnie.run_wc_warmups())
+
+    @staticmethod
+    async def run_wc_warmups():
+        '''Builds queued channel caches one at a time so a restart does not flood Discord with requests.'''
+
+        while True:
+            channel = await Marnie.wc_warm_queue.get()
+            try:
+                if channel.id not in Marnie.wc_cache:
+                    await Marnie.refresh_wc_cache(channel)
+            except discord.Forbidden:
+                Marnie.wc_warm_skipped.add(channel.id)
+            except Exception:
+                logging.getLogger(__name__).exception("wc warm-up failed for channel %s", channel.id)
+            finally:
+                Marnie.wc_warm_pending.discard(channel.id)
 
 
     @staticmethod
-    def wc_color_func(*args, **kwargs) -> str:
-        '''Color palette for the word cloud.'''
+    def wc_color_func(*args, random_state=None, **kwargs) -> str:
+        '''Color palette for the word cloud. Uses the seeded random_state from recolor() when given.'''
 
         palette = [
             "#ff76aa",
@@ -620,7 +723,8 @@ class Marnie:
             "#d7d9e4",
             "#c3a6ff",
         ]
-        return random.choice(palette)
+        rng = random_state if isinstance(random_state, random.Random) else random
+        return rng.choice(palette)
 
     @staticmethod
     def wordcloud_status_image() -> discord.File:
@@ -634,17 +738,22 @@ class Marnie:
 
     @staticmethod
     def wordcloud_image(frequencies: Counter) -> discord.File:
-        '''Builds the final word cloud image.'''
+        '''Builds the final word cloud image. CPU-heavy, so the command runs it in a worker thread.
+
+        Layout is computed at half size and drawn at scale=2, which is much faster than laying
+        out at full size. The output is still 1800x1100; margin and min font size are halved
+        because the scale multiplies them back up.'''
 
         cloud = WordCloud(
-            width=1800,
-            height=1100,
+            width=900,
+            height=550,
+            scale=2,
             background_color="#1f1f28",
             collocations=False,
             max_words=180,
-            margin=24,
+            margin=12,
             prefer_horizontal=0.9,
-            min_font_size=14,
+            min_font_size=7,
         ).generate_from_frequencies(frequencies)
 
         cloud = cloud.recolor(color_func=Marnie.wc_color_func, random_state=17)
