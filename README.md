@@ -79,6 +79,8 @@ All of her commands are as follows:
 * !**sprite** {pokemon} - Returns a Pokemon's sprite. Like !dt, you can query Pokemon by their name or dex number.
 * !**shiny** {pokemon} - Returns a Pokemon's shiny sprite. Like !dt, you can query Pokemon by their name or dex number.
 * !**randsprite** - Returns a random Pokemon's sprite.
+* !**art** {pokemon} - Returns a Pokemon's official artwork. Like !dt, you can query Pokemon by their name or dex number.
+* !**randart** - Returns a random Pokemon's official artwork.
 * !**wtp** - Starts a round of Who's That Pokemon! Shows a silhouette, and the first person to type the Pokemon's name within 30 seconds wins. Forms don't matter, so "landorus" is right for Landorus-Therian, and small typos are forgiven.
 * !**top** - Lists the top 3 chatters in this channel, counted from up to 10000 recent messages. Bots, commands, and people who left the server are not counted.
 

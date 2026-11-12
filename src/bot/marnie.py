@@ -223,6 +223,26 @@ class Marnie:
             await ctx.send(file=(await Marnie.sprite_handler(*rand_sprite)))
 
         @self.bot.command()
+        async def art(ctx, *, query: str = None):
+
+            if query is not None:
+                answer = get_objs.fetcher.art(query)
+                if isinstance(answer, list):
+                    await ctx.send(file=(await Marnie.sprite_handler(*answer)))
+                else:
+                    await ctx.send(answer)
+            else:
+                await ctx.send("how can i find art **without knowing** the pokemon to find art for?\n\nremember, if you wanna use the ``!art`` command, you type ``!art`` then the name of the Pokemon whose art you want. for example, ``!art morpeko``.")
+
+        @self.bot.command()
+        async def randart(ctx):
+            answer = get_objs.fetcher.art(str(random.randint(1, objects.pokemon.get_num_pokemon())))
+            if isinstance(answer, list):
+                await ctx.send(file=(await Marnie.sprite_handler(*answer)))
+            else:
+                await ctx.send(answer)
+
+        @self.bot.command()
         async def wtp(ctx):
             if ctx.channel.id in Marnie.wtp_active_channels:
                 await ctx.send("a round of who's that pokemon is already going on here! type your guess.")

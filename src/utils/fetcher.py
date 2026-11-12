@@ -134,10 +134,18 @@ class Fetcher:
     
     def sprite(self, query: str, shiny: bool) -> List | str:
         '''Parses the query then returns the appropiate sprite.'''
-        
-        original_query, mon_sanitized_query = query, Fetcher.mon_sanitize(Fetcher.sanitize(query))
 
-        function_name = self.get_shiny_sprite if shiny else self.get_sprite
+        return self.picture(query, self.get_shiny_sprite if shiny else self.get_sprite)
+
+    def art(self, query: str) -> List | str:
+        '''Parses the query then returns the Pokemon's official artwork.'''
+
+        return self.picture(query, self.get_art)
+
+    def picture(self, query: str, function_name: collections.abc.Callable) -> List | str:
+        '''Finds the Pokemon a query means, then returns its picture using the given getter.'''
+
+        original_query, mon_sanitized_query = query, Fetcher.mon_sanitize(Fetcher.sanitize(query))
 
         if pokemonic_answer := Fetcher.pokemonic_get(mon_sanitized_query, function_name): return pokemonic_answer
 
@@ -160,6 +168,13 @@ class Fetcher:
 
         shiny_url = response.json()['sprites']['front_shiny']     
         return [shiny_url, pokemon] if shiny_url else f"sorry, {pokemon} has no shiny sprite right now"
+
+    def get_art(self, pokemon: str, response: requests.models.Response) -> List | str:
+        '''Returns a URL to the official artwork, a large picture with a transparent background.'''
+
+        sprites = response.json().get('sprites') or {}
+        art_url = ((sprites.get('other') or {}).get('official-artwork') or {}).get('front_default')
+        return [art_url, pokemon] if art_url else f"sorry, {pokemon} has no art right now"
     
     def get_type(self, pokemon: str, response: requests.models.Response) -> List:
         '''Fetches the types from a Pokemon HTTP Response. Returns a list containing the Pokemon's name and types.'''
