@@ -4,7 +4,6 @@ import pytest
 from PIL import Image
 
 from src.bot.marnie import Marnie
-from src.constants.output import help as h
 
 
 def sprite_png(transparent: bool = True) -> bytes:
@@ -109,9 +108,3 @@ def test_image_url_prefers_official_artwork():
     assert Marnie.wtp_image_url({"sprites": {"front_default": "sprite.png", "other": None}}) == "sprite.png"
     assert Marnie.wtp_image_url({"sprites": {"front_default": None}}) is None
     assert Marnie.wtp_image_url({}) is None
-
-
-def test_help_documents_new_commands_and_fits_in_one_discord_message():
-    assert "!**wtp**" in h.command
-    assert "!**top**" in h.command
-    assert len(h.command) <= 2000

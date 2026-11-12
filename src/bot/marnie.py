@@ -1,6 +1,7 @@
 from discord.ext import commands
 from ..constants.api import urls
-from ..constants.output import aliases, help as h, wordcloud as wc
+from ..constants.output import aliases, wordcloud as wc
+from . import help_menu
 from ..constants.getters import get_objs
 from ..constants.structs import objects
 from ..servers import web_server
@@ -175,7 +176,14 @@ class Marnie:
 
         @self.bot.command()
         async def help(ctx):
-            await ctx.send(h.command)
+            if not ctx.channel.permissions_for(ctx.me).embed_links:
+                for text_page in help_menu.build_text_pages(Marnie.command_prefix):
+                    await ctx.send(text_page)
+                return
+
+            avatar_url = self.bot.user.display_avatar.url if self.bot.user is not None else None
+            menu = help_menu.HelpMenu(help_menu.build_embeds(Marnie.command_prefix, avatar_url))
+            menu.message = await ctx.send(embed=menu.embeds[0], view=menu)
 
         @self.bot.command()
         async def muted(ctx):

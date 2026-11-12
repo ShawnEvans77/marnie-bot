@@ -1,17 +1,37 @@
-'''Marnie's help command.'''
+'''The words in Marnie's help menu.
 
-command = "* !**dt** {query} - Returns information on a Pokemon, Pokemon ability, Pokemon item, or Pokemon move. Pokemon can be queried by their name or dex number.\n" \
-          "* !**weak** {type} - Lists weaknesses, resistances, and immunities of a given type. You can query a dual type by sending two types seperated by slashes or commas to the command. For example, !dt fire/water or !dt fire,water.\n" \
-          "* !**weak** {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon. Like !dt, you can query Pokemon by their name or dex number.\n" \
-          "* !**pick** {args...} - Selects a random option given a list of options.\n" \
-          "* !**randmon** - Returns the information of a random Pokemon.\n" \
-          "* !**id** {user} - Returns a Discord ID. With no query, it returns your own. With a query, it looks up a username or nickname.\n" \
-          "* !**wc** {query} - Sends a word cloud image from up to 10000 recent channel messages. Query can be a server username or nickname, and filters to that person's words inside the same 10000-message window.\n" \
-          "* !**muted** - Lists all timed out server members and the amount of time they are timed out for.\n" \
-          "* !**sprite** {pokemon} - Returns a Pokemon's sprite. Like !dt, you can query Pokemon by their name or dex number.\n" \
-          "* !**shiny** {pokemon} - Returns a Pokemon's shiny sprite. Like !dt, you can query Pokemon by their name or dex number.\n" \
-          "* !**randsprite** - Returns a random Pokemon's sprite.\n" \
-          "* !**art** {pokemon} - Returns a Pokemon's official artwork. Like !dt, you can query Pokemon by their name or dex number.\n" \
-          "* !**randart** - Returns a random Pokemon's official artwork.\n" \
-          "* !**wtp** -Starts a round of Who's That Pokemon! Shows a silhouette, and the first person to type the Pokemon's name within 30 seconds wins. Forms don't matter, so \"landorus\" is right for Landorus-Therian, and small typos are forgiven.\n" \
-          "* !**top** - Lists the top 3 chatters in this channel, counted from up to 10000 recent messages. Bots, commands, and people who left the server are not counted."
+Each page has a title, an emoji, a short blurb, and its commands.
+Each command is (emoji, usage, description). Usage is written without the command prefix.'''
+
+intro = "type a command just like the examples. i'll forgive your typos! <3"
+
+pages = (
+    {
+        "title": "pokemon commands",
+        "emoji": "🌸",
+        "blurb": "everything i know about pokemon!",
+        "commands": (
+            ("📖", "dt {query}", "info on a pokemon, ability, item, or move. you can look pokemon up by name or dex number, like ``!dt morpeko`` or ``!dt 877``."),
+            ("🛡️", "weak {type or pokemon}", "weaknesses, resistances, and immunities of a type or a pokemon. for two types, split them with a slash or a comma, like ``!weak fire/water``."),
+            ("🎲", "randmon", "info on a random pokemon."),
+            ("👾", "sprite {pokemon}", "a pokemon's sprite, by name or dex number."),
+            ("✨", "shiny {pokemon}", "a pokemon's shiny sprite, by name or dex number."),
+            ("🎨", "art {pokemon}", "a pokemon's big official artwork, by name or dex number."),
+            ("🎁", "randsprite", "a random pokemon's sprite."),
+            ("🖼️", "randart", "a random pokemon's official artwork."),
+        ),
+    },
+    {
+        "title": "fun & server commands",
+        "emoji": "🎀",
+        "blurb": "games, chat stats, and server stuff!",
+        "commands": (
+            ("❓", "wtp", "who's that pokemon! i show a silhouette, and the first person to type its name within 30 seconds wins. forms don't matter, so \"landorus\" is right for landorus-therian."),
+            ("🎯", "pick {options...}", "i pick one option at random. split them with commas, like ``!pick socks, shoes``."),
+            ("☁️", "wc {user}", "a word cloud from up to 10000 recent messages in this channel. add a username or nickname to see just that person's words."),
+            ("🏆", "top", "the top 3 chatters in this channel, out of up to 10000 recent messages. bots, commands, and people who left don't count."),
+            ("🔇", "muted", "everyone who is timed out, and for how much longer."),
+            ("🪪", "id {user}", "a discord id. with no name it's yours, with a username or nickname it's theirs."),
+        ),
+    },
+)

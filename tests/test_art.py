@@ -1,6 +1,5 @@
 import pytest
 import src.constants.getters.get_objs as get_objs
-from src.constants.output import help as h
 
 f = get_objs.fetcher
 
@@ -43,9 +42,3 @@ def test_sprite_still_works_after_sharing_lookup_with_art():
 
     assert f.sprite('pikachu', shiny=False) == [sprite_url + "25.png", "pikachu"]
     assert f.sprite('pikachu', shiny=True) == [sprite_url + "shiny/25.png", "pikachu"]
-
-
-def test_help_documents_art_commands_and_fits_in_one_discord_message():
-    assert "!**art**" in h.command
-    assert "!**randart**" in h.command
-    assert len(h.command) <= 2000
