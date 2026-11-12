@@ -42,4 +42,4 @@ class Pokedex(list.List):
     def randmon(self) -> int:
         '''Returns a random Pokemon by dex number.'''
         
-        return random.randint(1, self.num_pokemon+1)
+        return random.randint(1, self.num_pokemon)
