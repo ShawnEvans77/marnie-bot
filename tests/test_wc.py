@@ -136,6 +136,67 @@ def test_collect_word_counts_for_one_member():
     assert asyncio.run(Marnie.collect_word_counts(channel, member)) == Counter({"frosmoth": 1})
 
 
+def chatty_cache() -> dict:
+    '''Author 1 sends 3 messages, author 2 sends 2, authors 3 and 4 send 1 each. A bot and a command are ignored.'''
+
+    cache = Marnie.empty_wc_cache()
+    messages = [
+        make_message(1, "snom", author_id=1),
+        make_message(2, "", author_id=1),
+        make_message(3, "the", author_id=1),
+        make_message(4, "frosmoth", author_id=2),
+        make_message(5, "frosmoth", author_id=2),
+        make_message(6, "hello", author_id=3),
+        make_message(7, "hello", author_id=4),
+        make_message(8, "beep", author_id=9, bot=True),
+        make_message(9, "!top", author_id=4),
+    ]
+
+    for message in messages:
+        Marnie.add_wc_message(cache, message)
+
+    return cache
+
+
+NAMES = {1: "Snom_Fan", 2: "Bea", 3: "Cy", 4: "Dee"}
+
+
+def test_top_chatters_lists_three_in_order():
+    assert Marnie.top_chatters_message(chatty_cache(), NAMES.get) == (
+        "**top chatters** out of the last 9 messages here:\n"
+        "🥇 **snom\\_fan** - 3 messages\n"
+        "🥈 **bea** - 2 messages\n"
+        "🥉 **cy** - 1 message"
+    )
+
+
+def test_top_chatters_skips_people_who_left():
+    names = {2: "Bea", 3: "Cy", 4: "Dee"}
+
+    assert Marnie.top_chatters_message(chatty_cache(), names.get) == (
+        "**top chatters** out of the last 9 messages here:\n"
+        "🥇 **bea** - 2 messages\n"
+        "🥈 **cy** - 1 message\n"
+        "🥉 **dee** - 1 message"
+    )
+
+
+def test_top_chatters_follow_deletes_and_window_trimming(monkeypatch):
+    cache = chatty_cache()
+    Marnie.wc_cache[10] = cache
+
+    Marnie.delete_wc_cache_messages(10, [1, 2])
+    assert cache["chatter_counts"] == Counter({1: 1, 2: 2, 3: 1, 4: 1})
+
+    monkeypatch.setattr(Marnie, "wc_message_limit", 3)
+    Marnie.add_wc_message(cache, make_message(10, "hi", author_id=3))
+    assert cache["chatter_counts"] == Counter({3: 1})
+
+
+def test_top_chatters_with_nobody():
+    assert Marnie.top_chatters_message(Marnie.empty_wc_cache(), NAMES.get) == "nobody has chatted here yet..."
+
+
 def test_wordcloud_image_is_full_size():
     file = Marnie.wordcloud_image(Counter({"snom": 5, "frosmoth": 3, "marnie": 2}))
     assert Image.open(file.fp).size == (1800, 1100)

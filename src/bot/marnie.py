@@ -1,14 +1,17 @@
 from discord.ext import commands
-from ..constants.output import help as h, wordcloud as wc
+from ..constants.api import urls
+from ..constants.output import aliases, help as h, wordcloud as wc
 from ..constants.getters import get_objs
 from ..constants.structs import objects
 from ..servers import web_server
+from ..utils.fetcher import Fetcher
 from dotenv import load_dotenv
 from collections import Counter, deque
 from io import BytesIO
 from PIL import Image
+from thefuzz import fuzz
 from wordcloud import WordCloud
-import discord, logging, os, random, datetime, io, aiohttp, re, asyncio
+import discord, logging, os, random, datetime, io, aiohttp, re, asyncio, unicodedata
 
 class Marnie:
     '''The Marnie Class represents your Discord Bot.'''
@@ -23,6 +26,15 @@ class Marnie:
     wc_warm_task = None
     wc_warm_pending = set()
     wc_warm_skipped = set()
+    top_chatter_count = 3
+    wtp_timeout = 30
+    wtp_fuzzy_threshold = 85
+    wtp_pick_attempts = 5
+    wtp_canvas_size = 512
+    wtp_sprite_box = 400
+    wtp_background = "#ff76aa"
+    wtp_active_channels = set()
+    wtp_species_ids = None
     last_spoken_channels = {}
     mute_cease_tasks = {}
 
@@ -209,6 +221,63 @@ class Marnie:
         async def randsprite(ctx):
             rand_sprite = get_objs.fetcher.sprite(str(objects.pokemon.randmon()), shiny=False)
             await ctx.send(file=(await Marnie.sprite_handler(*rand_sprite)))
+
+        @self.bot.command()
+        async def wtp(ctx):
+            if ctx.channel.id in Marnie.wtp_active_channels:
+                await ctx.send("a round of who's that pokemon is already going on here! type your guess.")
+                return
+
+            Marnie.wtp_active_channels.add(ctx.channel.id)
+
+            try:
+                async with ctx.typing():
+                    wtp_round = await Marnie.fetch_wtp_round()
+
+                if wtp_round is None:
+                    await ctx.send("sorry, i couldn't find a pokemon to show right now... try ``!wtp`` again in a bit?")
+                    return
+
+                await ctx.send(
+                    f"**who's that pokemon?** type its name! you have {Marnie.wtp_timeout} seconds.",
+                    file=discord.File(BytesIO(wtp_round["silhouette"]), filename="wtp.png"),
+                )
+
+                def is_correct(message) -> bool:
+                    return (
+                        message.channel.id == ctx.channel.id
+                        and not message.author.bot
+                        and Marnie.wtp_guess_matches(message.content, wtp_round)
+                    )
+
+                reveal = discord.File(BytesIO(wtp_round["reveal"]), filename="wtp-answer.png")
+
+                try:
+                    winner = await self.bot.wait_for("message", check=is_correct, timeout=Marnie.wtp_timeout)
+                except asyncio.TimeoutError:
+                    await ctx.send(f"time's up! it's **{wtp_round['name']}**!", file=reveal)
+                else:
+                    await ctx.send(f"it's **{wtp_round['name']}**! {winner.author.mention} got it!", file=reveal)
+            finally:
+                Marnie.wtp_active_channels.discard(ctx.channel.id)
+
+        @self.bot.command()
+        async def top(ctx):
+            async with ctx.typing():
+                try:
+                    channel_cache = await Marnie.refresh_wc_cache(ctx.channel)
+                except discord.Forbidden:
+                    await ctx.send("error: i can't read this channel's message history.")
+                    return
+
+                def name_for(user_id: int) -> str | None:
+                    user = ctx.guild.get_member(user_id) if ctx.guild is not None else self.bot.get_user(user_id)
+                    return Marnie.display_name(user) if user is not None else None
+
+                await ctx.send(
+                    Marnie.top_chatters_message(channel_cache, name_for),
+                    allowed_mentions=discord.AllowedMentions.none(),
+                )
 
     def start(self):
         '''Makes the bot to go online and start accepting commands.'''
@@ -492,6 +561,7 @@ class Marnie:
             "messages": deque(),
             "by_id": {},
             "newest_id": None,
+            "chatter_counts": Counter(),
             "message_counts": Counter(),
             "fallback_message_counts": Counter(),
             "author_counts": {},
@@ -503,14 +573,19 @@ class Marnie:
         '''Builds the cached representation for one message in the wc window.
 
         Bot messages, empty messages, and commands count toward the window but add no words.
-        A message made only of stopwords is stored as a fallback entry.'''
+        A message made only of stopwords is stored as a fallback entry.
+        chatter_id is who gets credit for the message in !top: any non-bot message that is
+        not a command, even one with no words (like an image).'''
 
+        chatter_id = None
         author_id = None
         counts = None
         fallback = False
+        content = message.content or ""
 
-        if not message.author.bot and message.content and not message.content.startswith(Marnie.command_prefix):
-            all_tokens = Marnie.tokenize_wc_text_unfiltered(Marnie.sanitize_wc_text(message.content))
+        if not message.author.bot and not content.startswith(Marnie.command_prefix):
+            chatter_id = message.author.id
+            all_tokens = Marnie.tokenize_wc_text_unfiltered(Marnie.sanitize_wc_text(content))
 
             if all_tokens:
                 author_id = message.author.id
@@ -520,6 +595,7 @@ class Marnie:
 
         return {
             "id": message.id,
+            "chatter_id": chatter_id,
             "author_id": author_id,
             "counts": counts,
             "fallback": fallback,
@@ -539,6 +615,9 @@ class Marnie:
     @staticmethod
     def apply_wc_entry(cache: dict, entry: dict, direction: int):
         '''Applies or removes one cached message entry from aggregate counters.'''
+
+        if entry["chatter_id"] is not None:
+            Marnie.adjust_wc_counter(cache["chatter_counts"], {entry["chatter_id"]: 1}, direction)
 
         if entry["author_id"] is None:
             return
@@ -668,7 +747,7 @@ class Marnie:
                 continue
 
             Marnie.apply_wc_entry(cache, entry, direction=-1)
-            entry.update(author_id=None, counts=None, fallback=False)
+            entry.update(chatter_id=None, author_id=None, counts=None, fallback=False)
 
     @staticmethod
     def schedule_wc_warmup(channel):
@@ -771,3 +850,188 @@ class Marnie:
         async with aiohttp.ClientSession() as session:
             async with session.get(url) as resp:
                 return discord.File(io.BytesIO(await resp.read()), f'{"shiny-" if "shiny" in url else ""}{pokemon}.png')
+
+    @staticmethod
+    def top_chatters_message(cache: dict, name_for) -> str:
+        '''Formats the top chatters of a channel's wc window.
+
+        name_for maps a user id to a display name, or None for people who can't be found
+        (like members who left the server), who are skipped.'''
+
+        ranked = []
+
+        for user_id, message_count in cache["chatter_counts"].most_common():
+            name = name_for(user_id)
+            if name is None:
+                continue
+
+            ranked.append((name, message_count))
+            if len(ranked) == Marnie.top_chatter_count:
+                break
+
+        if not ranked:
+            return "nobody has chatted here yet..."
+
+        medals = ("🥇", "🥈", "🥉")
+        lines = [f"**top chatters** out of the last {Marnie.plural(len(cache['messages']), 'message')} here:"]
+
+        for place, (name, message_count) in enumerate(ranked):
+            medal = medals[place] if place < len(medals) else f"{place + 1}."
+            lines.append(f"{medal} **{discord.utils.escape_markdown(name.lower())}** - {Marnie.plural(message_count, 'message')}")
+
+        return "\n".join(lines)
+
+    @staticmethod
+    def wtp_normalize(text: str) -> str:
+        '''Lowercases text and strips accents, spaces, dashes, and punctuation,
+        so "Mr. Mime", "mr-mime", and "mrmime" all compare equal.'''
+
+        decomposed = unicodedata.normalize("NFKD", text.casefold())
+        return "".join(character for character in decomposed if character.isalnum())
+
+    @staticmethod
+    def wtp_species_id_map() -> dict:
+        '''Maps every normalized Pokemon name, forms included, to its species (national dex) number.'''
+
+        if Marnie.wtp_species_ids is None:
+            dex = objects.pokemon.df
+            Marnie.wtp_species_ids = {
+                Marnie.wtp_normalize(identifier): species_id
+                for identifier, species_id in zip(dex['identifier'], dex['species_id'])
+            }
+
+        return Marnie.wtp_species_ids
+
+    @staticmethod
+    def wtp_guess_matches(guess: str, wtp_round: dict) -> bool:
+        '''Returns whether a chat message names the round's Pokemon. Forms never matter:
+        for Landorus-Therian, "landorus", "landorus-therian", "landorustherian", and any
+        other Landorus form are all correct. Small typos are forgiven, unless the guess
+        is the name of a different Pokemon.'''
+
+        guess = guess.strip()
+        if not guess or len(guess) > 40:
+            return False
+
+        sanitized = Fetcher.sanitize(guess)
+        candidates = (sanitized, Fetcher.mon_sanitize(sanitized), aliases.alias_map.get(sanitized))
+        answers = (wtp_round["species_key"], wtp_round["identifier_key"])
+        species_ids = Marnie.wtp_species_id_map()
+        names_other_pokemon = False
+
+        for candidate in candidates:
+            key = Marnie.wtp_normalize(candidate) if candidate else ""
+            if not key:
+                continue
+
+            if key in answers:
+                return True
+
+            species_id = species_ids.get(key)
+            if species_id is not None:
+                if species_id == wtp_round["species_id"]:
+                    return True
+                names_other_pokemon = True
+
+        if names_other_pokemon:
+            return False
+
+        key = Marnie.wtp_normalize(guess)
+        if not key:
+            return False
+
+        return any(fuzz.ratio(key, answer) >= Marnie.wtp_fuzzy_threshold for answer in answers)
+
+    @staticmethod
+    def wtp_image_url(data: dict) -> str | None:
+        '''Picks the picture for a round from a PokeAPI Pokemon response: official artwork, else the sprite.'''
+
+        sprites = data.get("sprites") or {}
+        artwork = ((sprites.get("other") or {}).get("official-artwork") or {}).get("front_default")
+        return artwork or sprites.get("front_default")
+
+    @staticmethod
+    def wtp_images(image_bytes: bytes) -> tuple[bytes, bytes]:
+        '''Turns a transparent Pokemon picture into two PNGs: the black silhouette and the reveal.
+        Raises ValueError if the picture is empty or has no transparent background to cut out.'''
+
+        sprite = Image.open(BytesIO(image_bytes)).convert("RGBA")
+        alpha = sprite.getchannel("A")
+        bounds = alpha.getbbox()
+
+        if bounds is None or alpha.getextrema()[0] == 255:
+            raise ValueError("picture has no usable transparent background")
+
+        sprite = sprite.crop(bounds)
+        scale = min(Marnie.wtp_sprite_box / sprite.width, Marnie.wtp_sprite_box / sprite.height)
+        size = (max(1, round(sprite.width * scale)), max(1, round(sprite.height * scale)))
+        # Small pixel-art sprites stay crisp with NEAREST; large artwork shrinks smoothly with LANCZOS.
+        resample = Image.Resampling.NEAREST if scale >= 2 else Image.Resampling.LANCZOS
+        sprite = sprite.resize(size, resample)
+
+        left = (Marnie.wtp_canvas_size - sprite.width) // 2
+        top = (Marnie.wtp_canvas_size - sprite.height) // 2
+        canvas_size = (Marnie.wtp_canvas_size, Marnie.wtp_canvas_size)
+
+        silhouette = Image.new("RGB", canvas_size, Marnie.wtp_background)
+        silhouette.paste((0, 0, 0), (left, top, left + sprite.width, top + sprite.height), sprite.getchannel("A"))
+
+        reveal = Image.new("RGB", canvas_size, Marnie.wtp_background)
+        reveal.paste(sprite, (left, top), sprite)
+
+        pngs = []
+        for image in (silhouette, reveal):
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            pngs.append(buffer.getvalue())
+
+        return pngs[0], pngs[1]
+
+    @staticmethod
+    def build_wtp_round(identifier: str, species: str, image_bytes: bytes) -> dict:
+        '''Builds one round: the pictures plus everything needed to judge guesses.
+        The answer is the species ("landorus"), whatever form the picture shows.'''
+
+        silhouette, reveal = Marnie.wtp_images(image_bytes)
+
+        return {
+            "identifier": identifier,
+            "name": species.title(),
+            "species_id": objects.pokemon.get_species_id(identifier),
+            "species_key": Marnie.wtp_normalize(species),
+            "identifier_key": Marnie.wtp_normalize(identifier),
+            "silhouette": silhouette,
+            "reveal": reveal,
+        }
+
+    @staticmethod
+    async def fetch_wtp_round() -> dict | None:
+        '''Picks a random Pokemon (forms included) and builds its round.
+        Some forms have no picture, so it tries a few picks. Returns None if every try fails.'''
+
+        timeout = aiohttp.ClientTimeout(total=15)
+
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            for _ in range(Marnie.wtp_pick_attempts):
+                identifier = random.choice(objects.pokemon.list)
+
+                try:
+                    async with session.get(urls.poke_url + identifier) as response:
+                        if response.status != 200:
+                            continue
+                        data = await response.json()
+
+                    image_url = Marnie.wtp_image_url(data)
+                    if not image_url:
+                        continue
+
+                    async with session.get(image_url) as response:
+                        if response.status != 200:
+                            continue
+                        image_bytes = await response.read()
+
+                    return Marnie.build_wtp_round(identifier, data["species"]["name"], image_bytes)
+                except (aiohttp.ClientError, asyncio.TimeoutError, OSError, ValueError, KeyError, TypeError):
+                    continue
+
+        return None
