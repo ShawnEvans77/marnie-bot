@@ -123,4 +123,4 @@ Thanks for using the Marnie REPL! <3
 
 ## Motivation
 
-I'm in a Discord Server and we needed a bot that supported these features. I made this bot myself to help out that Discord Server.
+I'm in a Discord server and we needed a bot that supported these features. I made this bot myself to help out that Discord server.
