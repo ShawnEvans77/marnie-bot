@@ -22,4 +22,7 @@ alias_map = {
     "chomp": "garchomp",
     "dnite": "dragonite",
     "pikablu": "marill",
+    "eight": "lickitung",
+    "chooger": "lickilicky",
+    "pyke": "hypno",
 }

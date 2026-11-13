@@ -39,3 +39,9 @@ def test_dt_move():
     assert "Fishious Rend" in f.dt("fishious-rend")
     assert "Swords Dance" in f.dt("swords dance")
     assert "Mega Punch" in f.dt("mega-punch")
+
+def test_dt_aliases():
+    assert "**Lickitung**" in f.dt("eight")
+    assert "**Lickilicky**" in f.dt("chooger")
+    assert "**Hypno**" in f.dt("pyke")
+    assert "**Hypno**" in f.dt("Pyke")
