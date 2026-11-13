@@ -1,14 +1,14 @@
 from ..constants.types import type_chart as tc, type_map as tm
 from ..constants.output import weak_res_imm
 from ..constants.structs import objects
-from ..constants.getters import get_objs
 from src.utils import fetcher as static_f
 from typing import List
 
 class Weak:
     '''Utility class for finding a type's weaknesses, resistances, and immunities, in that order.'''
 
-    def __init__(self):
+    def __init__(self, fetcher: static_f.Fetcher | None = None):
+        self.fetcher = fetcher if fetcher is not None else static_f.Fetcher()
         self.dmg_ordering = [tc.super_dmg, tc.resist_dmg, tc.no_dmg]
     
     def weak(self, *args: str) -> str:
@@ -25,17 +25,17 @@ class Weak:
         if all(arg in tm.all_types for arg in args):
             return self.get_weak(Weak.title_type(*args), *args)
                 
-        if pokemonic_answer := (static_f.Fetcher.pokemonic_get(args[0], get_objs.fetcher.get_type)):
+        if pokemonic_answer := (static_f.Fetcher.pokemonic_get(args[0], self.fetcher.get_type)):
             return self.get_weak_pokemon(pokemonic_answer[0], *pokemonic_answer[1])
                 
         if (sanitized_pokemon := (static_f.Fetcher.mon_sanitize(args[0]))) in objects.pokemon:
-            return self.get_weak_pokemon(sanitized_pokemon, *Weak.get_pokemon_type(sanitized_pokemon)[1])
+            return self.get_weak_pokemon(sanitized_pokemon, *self.get_pokemon_type(sanitized_pokemon)[1])
 
         answer = ""
         
         if closest_mon := objects.pokemon.close_match(sanitized_pokemon):
             answer += f"i dunno know what pokemon \"{orig_args[0]}\" is so i'll guess that you meant {closest_mon}\n\n"
-            return answer + self.get_weak_pokemon(closest_mon, *Weak.get_pokemon_type(closest_mon)[1])
+            return answer + self.get_weak_pokemon(closest_mon, *self.get_pokemon_type(closest_mon)[1])
 
         for i in range(num_args):
             if closest_type := objects.types.close_match(args[i]):
@@ -111,11 +111,10 @@ class Weak:
 
         return self.get_weak(Weak.title_pokemon(pokemon_name, *types), *types)
     
-    @staticmethod
-    def get_pokemon_type(pokemon: str) -> List:
+    def get_pokemon_type(self, pokemon: str) -> List:
         '''Makes an HTTP request to get a Pokemon's type if needed.'''
 
-        return get_objs.fetcher.get_type(pokemon, static_f.Fetcher.request_pokemon(pokemon))
+        return self.fetcher.get_type(pokemon, static_f.Fetcher.request_pokemon(pokemon))
     
     @staticmethod
     def title_type(*types: str) -> str:

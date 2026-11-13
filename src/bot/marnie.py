@@ -134,7 +134,7 @@ class Marnie:
             if query is not None:
                 await ctx.send(f"i randomly selected: {random.choice(query.split(',')).strip()}")
             else:
-                await ctx.send("how can i ``!pick`` from **no options**?\n\nremember, if you wanna use the ``!weak`` command, you type a set of comma separated values after ``!pick``. for example: ``!pick socks, shoes``")
+                await ctx.send("how can i ``!pick`` from **no options**?\n\nremember, if you wanna use the ``!pick`` command, you type a set of comma separated values after ``!pick``. for example: ``!pick socks, shoes``")
 
         @self.bot.command()
         async def randmon(ctx):
@@ -198,6 +198,10 @@ class Marnie:
 
         @self.bot.command()
         async def muted(ctx):
+            if ctx.guild is None:
+                await ctx.send("i can only check who's muted inside a server, silly!")
+                return
+
             answer = ""
 
             for member in ctx.guild.members:
