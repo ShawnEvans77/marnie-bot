@@ -1,6 +1,6 @@
 from discord.ext import commands
 from .. import help_menu
-from ..helpers import find_member, find_user
+from ..helpers import display_name, find_member, find_user
 from ...constants.output import command
 import random
 
@@ -40,5 +40,4 @@ class Utility(commands.Cog):
             await ctx.send(f"i couldn't find anybody named \"{query}\"... check their spelling?")
             return
 
-        display_name = getattr(user, "display_name", None) or user.global_name or user.name
-        await ctx.send(f"**{display_name}**'s discord id is ``{user.id}``.")
+        await ctx.send(f"**{display_name(user)}**'s discord id is ``{user.id}``.")

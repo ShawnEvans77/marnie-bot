@@ -2,5 +2,3 @@
 
 asset = 'assets'
 csv = 'csv'
-json = 'json'
-txt = 'text'

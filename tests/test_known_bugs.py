@@ -40,3 +40,27 @@ def test_weak_finder_can_be_imported_first():
     )
 
     assert result.returncode == 0, result.stderr
+
+
+def test_lando_t_is_the_therian_forme():
+    from src.constants.output import aliases
+
+    assert aliases.alias_map["lando-t"] == "landorus-therian"
+
+
+def test_close_match_ignores_capital_letters():
+    from src.constants.structs import objects
+
+    assert objects.pokemon.close_match("PIKACHUU") == objects.pokemon.close_match("pikachuu") == "pikachu"
+    assert objects.pokemon.close_match("PIKACHU") is None
+
+
+def test_display_name_prefers_server_nickname():
+    from types import SimpleNamespace
+    from src.bot.helpers import display_name
+
+    member = SimpleNamespace(display_name="snommy", global_name="Snom Fan", name="snomfan")
+    user = SimpleNamespace(global_name="Snom Fan", name="snomfan")
+
+    assert display_name(member) == "snommy"
+    assert display_name(user) == "Snom Fan"

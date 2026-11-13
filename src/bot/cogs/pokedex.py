@@ -2,7 +2,7 @@ from discord.ext import commands
 from .. import dex_embed
 from ...constants.getters import get_objs
 from ...constants.structs import objects
-import discord, asyncio, io, random, aiohttp
+import discord, asyncio, io, aiohttp
 
 
 async def lookup(function, *args):
@@ -12,28 +12,40 @@ async def lookup(function, *args):
     return await asyncio.to_thread(function, *args)
 
 
-async def sprite_file(url: str, pokemon: str) -> discord.File:
-    '''Downloads a sprite or artwork and wraps it as a Discord file.'''
-
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            return discord.File(io.BytesIO(await resp.read()), f'{"shiny-" if "shiny" in url else ""}{pokemon}.png')
-
 
 class Pokedex(commands.Cog):
     '''Pokemon lookups: !dt, !dex, !weak, sprites, and art.'''
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.session = None
 
-    @staticmethod
-    async def send_picture(ctx, answer):
-        '''Sends a fetched picture, or Marnie's message if there was no picture.'''
+    async def cog_unload(self):
+        if self.session is not None:
+            await self.session.close()
 
-        if isinstance(answer, list):
-            await ctx.send(file=await sprite_file(*answer))
-        else:
+    async def send_picture(self, ctx, answer, shiny: bool = False):
+        '''Downloads and sends a fetched picture, or sends Marnie's message if there was no picture.
+        Every download shares one session, made on the first one.'''
+
+        if isinstance(answer, str):
             await ctx.send(answer)
+            return
+
+        url, pokemon = answer
+
+        if self.session is None or self.session.closed:
+            self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
+
+        try:
+            async with self.session.get(url) as response:
+                response.raise_for_status()
+                picture = await response.read()
+        except (aiohttp.ClientError, asyncio.TimeoutError):
+            await ctx.send("sorry, i couldn't download that picture right now... try again in a bit?")
+            return
+
+        await ctx.send(file=discord.File(io.BytesIO(picture), f"{'shiny-' if shiny else ''}{pokemon}.png"))
 
     @commands.command()
     async def dt(self, ctx, *, query: str = None):
@@ -79,7 +91,7 @@ class Pokedex(commands.Cog):
     @commands.command()
     async def shiny(self, ctx, *, query: str = None):
         if query is not None:
-            await self.send_picture(ctx, await lookup(get_objs.fetcher.sprite, query, True))
+            await self.send_picture(ctx, await lookup(get_objs.fetcher.sprite, query, True), shiny=True)
         else:
             await ctx.send("how can i find a shiny sprite **without knowing** the pokemon to find a sprite for?\n\nremember, if you wanna use the ``!shiny`` command, you type ``!shiny`` then the name of the Pokemon whose shiny sprite you want. for example, ``!shiny goodra``.")
 
@@ -96,4 +108,4 @@ class Pokedex(commands.Cog):
 
     @commands.command()
     async def randart(self, ctx):
-        await self.send_picture(ctx, await lookup(get_objs.fetcher.art, str(random.randint(1, objects.pokemon.get_num_pokemon()))))
+        await self.send_picture(ctx, await lookup(get_objs.fetcher.art, str(objects.pokemon.randmon())))

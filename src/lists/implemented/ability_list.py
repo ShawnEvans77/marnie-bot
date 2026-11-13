@@ -11,4 +11,4 @@ class AbilityList(list.List):
     def get_generation(self, ability: str) -> str:
         '''Given an ability, return the generation it comes from as a string.'''
         
-        return self.df[self.df['identifier'] == ability]['generation_id'].values[0]
+        return self.lookup(ability, 'generation_id')

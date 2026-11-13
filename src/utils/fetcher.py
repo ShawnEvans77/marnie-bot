@@ -1,11 +1,12 @@
 from ..constants.api import urls, language
 from ..constants.output import aliases, formatters, nationalities, prefixes
 from ..constants.structs import objects
-from .dex import DexEntry
-from typing import List, NamedTuple
+from .dex import DexEntry, art_url, title
+from collections.abc import Callable
+from typing import NamedTuple
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-import requests, collections, pandas
+import requests, pandas
 
 def build_session() -> requests.Session:
     '''Builds the one session every PokeAPI request goes through. A session keeps its connection
@@ -37,7 +38,6 @@ class Fetcher:
     
     Attributes:
         func_map - Maps each collection to its !dt function and its URL.
-        funcs - A set-like object mapping collections to their associated function names and URLs.
         kinds - Maps each collection to the name of the kind of thing it holds.
         session - The shared connection to PokeAPI.
         timeout - How many seconds one request may take before it is given up on.
@@ -58,7 +58,6 @@ class Fetcher:
 
     def __init__(self):
         self.func_map = self.get_func_map()
-        self.funcs = self.func_map.items()
         self.kinds = {objects.pokemon: "pokemon", objects.items: "item", objects.moves: "move", objects.abilities: "ability"}
 
     def get_func_map(self) -> dict:
@@ -119,13 +118,13 @@ class Fetcher:
 
         mon_sanitized_query = Fetcher.mon_sanitize(sanitized_query)
 
-        for k, v in self.funcs:
+        for k, v in self.func_map.items():
             if sanitized_query in k:
                 return Found(k, sanitized_query, Fetcher.get(v[1]+sanitized_query), False)
             elif k == objects.pokemon and mon_sanitized_query in k:
                 return Found(k, mon_sanitized_query, Fetcher.get(v[1]+mon_sanitized_query), False)
 
-        for k, v in self.funcs:
+        for k, v in self.func_map.items():
             if  (k == objects.pokemon and (closest := k.close_match(mon_sanitized_query))) or (closest := k.close_match(sanitized_query)):
                 return Found(k, closest, Fetcher.get(v[1]+closest), True)
 
@@ -168,7 +167,7 @@ class Fetcher:
         for i in range(len(abilities)):
 
             ability_label = f"**Ab. {i+1}**" if not abilities[i]['is_hidden'] else "**HA**"
-            answer += f"{ability_label}: {Fetcher.reverse_sanitize(abilities[i]['ability']['name'])}"
+            answer += f"{ability_label}: {title(abilities[i]['ability']['name'])}"
 
             if i != len(abilities) - 1: answer += " | "
 
@@ -179,7 +178,7 @@ class Fetcher:
         '''Returns information on a Pokemon item. Information consists of a simple description of what the item does.'''
 
         answer = ""
-        answer += f"**{Fetcher.reverse_sanitize(item)}\n**"
+        answer += f"**{title(item)}\n**"
 
         json = response.json()
         answer += f"{Fetcher.get_effect(json)}\n"
@@ -190,7 +189,7 @@ class Fetcher:
         '''Returns information on a Pokemon move. Information consists of the moves accuracy, PP, generation, and type.'''
 
         answer = ""
-        answer += f"**{Fetcher.reverse_sanitize(move)}** - "
+        answer += f"**{title(move)}** - "
 
         accuracy = objects.moves.get_accuracy(move)
         power = objects.moves.get_power(move)
@@ -213,7 +212,7 @@ class Fetcher:
         '''Returns information on a Pokemon ability. Information consists of the ability's generation and effect.'''
 
         answer = ""
-        answer += f"**{Fetcher.reverse_sanitize(ability)}** "
+        answer += f"**{title(ability)}** "
         answer += f"- **{formatters.generation}**: {objects.abilities.get_generation(ability)}\n"
 
         json = response.json()
@@ -221,17 +220,17 @@ class Fetcher:
 
         return Fetcher.beautify(answer)
     
-    def sprite(self, query: str, shiny: bool) -> List | str:
+    def sprite(self, query: str, shiny: bool) -> list | str:
         '''Parses the query then returns the appropiate sprite.'''
 
         return self.picture(query, self.get_shiny_sprite if shiny else self.get_sprite)
 
-    def art(self, query: str) -> List | str:
+    def art(self, query: str) -> list | str:
         '''Parses the query then returns the Pokemon's official artwork.'''
 
         return self.picture(query, self.get_art)
 
-    def picture(self, query: str, function_name: collections.abc.Callable) -> List | str:
+    def picture(self, query: str, function_name: Callable) -> list | str:
         '''Finds the Pokemon a query means, then returns its picture using the given getter.'''
 
         original_query, mon_sanitized_query = query, Fetcher.mon_sanitize(Fetcher.sanitize(query))
@@ -246,26 +245,25 @@ class Fetcher:
 
         return f"i don't think {original_query} is a pokemon... check your spelling?"
     
-    def get_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
+    def get_sprite(self, pokemon: str, response: requests.models.Response) -> list | str:
         '''Returns a URL to the sprite.'''
 
         url = response.json()['sprites']['front_default']     
         return [url, pokemon] if url else f"sorry, {pokemon} has no sprite right now"
     
-    def get_shiny_sprite(self, pokemon: str, response: requests.models.Response) -> List | str:
+    def get_shiny_sprite(self, pokemon: str, response: requests.models.Response) -> list | str:
         '''Returns a URL to the shiny sprite.'''
 
         shiny_url = response.json()['sprites']['front_shiny']     
         return [shiny_url, pokemon] if shiny_url else f"sorry, {pokemon} has no shiny sprite right now"
 
-    def get_art(self, pokemon: str, response: requests.models.Response) -> List | str:
+    def get_art(self, pokemon: str, response: requests.models.Response) -> list | str:
         '''Returns a URL to the official artwork, a large picture with a transparent background.'''
 
-        sprites = response.json().get('sprites') or {}
-        art_url = ((sprites.get('other') or {}).get('official-artwork') or {}).get('front_default')
-        return [art_url, pokemon] if art_url else f"sorry, {pokemon} has no art right now"
+        url = art_url(response.json())
+        return [url, pokemon] if url else f"sorry, {pokemon} has no art right now"
     
-    def get_type(self, pokemon: str, response: requests.models.Response) -> List:
+    def get_type(self, pokemon: str, response: requests.models.Response) -> list:
         '''Fetches the types from a Pokemon HTTP Response. Returns a list containing the Pokemon's name and types.'''
         
         json = response.json()
@@ -278,7 +276,7 @@ class Fetcher:
         return [pokemon, answer]
     
     @staticmethod
-    def pokemonic_get(query: str, function: collections.abc.Callable):
+    def pokemonic_get(query: str, function: Callable):
         '''Calls and returns the value of the appropiate function if the input parameter is a Pokemon, Pokemon alias, dex number, or flavor.'''
 
         if query in aliases.alias_map:
@@ -301,12 +299,6 @@ class Fetcher:
         return Fetcher.get(urls.poke_url+pokemon)
 
     @staticmethod
-    def reverse_sanitize(query: str) -> str:
-        '''Gets rid of dashes in a String and titles it.'''
-        
-        return query.replace("-", " ").title()
-    
-    @staticmethod
     def sanitize(token: str) -> str:
         '''Removes trailing spaces, replaces spaces with dashes.'''
 
@@ -318,18 +310,12 @@ class Fetcher:
 
         tokens = token.split("-")
         
-        if tokens[0] in nationalities.nat_key: tokens[0] = nationalities.nat_map[tokens[0]]
+        tokens[0] = nationalities.nat_map.get(tokens[0], tokens[0])
 
         if (tokens[0] in prefixes.pre_tuple) and (len(tokens) >= 2):
-            answer = tokens[1] + "-" + tokens[0]
+            return "-".join([tokens[1], tokens[0], *tokens[2:]])
 
-            if len(tokens) >= 3:
-                rest_tup = (word for word in tokens[2:])
-                answer += ("-"+"-".join(rest_tup))
-
-            return answer
-        else:
-            return token
+        return token
              
     @staticmethod
     def beautify(output: str) -> str:
@@ -388,7 +374,3 @@ class Fetcher:
         '''Message for a query that matches nothing.'''
 
         return f"i don't know what \"{query}\" is... check your spelling?"
-
-    @staticmethod
-    def error_number(num_str: str) -> str:
-        return f"there are only {objects.pokemon.get_num_pokemon()} pokemon, {num_str} is way too big..."

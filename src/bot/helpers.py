@@ -4,9 +4,9 @@ import discord
 
 
 def display_name(user) -> str:
-    '''Returns a user's best available display name.'''
+    '''Returns a user's best available display name: their server nickname, else their global name, else their username.'''
 
-    return user.global_name or getattr(user, "display_name", None) or user.name
+    return getattr(user, "display_name", None) or user.global_name or user.name
 
 
 def find_by_name(people, query: str, name_fields: tuple[str, ...]):

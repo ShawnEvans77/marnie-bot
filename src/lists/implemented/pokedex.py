@@ -4,7 +4,7 @@ from ...constants.output import thresholds
 import pandas, random
 
 class Pokedex(list.List):
-    '''The Pokedex stores abilities from all Pokemon Games.'''
+    '''The Pokedex stores Pokemon, forms included, from all Pokemon Games.'''
 
     def __init__(self):
         super().__init__(f'{folders.asset}/{folders.csv}/{filenames.dex_csv}', thresholds.poke_threshold)
@@ -37,7 +37,7 @@ class Pokedex(list.List):
     def get_species_id(self, pokemon: str) -> str:
         '''Returns the national dex number of the input Pokemon.'''
         
-        return self.df[self.df['identifier'] == pokemon]['species_id'].values[0]
+        return self.lookup(pokemon, 'species_id')
     
     def randmon(self) -> int:
         '''Returns a random Pokemon by dex number.'''

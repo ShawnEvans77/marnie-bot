@@ -5,5 +5,3 @@ nat_map = {
     "alolan": "alola",
     "hisuian": "hisui",
 }
-
-nat_key = nat_map.keys()

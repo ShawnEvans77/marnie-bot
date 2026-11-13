@@ -3,6 +3,7 @@
 from ..constants.api import urls
 from ..constants.output import aliases
 from ..constants.structs import objects
+from .dex import art_url, sprite_url
 from .fetcher import Fetcher
 from io import BytesIO
 from PIL import Image
@@ -81,9 +82,7 @@ def guess_matches(guess: str, wtp_round: dict) -> bool:
 def image_url(data: dict) -> str | None:
     '''Picks the picture for a round from a PokeAPI Pokemon response: official artwork, else the sprite.'''
 
-    sprites = data.get("sprites") or {}
-    artwork = ((sprites.get("other") or {}).get("official-artwork") or {}).get("front_default")
-    return artwork or sprites.get("front_default")
+    return art_url(data) or sprite_url(data)
 
 
 def images(image_bytes: bytes) -> tuple[bytes, bytes]:

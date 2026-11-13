@@ -30,12 +30,12 @@ class ChatStats(commands.Cog):
 
             if query is not None:
                 if ctx.guild is None:
-                    await ctx.send("error: i can only look up a user's messages inside a server.")
+                    await ctx.send("i can only look up someone's messages inside a server, silly!")
                     return
 
                 target_member = find_member(ctx.guild, query)
                 if target_member is None:
-                    await ctx.send(f"error: user \"{query}\" not recognized.")
+                    await ctx.send(f"i couldn't find anybody named \"{query}\"... check their spelling?")
                     return
 
             try:
@@ -46,8 +46,7 @@ class ChatStats(commands.Cog):
 
             if not frequencies:
                 if target_member is not None:
-                    name = target_member.display_name or target_member.global_name or target_member.name
-                    await ctx.send(f"error: {name}'s messages do not exist in the last {self.message_limit} messages.")
+                    await ctx.send(f"**{display_name(target_member)}** hasn't said anything in the last {self.message_limit} messages here...")
                 else:
                     await ctx.send(file=word_counts.blank_image())
                 return
@@ -60,7 +59,7 @@ class ChatStats(commands.Cog):
             try:
                 window = await self.refresh(ctx.channel)
             except discord.Forbidden:
-                await ctx.send("error: i can't read this channel's message history.")
+                await ctx.send("sorry, i'm not allowed to read this channel's message history...")
                 return
 
             def name_for(user_id: int) -> str | None:

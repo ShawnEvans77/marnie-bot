@@ -20,9 +20,9 @@ class Marnie:
 
         @self.bot.event
         async def on_ready():
-            print(f"-------------------------------")
-            print(f"marnie bot fully operational! <3")
-            print(f"-------------------------------")
+            print("-------------------------------")
+            print("marnie bot fully operational! <3")
+            print("-------------------------------")
 
     async def load_cogs(self):
         '''Adds every cog to the bot. discord.py calls this once while logging in.'''

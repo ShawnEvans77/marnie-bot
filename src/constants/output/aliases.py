@@ -10,7 +10,7 @@ alias_map = {
     "fridge": "rotom-frost",
     "lando": "landorus-incarnate",
     "landot": "landorus-therian",
-    "lando-t": "landorus-incarnate",
+    "lando-t": "landorus-therian",
     "mark": "ludicolo",
     "trump": "gumshoos",
     "kamala": "komala",
