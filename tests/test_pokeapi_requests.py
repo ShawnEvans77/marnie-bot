@@ -9,7 +9,7 @@ import requests
 from discord.ext import commands
 
 import src.constants.getters.get_objs as get_objs
-from src.bot.marnie import Marnie
+from src.bot.cogs.errors import pokeapi_error_message
 from src.constants.api import urls
 from src.utils.fetcher import Fetcher
 
@@ -23,14 +23,6 @@ class FakeCtx:
 
     async def send(self, content=None, **kwargs):
         self.sent.append(content)
-
-
-@pytest.fixture
-def marnie(monkeypatch):
-    '''A Marnie that does not open (and wipe) the real discord.log.'''
-
-    monkeypatch.setattr(logging, "FileHandler", lambda **kwargs: logging.NullHandler())
-    return Marnie()
 
 
 def http_error(status_code: int) -> requests.HTTPError:
@@ -75,7 +67,7 @@ def test_get_raises_when_pokeapi_has_no_such_page():
         Fetcher.get(urls.poke_url + "definitely-not-a-pokemon")
 
     assert error.value.response.status_code == 404
-    assert Marnie.pokeapi_error_message(error.value) == "sorry, pokeapi doesn't have any data on that one..."
+    assert pokeapi_error_message(error.value) == "sorry, pokeapi doesn't have any data on that one..."
 
 
 def test_lookups_from_several_threads_at_once_all_succeed():
@@ -97,13 +89,13 @@ def test_lookups_from_several_threads_at_once_all_succeed():
     (http_error(404), "sorry, pokeapi doesn't have any data on that one..."),
 ])
 def test_error_messages(error, expected):
-    assert Marnie.pokeapi_error_message(error) == expected
+    assert pokeapi_error_message(error) == expected
 
 
 def test_failed_lookup_tells_the_user(marnie):
     async def scenario():
         ctx = FakeCtx()
-        await marnie.bot.on_command_error(ctx, commands.CommandInvokeError(requests.ConnectionError()))
+        await marnie.bot.get_cog("Errors").on_command_error(ctx, commands.CommandInvokeError(requests.ConnectionError()))
         return ctx.sent
 
     assert asyncio.run(scenario()) == ["sorry, i couldn't reach pokeapi right now... try again in a bit?"]
@@ -112,7 +104,7 @@ def test_failed_lookup_tells_the_user(marnie):
 def test_other_errors_are_logged_and_not_sent(marnie, caplog):
     async def scenario():
         ctx = FakeCtx()
-        await marnie.bot.on_command_error(ctx, commands.CommandNotFound('Command "lol" is not found'))
+        await marnie.bot.get_cog("Errors").on_command_error(ctx, commands.CommandNotFound('Command "lol" is not found'))
         return ctx.sent
 
     with caplog.at_level(logging.ERROR, logger="discord.ext.commands.bot"):
@@ -135,9 +127,9 @@ def test_dt_command_fails_with_a_message_when_pokeapi_is_down(marnie, monkeypatc
         ctx.command = command
 
         try:
-            await command.callback(ctx, query="snom")
+            await command(ctx, query="snom")
         except requests.RequestException as error:
-            await marnie.bot.on_command_error(ctx, commands.CommandInvokeError(error))
+            await marnie.bot.get_cog("Errors").on_command_error(ctx, commands.CommandInvokeError(error))
 
         return ctx.sent
 
@@ -164,7 +156,7 @@ def test_bot_keeps_running_while_a_lookup_waits(marnie, monkeypatch):
                 ticks += 1
 
         ticking = asyncio.create_task(ticker())
-        await marnie.bot.get_command("dt").callback(ctx, query="snom")
+        await marnie.bot.get_command("dt")(ctx, query="snom")
         ticking.cancel()
 
         return ctx.sent, ticks

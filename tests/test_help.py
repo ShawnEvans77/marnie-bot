@@ -1,12 +1,10 @@
 import asyncio
-import logging
 from types import SimpleNamespace
 
 import discord
 import pytest
 
 from src.bot import help_menu
-from src.bot.marnie import Marnie
 from src.constants.output import help as h
 
 
@@ -35,14 +33,6 @@ class FakeCtx:
     async def send(self, content=None, **kwargs):
         self.sent.append((content, kwargs))
         return FakeMessage()
-
-
-@pytest.fixture
-def marnie(monkeypatch):
-    '''A Marnie that does not open (and wipe) the real discord.log.'''
-
-    monkeypatch.setattr(logging, "FileHandler", lambda **kwargs: logging.NullHandler())
-    return Marnie()
 
 
 def documented_commands() -> list[str]:
@@ -131,7 +121,7 @@ def test_buttons_grey_out_on_timeout():
 def test_help_command_sends_the_menu(marnie):
     async def scenario():
         ctx = FakeCtx(embed_links=True)
-        await marnie.bot.get_command("help").callback(ctx)
+        await marnie.bot.get_command("help")(ctx)
 
         assert len(ctx.sent) == 1
         content, kwargs = ctx.sent[0]
@@ -149,7 +139,7 @@ def test_help_command_sends_the_menu(marnie):
 def test_help_command_falls_back_to_text_without_embed_permission(marnie):
     async def scenario():
         ctx = FakeCtx(embed_links=False)
-        await marnie.bot.get_command("help").callback(ctx)
+        await marnie.bot.get_command("help")(ctx)
 
         assert [content for content, _ in ctx.sent] == help_menu.build_text_pages("!")
         assert all(kwargs == {} for _, kwargs in ctx.sent)

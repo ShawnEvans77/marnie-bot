@@ -3,7 +3,7 @@ from io import BytesIO
 import pytest
 from PIL import Image
 
-from src.bot.marnie import Marnie
+from src.utils import wtp_round as wtp
 
 
 def sprite_png(transparent: bool = True) -> bytes:
@@ -17,7 +17,7 @@ def sprite_png(transparent: bool = True) -> bytes:
 
 
 def make_round(identifier: str, species: str) -> dict:
-    return Marnie.build_wtp_round(identifier, species, sprite_png())
+    return wtp.build_round(identifier, species, sprite_png())
 
 
 @pytest.mark.parametrize('identifier, species, guess', [
@@ -47,7 +47,7 @@ def make_round(identifier: str, species: str) -> dict:
     ('pikachu', 'pikachu', 'pikachu-rock-star'),
 ])
 def test_guess_is_accepted(identifier: str, species: str, guess: str):
-    assert Marnie.wtp_guess_matches(guess, make_round(identifier, species)) is True
+    assert wtp.guess_matches(guess, make_round(identifier, species)) is True
 
 
 @pytest.mark.parametrize('identifier, species, guess', [
@@ -68,7 +68,7 @@ def test_guess_is_accepted(identifier: str, species: str, guess: str):
     ('alakazam-mega', 'alakazam', 'mega'),
 ])
 def test_guess_is_rejected(identifier: str, species: str, guess: str):
-    assert Marnie.wtp_guess_matches(guess, make_round(identifier, species)) is False
+    assert wtp.guess_matches(guess, make_round(identifier, species)) is False
 
 
 def test_round_answer_is_the_species_not_the_form():
@@ -79,9 +79,9 @@ def test_round_answer_is_the_species_not_the_form():
 
 
 def test_images_are_a_black_silhouette_and_a_colored_reveal():
-    silhouette_png, reveal_png = Marnie.wtp_images(sprite_png())
+    silhouette_png, reveal_png = wtp.images(sprite_png())
     silhouette, reveal = Image.open(BytesIO(silhouette_png)), Image.open(BytesIO(reveal_png))
-    size = Marnie.wtp_canvas_size
+    size = wtp.CANVAS_SIZE
     background = silhouette.getpixel((0, 0))
 
     assert silhouette.size == reveal.size == (size, size)
@@ -98,13 +98,13 @@ def test_images_are_a_black_silhouette_and_a_colored_reveal():
 ])
 def test_images_reject_unusable_pictures(image_bytes: bytes):
     with pytest.raises((ValueError, OSError)):
-        Marnie.wtp_images(image_bytes)
+        wtp.images(image_bytes)
 
 
 def test_image_url_prefers_official_artwork():
     data = {"sprites": {"front_default": "sprite.png", "other": {"official-artwork": {"front_default": "art.png"}}}}
 
-    assert Marnie.wtp_image_url(data) == "art.png"
-    assert Marnie.wtp_image_url({"sprites": {"front_default": "sprite.png", "other": None}}) == "sprite.png"
-    assert Marnie.wtp_image_url({"sprites": {"front_default": None}}) is None
-    assert Marnie.wtp_image_url({}) is None
+    assert wtp.image_url(data) == "art.png"
+    assert wtp.image_url({"sprites": {"front_default": "sprite.png", "other": None}}) == "sprite.png"
+    assert wtp.image_url({"sprites": {"front_default": None}}) is None
+    assert wtp.image_url({}) is None
