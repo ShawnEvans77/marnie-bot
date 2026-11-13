@@ -1,7 +1,8 @@
 from ..constants.api import urls, language
 from ..constants.output import aliases, formatters, nationalities, prefixes
 from ..constants.structs import objects
-from typing import List
+from .dex import DexEntry
+from typing import List, NamedTuple
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import requests, collections, pandas
@@ -19,6 +20,15 @@ def build_session() -> requests.Session:
     session.mount("http://", adapter)
     return session
 
+class Found(NamedTuple):
+    '''What a query turned out to mean: the list it belongs to (Pokemon, items, moves, or
+    abilities), its name, PokeAPI's answer, and whether it was only a fuzzy match.'''
+
+    collection: object
+    name: str
+    response: requests.models.Response
+    fuzzy: bool
+
 class Fetcher:
     '''The Fetcher class is a wrapper for PokeAPI. Queries should be sent to the dt() function, 
     which parses the query to determine if it is a move, item, ability, or Pokemon.
@@ -26,7 +36,9 @@ class Fetcher:
     The class imports a constants module that contains Pokemon aliases and lists of items.
     
     Attributes:
+        func_map - Maps each collection to its !dt function and its URL.
         funcs - A set-like object mapping collections to their associated function names and URLs.
+        kinds - Maps each collection to the name of the kind of thing it holds.
         session - The shared connection to PokeAPI.
         timeout - How many seconds one request may take before it is given up on.
     '''
@@ -45,7 +57,9 @@ class Fetcher:
         return response
 
     def __init__(self):
-        self.funcs = self.get_func_map().items()
+        self.func_map = self.get_func_map()
+        self.funcs = self.func_map.items()
+        self.kinds = {objects.pokemon: "pokemon", objects.items: "item", objects.moves: "move", objects.abilities: "ability"}
 
     def get_func_map(self) -> dict:
         '''Returns a function map and their associated URLs.'''
@@ -61,24 +75,70 @@ class Fetcher:
         '''Returns a query on a specified Pokemon item. Invokes the appropiate subroutine depending on if the input query
         is a Pokemon, item, ability, or move.'''
 
-        original_query, sanitized_query = query, Fetcher.sanitize(query)
+        found = self.find(query)
 
-        if pokemonic_answer := Fetcher.pokemonic_get(sanitized_query, self.dt_pokemon): return pokemonic_answer
+        return self.describe(query, found) if found else Fetcher.unknown(query)
+
+    def dex(self, query: str) -> DexEntry | str:
+        '''Looks a query up the same way dt() does, but returns everything the !dex embed needs
+        instead of text. Returns Marnie's "i don't know" message if the query matches nothing.
+
+        For a Pokemon it also asks PokeAPI for the species (dex entry, egg groups, and so on) and
+        its evolution chain. Those two are extras: if either can't be fetched, it is left as None
+        and the embed simply leaves that part out.'''
+
+        found = self.find(query)
+
+        if not found: return Fetcher.unknown(query)
+
+        data = found.response.json()
+
+        entry = DexEntry(
+            kind=self.kinds[found.collection],
+            name=found.name,
+            data=data,
+            text=self.describe(query, found),
+            note=Fetcher.fuzzy(query, found.name).strip() if found.fuzzy else None,
+        )
+
+        if found.collection is objects.pokemon:
+            entry.species = Fetcher.get_extra((data.get('species') or {}).get('url'))
+            entry.evolution = Fetcher.get_extra(((entry.species or {}).get('evolution_chain') or {}).get('url'))
+
+        return entry
+
+    def find(self, query: str) -> Found | None:
+        '''Works out what a query means and requests it from PokeAPI. Tries, in order: a Pokemon
+        alias, dex number, or flavor, then an exact name, then the closest fuzzy match.
+        Returns None if nothing matches.'''
+
+        sanitized_query = Fetcher.sanitize(query)
+
+        if pokemonic_answer := Fetcher.pokemonic_get(sanitized_query, lambda name, response: Found(objects.pokemon, name, response, False)):
+            return pokemonic_answer
 
         mon_sanitized_query = Fetcher.mon_sanitize(sanitized_query)
 
         for k, v in self.funcs:
             if sanitized_query in k:
-                return v[0](sanitized_query, Fetcher.get(v[1]+sanitized_query))
+                return Found(k, sanitized_query, Fetcher.get(v[1]+sanitized_query), False)
             elif k == objects.pokemon and mon_sanitized_query in k:
-                return v[0](mon_sanitized_query, Fetcher.get(v[1]+mon_sanitized_query))
+                return Found(k, mon_sanitized_query, Fetcher.get(v[1]+mon_sanitized_query), False)
 
         for k, v in self.funcs:
             if  (k == objects.pokemon and (closest := k.close_match(mon_sanitized_query))) or (closest := k.close_match(sanitized_query)):
-                return Fetcher.fuzzy(original_query, closest) + v[0](closest, Fetcher.get(v[1]+closest))
+                return Found(k, closest, Fetcher.get(v[1]+closest), True)
 
-        return f"i don't know what \"{original_query}\" is... check your spelling?"
-    
+        return None
+
+    def describe(self, query: str, found: Found) -> str:
+        '''Writes the !dt text for something find() found, with the "perhaps you meant" line
+        on top if it was a fuzzy match.'''
+
+        text = self.func_map[found.collection][0](found.name, found.response)
+
+        return (Fetcher.fuzzy(query, found.name) if found.fuzzy else "") + text
+
     def dt_pokemon(self, pokemon: str, response: requests.models.Response) -> str:
         '''Returns information on a given Pokemon. Information returned consists of the Pokemon's
         name, generation, type, abilities, base stats, and base stat total.'''
@@ -145,8 +205,7 @@ class Fetcher:
         answer += f"**Category**: {json['damage_class']['name'].title()}"
 
         answer += "\n"
-        effect = f"{Fetcher.get_effect(json)}\n"
-        answer += effect if formatters.placeholder not in effect else effect.replace(formatters.placeholder, str(json['effect_chance']) + "%")
+        answer += f"{Fetcher.get_move_effect(json)}\n"
 
         return Fetcher.beautify(answer)
 
@@ -302,6 +361,34 @@ class Fetcher:
 
         return effect
     
+    @staticmethod
+    def get_move_effect(json) -> str:
+        '''Returns the effect of a move, with the move's real effect chance written in.'''
+
+        effect = Fetcher.get_effect(json)
+
+        return effect if formatters.placeholder not in effect else effect.replace(formatters.placeholder, str(json['effect_chance']) + "%")
+
+    @staticmethod
+    def get_extra(url: str | None) -> dict | None:
+        '''Requests extra data that an answer can do without. Returns None, instead of raising,
+        if there is no URL, PokeAPI can't be reached, or the answer isn't a JSON object.'''
+
+        if not url: return None
+
+        try:
+            extra = Fetcher.get(url).json()
+        except (requests.RequestException, ValueError):
+            return None
+
+        return extra if isinstance(extra, dict) else None
+
+    @staticmethod
+    def unknown(query: str) -> str:
+        '''Message for a query that matches nothing.'''
+
+        return f"i don't know what \"{query}\" is... check your spelling?"
+
     @staticmethod
     def error_number(num_str: str) -> str:
         return f"there are only {objects.pokemon.get_num_pokemon()} pokemon, {num_str} is way too big..."

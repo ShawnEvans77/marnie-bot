@@ -12,6 +12,7 @@ pages = (
         "blurb": "everything i know about pokemon!",
         "commands": (
             ("📖", "dt {query}", "info on a pokemon, ability, item, or move. you can look pokemon up by name or dex number, like ``!dt morpeko`` or ``!dt 877``."),
+            ("📚", "dex {query}", "like ``!dt``, but with more detail: official art, stat bars, type matchups, the dex entry, breeding info, and the evolution line. works on pokemon, abilities, items, and moves, like ``!dex morpeko``."),
             ("🛡️", "weak {type or pokemon}", "weaknesses, resistances, and immunities of a type or a pokemon. for two types, split them with a slash or a comma, like ``!weak fire/water``."),
             ("🎲", "randmon", "info on a random pokemon."),
             ("👾", "sprite {pokemon}", "a pokemon's sprite, by name or dex number."),

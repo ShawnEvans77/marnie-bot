@@ -69,6 +69,7 @@ Here are some examples of what she can output:
 All of her commands are as follows:
 
 * !**dt** {query} - Returns information on a Pokemon, Pokemon ability, Pokemon item, or Pokemon move. Pokemon can be queried by their name or dex number.
+* !**dex** {query} - A more in-depth !dt, sent as an embed. For a Pokemon it shows the official artwork, dex entry, types, height, weight, abilities, base stats drawn as bars, weaknesses, resistances, immunities, egg groups, gender ratio, catch rate, and evolution line. It also works on abilities, items, and moves. Queries work exactly like !dt: names, dex numbers, aliases, and typos are all understood.
 * !**weak** {type} - Lists weaknesses, resistances, and immunities of a given type. You can query a dual type by sending two types seperated by slashes or commas to the command. For example, !weak fire/water or !weak fire,water. Like !dt, you can query Pokemon by their name or dex number.
 * !**weak** {pokemon} - Lists weaknesses, resistances, and immunities of a given Pokemon.
 * !**pick** {args...} - Selects a random option given a list of options.

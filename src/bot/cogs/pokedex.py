@@ -1,4 +1,5 @@
 from discord.ext import commands
+from .. import dex_embed
 from ...constants.getters import get_objs
 from ...constants.structs import objects
 import discord, asyncio, io, random, aiohttp
@@ -20,7 +21,7 @@ async def sprite_file(url: str, pokemon: str) -> discord.File:
 
 
 class Pokedex(commands.Cog):
-    '''Pokemon lookups: !dt, !weak, sprites, and art.'''
+    '''Pokemon lookups: !dt, !dex, !weak, sprites, and art.'''
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -40,6 +41,21 @@ class Pokedex(commands.Cog):
             await ctx.send(await lookup(get_objs.fetcher.dt, query))
         else:
             await ctx.send("how can i do ``!dt`` on **nothing**?\n\nyou have to send a query to ``!dt``, silly!\n\nremember, if you wanna use ``!dt``, you type !dt then a Pokemon, Pokemon move, Pokemon ability, or item. for example: ``!dt morpeko``.")
+
+    @commands.command()
+    async def dex(self, ctx, *, query: str = None):
+        if query is None:
+            await ctx.send("how can i do ``!dex`` on **nothing**?\n\nyou have to send a query to ``!dex``, silly!\n\nremember, if you wanna use ``!dex``, you type !dex then a Pokemon, Pokemon move, Pokemon ability, or item. for example: ``!dex morpeko``.")
+            return
+
+        entry = await lookup(get_objs.fetcher.dex, query)
+
+        if isinstance(entry, str):
+            await ctx.send(entry)
+        elif not ctx.channel.permissions_for(ctx.me).embed_links:
+            await ctx.send(entry.text)
+        else:
+            await ctx.send(entry.note, embed=dex_embed.build_embed(entry))
 
     @commands.command()
     async def weak(self, ctx, *, query: str = None):
