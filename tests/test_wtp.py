@@ -1,5 +1,8 @@
+import asyncio
 from io import BytesIO
+from types import SimpleNamespace
 
+import discord
 import pytest
 from PIL import Image
 
@@ -108,3 +111,120 @@ def test_image_url_prefers_official_artwork():
     assert wtp.image_url({"sprites": {"front_default": "sprite.png", "other": None}}) == "sprite.png"
     assert wtp.image_url({"sprites": {"front_default": None}}) is None
     assert wtp.image_url({}) is None
+
+
+# ---------------------------------------------------------------- the command
+
+class FakeMessage:
+    '''A message Marnie sent. Remembers where it sits in the channel's history.'''
+
+    def __init__(self, log: list, content: str, delete_error: Exception | None = None):
+        self.log, self.content, self.delete_error = log, content, delete_error
+        self.deleted = False
+
+    async def delete(self):
+        self.log.append(("delete", self.content))
+        if self.delete_error: raise self.delete_error
+        self.deleted = True
+
+
+class FakeTyping:
+    async def __aenter__(self): return None
+    async def __aexit__(self, *error): return False
+
+
+class FakeCtx:
+    def __init__(self, delete_error: Exception | None = None, fail_on_send: int | None = None):
+        self.channel = SimpleNamespace(id=1)
+        self.log, self.messages = [], []
+        self.delete_error, self.fail_on_send = delete_error, fail_on_send
+
+    def typing(self):
+        return FakeTyping()
+
+    async def send(self, content=None, **kwargs):
+        if len(self.messages) + 1 == self.fail_on_send:
+            raise RuntimeError("discord hiccup")
+
+        self.log.append(("send", content))
+        self.messages.append(FakeMessage(self.log, content, self.delete_error))
+        return self.messages[-1]
+
+
+def play_round(marnie, monkeypatch, ctx: FakeCtx, guess):
+    '''Plays one round of !wtp on landorus-therian. guess is what bot.wait_for does: return a
+    winning message, or raise.'''
+
+    async def fetch_round():
+        return make_round('landorus-therian', 'landorus')
+
+    async def wait_for(event, check, timeout):
+        return guess()
+
+    monkeypatch.setattr(wtp, "fetch_round", fetch_round)
+    monkeypatch.setattr(marnie.bot, "wait_for", wait_for)
+
+    asyncio.run(marnie.bot.get_command("wtp")(ctx))
+
+
+def winner():
+    return SimpleNamespace(author=SimpleNamespace(mention="<@7>"))
+
+
+def time_out():
+    raise asyncio.TimeoutError
+
+
+QUESTION = "**who's that pokemon?** type its name! you have 30 seconds."
+
+
+@pytest.mark.parametrize('guess, answer', [
+    (winner, "it's **Landorus**! <@7> got it!"),
+    (time_out, "time's up! it's **Landorus**!"),
+])
+def test_wtp_deletes_the_question_and_keeps_the_answer(marnie, monkeypatch, guess, answer: str):
+    ctx = FakeCtx()
+
+    play_round(marnie, monkeypatch, ctx, guess)
+
+    question, reveal = ctx.messages
+    assert ctx.log == [("send", QUESTION), ("send", answer), ("delete", QUESTION)]
+    assert question.deleted is True
+    assert reveal.deleted is False
+    assert marnie.bot.get_cog("WhosThatPokemon").active_channels == set()
+
+
+@pytest.mark.parametrize('error', [
+    discord.NotFound(SimpleNamespace(status=404, reason="Not Found"), "unknown message"),
+    discord.Forbidden(SimpleNamespace(status=403, reason="Forbidden"), "missing permissions"),
+])
+def test_wtp_round_still_ends_if_the_question_cant_be_deleted(marnie, monkeypatch, error):
+    ctx = FakeCtx(delete_error=error)
+
+    play_round(marnie, monkeypatch, ctx, winner)
+
+    assert ctx.log == [("send", QUESTION), ("send", "it's **Landorus**! <@7> got it!"), ("delete", QUESTION)]
+    assert marnie.bot.get_cog("WhosThatPokemon").active_channels == set()
+
+
+def test_wtp_deletes_the_question_even_if_the_answer_fails_to_send(marnie, monkeypatch):
+    ctx = FakeCtx(fail_on_send=2)
+
+    with pytest.raises(RuntimeError):
+        play_round(marnie, monkeypatch, ctx, winner)
+
+    assert ctx.log == [("send", QUESTION), ("delete", QUESTION)]
+    assert marnie.bot.get_cog("WhosThatPokemon").active_channels == set()
+
+
+def test_wtp_without_a_pokemon_has_no_question_to_delete(marnie, monkeypatch):
+    async def fetch_round():
+        return None
+
+    monkeypatch.setattr(wtp, "fetch_round", fetch_round)
+    ctx = FakeCtx()
+
+    asyncio.run(marnie.bot.get_command("wtp")(ctx))
+
+    assert ctx.log == [("send", "sorry, i couldn't find a pokemon to show right now... try ``!wtp`` again in a bit?")]
+    assert ctx.messages[0].deleted is False

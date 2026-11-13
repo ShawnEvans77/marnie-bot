@@ -73,7 +73,7 @@ def matchups(types: list[str]) -> list[list[str]] | None:
 
 def pokemon_embed(entry: dex.DexEntry) -> discord.Embed:
     '''A Pokemon: dex entry, types, size, abilities, stat bars, type matchups, breeding,
-    evolution line, and official art.'''
+    evolution line, and official art (or the sprite, for a Pokemon without art).'''
 
     data, species = entry.data, entry.species
     types = dex.type_names(data)
@@ -105,10 +105,10 @@ def pokemon_embed(entry: dex.DexEntry) -> discord.Embed:
     add_field(embed, "catch rate", dex.catch_rate(species))
     add_field(embed, "evolution line", dex.evolution_line(entry.evolution, dex.dig(data, 'species', 'name')), inline=False)
 
-    art, sprite = dex.art_url(data), dex.sprite_url(data)
-
-    if art: embed.set_image(url=art)
-    if sprite: embed.set_thumbnail(url=sprite)
+    # The picture goes in the thumbnail, not set_image: Discord shrinks an embed to the width of
+    # its big image (300px for square art), which squeezes the fields until their names wrap.
+    if picture := dex.art_url(data) or dex.sprite_url(data):
+        embed.set_thumbnail(url=picture)
 
     return embed
 

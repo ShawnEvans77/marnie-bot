@@ -231,6 +231,22 @@ def test_pokemon_embed_skips_matchups_for_a_type_outside_the_chart():
     assert embed.color.value == d.default_color
 
 
+@pytest.mark.parametrize('sprites, expected', [
+    ({"front_default": "sprite.png", "other": {"official-artwork": {"front_default": "art.png"}}}, "art.png"),
+    ({"front_default": "sprite.png", "other": {"official-artwork": {"front_default": None}}}, "sprite.png"),
+    ({"front_default": "sprite.png"}, "sprite.png"),
+    ({"front_default": None, "other": None}, None),
+])
+def test_pokemon_embed_never_uses_a_big_image(sprites: dict, expected: str | None):
+    '''A big image makes Discord shrink the whole embed to the image's width, which squeezes
+    the fields. The art goes in the thumbnail instead, or the sprite if there is no art.'''
+
+    embed = dex_embed.build_embed(dex.DexEntry(kind="pokemon", name="snom", data={"sprites": sprites}, text=""))
+
+    assert embed.image.url is None
+    assert embed.thumbnail.url == expected
+
+
 @pytest.mark.parametrize('kind', ["move", "ability", "item"])
 def test_other_embeds_with_no_data_say_so(kind: str):
     data = {"effect_entries": [], "flavor_text_entries": []}
@@ -268,8 +284,8 @@ def test_dex_pokemon():
     assert embed.title == "Articuno-Galar • #144"
     assert embed.description.startswith("*Freeze Pokémon* • legendary\n\n")
     assert embed.color.value == d.type_colors["psychic"]
-    assert embed.image.url == ART_URL + "10169.png"
-    assert embed.thumbnail.url == SPRITE_URL + "10169.png"
+    assert embed.image.url is None
+    assert embed.thumbnail.url == ART_URL + "10169.png"
     assert embed.footer.text == d.footer
     assert list(fields(embed)) == ["type", "height & weight", "abilities", "base stats", "weaknesses", "resistances", "immunities", "egg groups", "gender", "catch rate"]
     assert fields(embed) | {"base stats": None} == {
@@ -398,7 +414,7 @@ def test_dex_survives_losing_the_species_and_evolution_requests(monkeypatch):
     assert embed.title == "Garchomp • #445"
     assert embed.description is None
     assert list(fields(embed)) == ["type", "height & weight", "abilities", "base stats", "weaknesses", "resistances", "immunities"]
-    assert embed.image.url == ART_URL + "445.png"
+    assert embed.thumbnail.url == ART_URL + "445.png"
 
 
 def test_dex_survives_losing_only_the_evolution_request(monkeypatch):
